@@ -20,10 +20,12 @@
 #include "main.h"
 
 ADC_HandleTypeDef hadc2;
+WWDG_HandleTypeDef hwwdg;
 
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_ADC2_Init(void);
+static void MX_WWDG_Init(void);
 
 
 /**
@@ -33,12 +35,19 @@ static void MX_ADC2_Init(void);
 int main(void)
 {
 
+/**
+ * HAL_Init()
+ * 配置闪存缓存
+ * 设置中断优先级分组：NVIC_PriorityGroup_4
+ * 配置Systick定时器
+ * 底层硬件初始化
+**/
+  HAL_Init();    
+  SystemClock_Config();        //RCC配置振荡器和时钟
 
-  HAL_Init();
-  SystemClock_Config();
-
-  MX_GPIO_Init();
-  MX_ADC2_Init();
+  MX_GPIO_Init();             //GPIO初始化
+  MX_ADC2_Init();             //ADC初始化
+  MX_WWDG_Init();
 
   while (1)
   {
@@ -149,6 +158,36 @@ static void MX_ADC2_Init(void)
   /* USER CODE END ADC2_Init 2 */
 
 }
+
+/**
+  * @brief WWDG Initialization Function
+  * @param None
+  * @retval None
+  */
+ static void MX_WWDG_Init(void)
+ {
+ 
+   /* USER CODE BEGIN WWDG_Init 0 */
+ 
+   /* USER CODE END WWDG_Init 0 */
+ 
+   /* USER CODE BEGIN WWDG_Init 1 */
+ 
+   /* USER CODE END WWDG_Init 1 */
+   hwwdg.Instance = WWDG;
+   hwwdg.Init.Prescaler = WWDG_PRESCALER_1;
+   hwwdg.Init.Window = 64;
+   hwwdg.Init.Counter = 64;
+   hwwdg.Init.EWIMode = WWDG_EWI_DISABLE;
+   if (HAL_WWDG_Init(&hwwdg) != HAL_OK)
+   {
+     Error_Handler();
+   }
+   /* USER CODE BEGIN WWDG_Init 2 */
+ 
+   /* USER CODE END WWDG_Init 2 */
+ 
+ }
 
 /**
   * @brief GPIO Initialization Function
