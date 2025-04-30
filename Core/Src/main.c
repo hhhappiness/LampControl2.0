@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "type.h"
 
 ADC_HandleTypeDef hadc2;
 RTC_HandleTypeDef hrtc;
@@ -200,7 +201,7 @@ static void MX_ADC2_Init(void)
    /* USER CODE END RTC_Init 2 */
  
  }
- 
+
 /**
   * @brief WWDG Initialization Function
   * @param None
@@ -326,7 +327,15 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+/*
+ * 
+ */
+void Init()
+{
+  int i;
+  BOOL InitRTCFirstTime;
 
+}
 /* USER CODE END 4 */
 
 /**
