@@ -28,7 +28,7 @@ typedef unsigned int	 	u32;
 //typedef unsigned __int64 u64;
 
 
-
+typedef volatile const unsigned char vu32;
 typedef unsigned char	BOOL;	//C++中定义了bool,c里没有。定义成大写的为了跟C++的bool区分
 #define TRUE			1
 #define	FALSE			0

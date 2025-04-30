@@ -3,6 +3,21 @@
         "main.h": "c",
         "stm32g4xx_hal.h": "c",
         "stm32g4xx_hal_conf.h": "c",
-        "type.h": "c"
+        "type.h": "c",
+        "core_config.h": "c",
+        "ctrl.h": "c",
+        "ctrl_common.h": "c",
+        "appparacommon.h": "c",
+        "timer.h": "c",
+        "bsp.h": "c",
+        "stm32f4.h": "c",
+        "stm32g431xx.h": "c",
+        "rtc.h": "c",
+        "spimaster.h": "c",
+        "reset.h": "c",
+        "core_cm3.h": "c",
+        "core_cm4.h": "c",
+        "adc.h": "c",
+        "stm32g4xx.h": "c"
     }
 }

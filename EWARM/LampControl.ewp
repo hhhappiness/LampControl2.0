@@ -359,6 +359,7 @@
                     <state>$PROJ_DIR$/../Drivers/CMSIS/Device/ST/STM32G4xx/Include</state>
                     <state>$PROJ_DIR$/../Drivers/CMSIS/Include</state>
                     <state>$PROJ_DIR$\..\stm32lib</state>
+                    <state>$PROJ_DIR$\..\Core\Src\GUI</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1109,6 +1110,15 @@
             <group>
                 <name>Core</name>
                 <file>
+                    <name>$PROJ_DIR$\..\Core\Src\AppPara.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Core\Src\ctrl.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Core\Src\ctrl_common.c</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\Core\Src\main.c</name>
                 </file>
                 <file>
@@ -1116,6 +1126,9 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Core\Src\stm32g4xx_it.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Core\Src\SysPara.c</name>
                 </file>
             </group>
         </group>

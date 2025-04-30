@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "type.h"
+#include "ctrl.h"
 
 ADC_HandleTypeDef hadc2;
 RTC_HandleTypeDef hrtc;
@@ -30,6 +31,8 @@ static void MX_GPIO_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_WWDG_Init(void);
 static void MX_RTC_Init(void);
+void ConfigurationInit(void);
+void Init(void);
 
 
 /**
@@ -38,26 +41,9 @@ static void MX_RTC_Init(void);
   */
 int main(void)
 {
+  Init();
 
-/**
- * HAL_Init()
- * 配置闪存缓存
- * 设置中断优先级分组：NVIC_PriorityGroup_4
- * 配置Systick定时器
- * 底层硬件初始化
-**/
-  HAL_Init();    
-  SystemClock_Config();        //RCC配置振荡器和时钟
 
-  MX_GPIO_Init();             //GPIO初始化
-  MX_ADC2_Init();             //ADC初始化
-  MX_WWDG_Init();
-  MX_RTC_Init();
-
-  while (1)
-  {
-
-  }
 }
 
 /**
@@ -327,14 +313,37 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-/*
- * 
- */
-void Init()
+/** 
+  * @brief  硬件初始化
+  * @param  None
+  * @retval None
+  */
+void ConfigurationInit()
 {
+  /**
+ * HAL_Init()
+ * 配置闪存缓存
+ * 设置中断优先级分组：NVIC_PriorityGroup_4
+ * 配置Systick定时器
+ * 底层硬件初始化
+**/
+  HAL_Init();    
+  SystemClock_Config();        //RCC配置振荡器和时钟
+
+  MX_GPIO_Init();             //GPIO初始化
+  MX_ADC2_Init();             //ADC初始化
+  MX_WWDG_Init();             //看门狗初始化
+  MX_RTC_Init();           //RTC初始化
+  
+
+}
+
+void Init(void){
   int i;
   BOOL InitRTCFirstTime;
-
+  ConfigurationInit();
+	Status_MCU = Status_idle;
+  
 }
 /* USER CODE END 4 */
 
