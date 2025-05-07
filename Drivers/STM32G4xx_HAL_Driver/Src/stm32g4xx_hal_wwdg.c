@@ -342,7 +342,7 @@ HAL_StatusTypeDef HAL_WWDG_UnRegisterCallback(WWDG_HandleTypeDef *hwwdg, HAL_WWD
 HAL_StatusTypeDef HAL_WWDG_Refresh(WWDG_HandleTypeDef *hwwdg)
 {
   /* Write to WWDG CR the WWDG Counter value to refresh with */
-  WRITE_REG(hwwdg->Instance->CR, (hwwdg->Init.Counter));
+  WRITE_REG(hwwdg->Instance->CR, (WWDG_CR_WDGA | hwwdg->Init.Counter));  //若写入复位，则直接复位，不会返回HAL_OK
 
   /* Return function status */
   return HAL_OK;

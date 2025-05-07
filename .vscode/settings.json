@@ -18,6 +18,8 @@
         "core_cm3.h": "c",
         "core_cm4.h": "c",
         "adc.h": "c",
-        "stm32g4xx.h": "c"
+        "stm32g4xx.h": "c",
+        "apppara.h": "c",
+        "cstdint": "c"
     }
 }

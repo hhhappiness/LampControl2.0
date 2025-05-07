@@ -20,6 +20,7 @@
 #include "main.h"
 #include "type.h"
 #include "ctrl.h"
+#include "stm32.h"
 
 ADC_HandleTypeDef hadc2;
 RTC_HandleTypeDef hrtc;
@@ -31,9 +32,8 @@ static void MX_GPIO_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_WWDG_Init(void);
 static void MX_RTC_Init(void);
-void ConfigurationInit(void);
+void HardwareInit(void);
 void Init(void);
-
 
 /**
   * @brief  The application entry point.
@@ -42,7 +42,16 @@ void Init(void);
 int main(void)
 {
   Init();
-
+  //HAL_WWDG_Refresh(&hwwdg);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET); //LED ON
+  
+  while (1){
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET); //LED ON
+    HAL_Delay(1000);
+    HAL_WWDG_Refresh(&hwwdg);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET); //LED OFF
+    HAL_Delay(1000);
+  }
 
 }
 
@@ -83,7 +92,7 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV8;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
@@ -204,9 +213,9 @@ static void MX_ADC2_Init(void)
  
    /* USER CODE END WWDG_Init 1 */
    hwwdg.Instance = WWDG;
-   hwwdg.Init.Prescaler = WWDG_PRESCALER_1;
-   hwwdg.Init.Window = 64;
-   hwwdg.Init.Counter = 64;
+   hwwdg.Init.Prescaler = WWDG_PRESCALER_128;
+   hwwdg.Init.Window = 110;
+   hwwdg.Init.Counter = 110;
    hwwdg.Init.EWIMode = WWDG_EWI_DISABLE;
    if (HAL_WWDG_Init(&hwwdg) != HAL_OK)
    {
@@ -235,11 +244,11 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, POWER_ALL_ON_Pin|SNSR_GPIO_Pin|BKLT_ON_Pin, GPIO_PIN_RESET);
+ /*Configure GPIO pin Output Level */
+ HAL_GPIO_WritePin(GPIOA, POWER_ALL_ON_Pin|SNSR_GPIO_Pin|LCD_RSTB_Pin|BKLT_ON_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, DRIVER_ON_N_Pin|LCD_CSB_Pin|LDC_A0_Pin|LCD_RSTB_Pin, GPIO_PIN_RESET);
+ /*Configure GPIO pin Output Level */
+ HAL_GPIO_WritePin(GPIOB, DRIVER_ON_N_Pin|LDC_A0_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : SNSR_ADC_Pin PA5_DAC_Pin */
   GPIO_InitStruct.Pin = SNSR_ADC_Pin|PA5_DAC_Pin;
@@ -255,8 +264,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
   HAL_GPIO_Init(SNSR_PWR_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : POWER_ALL_ON_Pin SNSR_GPIO_Pin BKLT_ON_Pin */
-  GPIO_InitStruct.Pin = POWER_ALL_ON_Pin|SNSR_GPIO_Pin|BKLT_ON_Pin;
+  /*Configure GPIO pins : POWER_ALL_ON_Pin SNSR_GPIO_Pin LCD_RSTB_Pin BKLT_ON_Pin */
+  GPIO_InitStruct.Pin = POWER_ALL_ON_Pin|SNSR_GPIO_Pin|LCD_RSTB_Pin|BKLT_ON_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -286,20 +295,20 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
   HAL_GPIO_Init(CHG_STS_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : DRIVER_ON_N_Pin LCD_CSB_Pin LDC_A0_Pin LCD_RSTB_Pin */
-  GPIO_InitStruct.Pin = DRIVER_ON_N_Pin|LCD_CSB_Pin|LDC_A0_Pin|LCD_RSTB_Pin;
+  /*Configure GPIO pins : DRIVER_ON_N_Pin LDC_A0_Pin */
+  GPIO_InitStruct.Pin = DRIVER_ON_N_Pin|LDC_A0_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LCD_SDA_Pin LCD_SCL_Pin */
-  GPIO_InitStruct.Pin = LCD_SDA_Pin|LCD_SCL_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+  /*Configure GPIO pins : LCD_CSB_Pin LCD_SCL_Pin LCD_SDA_Pin */
+  GPIO_InitStruct.Pin = LCD_CSB_Pin|LCD_SCL_Pin|LCD_SDA_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF4_I2C2;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : KEY_CHA_Pin KEY_CHB_Pin */
   GPIO_InitStruct.Pin = KEY_CHA_Pin|KEY_CHB_Pin;
@@ -318,7 +327,7 @@ static void MX_GPIO_Init(void)
   * @param  None
   * @retval None
   */
-void ConfigurationInit()
+void HardwareInit()
 {
   /**
  * HAL_Init()
@@ -329,20 +338,16 @@ void ConfigurationInit()
 **/
   HAL_Init();    
   SystemClock_Config();        //RCC配置振荡器和时钟
-
   MX_GPIO_Init();             //GPIO初始化
   MX_ADC2_Init();             //ADC初始化
   MX_WWDG_Init();             //看门狗初始化
   MX_RTC_Init();           //RTC初始化
-  
 
 }
 
 void Init(void){
-  int i;
-  BOOL InitRTCFirstTime;
-  ConfigurationInit();
-	Status_MCU = Status_idle;
+  HardwareInit();
+  Status_MCU = Status_idle;
   
 }
 /* USER CODE END 4 */
