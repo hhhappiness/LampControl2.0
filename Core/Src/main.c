@@ -166,76 +166,85 @@ static void MX_ADC2_Init(void)
   * @param None
   * @retval None
   */
- static void MX_RTC_Init(void)
- {
- 
-   /* USER CODE BEGIN RTC_Init 0 */
- 
-   /* USER CODE END RTC_Init 0 */
- 
-   /* USER CODE BEGIN RTC_Init 1 */
- 
-   /* USER CODE END RTC_Init 1 */
- 
-   /** Initialize RTC Only
-   */
-   hrtc.Instance = RTC;
-   hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
-   hrtc.Init.AsynchPrediv = 127;
-   hrtc.Init.SynchPrediv = 255;
-   hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
-   hrtc.Init.OutPutRemap = RTC_OUTPUT_REMAP_NONE;
-   hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
-   hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
-   hrtc.Init.OutPutPullUp = RTC_OUTPUT_PULLUP_NONE;
-   if (HAL_RTC_Init(&hrtc) != HAL_OK)
-   {
-     Error_Handler();
-   }
-   /* USER CODE BEGIN RTC_Init 2 */
- 
-   /* USER CODE END RTC_Init 2 */
- 
- }
+static void MX_RTC_Init(void)
+{
+
+  /* USER CODE BEGIN RTC_Init 0 */
+  /* 使能PWR和BKP外设时钟 */
+// __HAL_RCC_PWR_CLK_ENABLE();
+// __HAL_RCC_BKP_CLK_ENABLE();
+
+//   /* 允许访问备份域 */
+// HAL_PWR_EnableBkUpAccess();
+  /* USER CODE END RTC_Init 0 */
+
+  /* USER CODE BEGIN RTC_Init 1 */
+
+  /* USER CODE END RTC_Init 1 */
+
+  /** Initialize RTC Only
+ */
+  hrtc.Instance = RTC;
+  hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
+  hrtc.Init.AsynchPrediv = 127;
+  hrtc.Init.SynchPrediv = 255;
+  hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
+  hrtc.Init.OutPutRemap = RTC_OUTPUT_REMAP_NONE;
+  hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
+  hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
+  hrtc.Init.OutPutPullUp = RTC_OUTPUT_PULLUP_NONE;
+  if (HAL_RTC_Init(&hrtc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN RTC_Init 2 */
+/** Enable the WakeUp*/
+if (HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 0, RTC_WAKEUPCLOCK_CK_SPRE_16BITS) != HAL_OK) //秒中断
+{
+  Error_Handler();
+}
+  /* USER CODE END RTC_Init 2 */
+
+}
 /**
   * @brief SPI2 Initialization Function
   * @param None
   * @retval None
   */
- static void MX_SPI2_Init(void)
- {
- 
-   /* USER CODE BEGIN SPI2_Init 0 */
- 
-   /* USER CODE END SPI2_Init 0 */
- 
-   /* USER CODE BEGIN SPI2_Init 1 */
- 
-   /* USER CODE END SPI2_Init 1 */
-   /* SPI2 parameter configuration*/
-   hspi2.Instance = SPI2;
-   hspi2.Init.Mode = SPI_MODE_MASTER;
-   hspi2.Init.Direction = SPI_DIRECTION_2LINES;
-   hspi2.Init.DataSize = SPI_DATASIZE_4BIT;
-   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
-   hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-   hspi2.Init.NSS = SPI_NSS_HARD_OUTPUT;
-   hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
-   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
-   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-   hspi2.Init.CRCPolynomial = 7;
-   hspi2.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
-   hspi2.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
-   if (HAL_SPI_Init(&hspi2) != HAL_OK)
-   {
-     Error_Handler();
-   }
-   /* USER CODE BEGIN SPI2_Init 2 */
- 
-   /* USER CODE END SPI2_Init 2 */
- 
- }
+static void MX_SPI2_Init(void)
+{
+
+  /* USER CODE BEGIN SPI2_Init 0 */
+
+  /* USER CODE END SPI2_Init 0 */
+
+  /* USER CODE BEGIN SPI2_Init 1 */
+
+  /* USER CODE END SPI2_Init 1 */
+  /* SPI2 parameter configuration*/
+  hspi2.Instance = SPI2;
+  hspi2.Init.Mode = SPI_MODE_MASTER;
+  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi2.Init.DataSize = SPI_DATASIZE_4BIT;
+  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi2.Init.NSS = SPI_NSS_SOFT;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi2.Init.CRCPolynomial = 7;
+  hspi2.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
+  hspi2.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
+  if (HAL_SPI_Init(&hspi2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI2_Init 2 */
+
+  /* USER CODE END SPI2_Init 2 */
+
+}
  
 /**
   * @brief WWDG Initialization Function
