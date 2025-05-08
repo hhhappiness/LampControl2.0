@@ -1,8 +1,8 @@
 #ifndef _STM_32_H_
 #define _STM_32_H_
+
 #include "stm32g4xx.h"
-#include "core_config.h"
-#include "core_cm4.h"
+#include "stdint.h"
 
 #ifdef __cplusplus
  extern "C" {
@@ -17,304 +17,49 @@
     #define NULL 0
 #endif
 
-//原来的时钟初始化使用的是system_stm32f10x.c里的SystemInit()和SetSysClock()，比较麻烦
-//实际频率一般固定，方案也不会太多。暂时不考虑时钟频率、时钟源发生变化的情况
-//主时钟选择，可定义RCC_CFGR_SW_HSI,RCC_CFGR_SW_HSE,RCC_CFGR_SW_PLL
-//如果用PLL，则PLL source固定为HSE，暂不考虑HSI/2和HSE/2的情况
-//以下定义等同于RCC_CFGR_SW_xxx，只去掉了(uint32_t)类型转换
-#define  SYS_CLOCK_SOURCE_HSI                     (0x00000000)        /*!< HSI selected as system clock */
-#define  SYS_CLOCK_SOURCE_HSE                     (0x00000001)        /*!< HSE selected as system clock */
-#define  SYS_CLOCK_SOURCE_PLL                     (0x00000002)        /*!< PLL selected as system clock */
-
-#ifndef SYS_CLOCK_SOURCE
-	#define  SYS_CLOCK_SOURCE		SYS_CLOCK_SOURCE_PLL
-#endif
-
-//根据不同的时钟源选择时钟初始化程序
-#if SYS_CLOCK_SOURCE == SYS_CLOCK_SOURCE_HSI
-	#define ClockInit()  ClockSwith_HSI()
-#elif SYS_CLOCK_SOURCE == SYS_CLOCK_SOURCE_HSE
-	#define ClockInit()  ClockInit_HSE()
-#else
-	#define ClockInit()  ClockInit_HSE_PLL() 
-#endif
-
-//以下宏定义与stm32f10x_rcc.h里的相应宏的值一样，只去掉了(uint32_t)类型转换，
-//原定义在条件编译时会报错，如"#if RTCCLK_SOURCE == RCC_RTCCLKSource_LSE"会报错
-//为了不改动库，在这里重新定义一下
-#define RTCCLKSource_LSE             (0x00000100) //RCC_RTCCLKSource_LSE
-#define RTCCLKSource_LSI             (0x00000200) //RCC_RTCCLKSource_LSI
-#define RTCCLKSource_HSE_Div128      (0x00000300) //RCC_RTCCLKSource_HSE_Div128
-
-#ifndef LSEClk  //没使用LSE时缺省为32768，有些地方计算要用
-    #define LSEClk  32768 
-#endif
-
-#ifndef LSIClk  //没使用LSE时缺省为32768，有些地方计算要用
-    #define LSIClk  40000 
-#endif
-
-#ifndef RTCCLK_SOURCE //未使用RTC的设成LSE, RTC Second中断的频率1Hz
-    #define RTCCLK_SOURCE   RTCCLKSource_LSE //未使用的就设成LSE
-    #define RTC_FREQ        1                   //RTC second 中断的频率
-#endif
-
-//如果是HSE+PLL，检查倍率是否正确
-#if (SYS_CLOCK_SOURCE == SYS_CLOCK_SOURCE_PLL)
-	#if SysClk/HSEClk >= 2 && SysClk/HSEClk <= 16
-		#define RCC_CFGR_PLLMULLx ((SysClk/HSEClk-2)<<18)
-	#else
-		#error Invalid SysClk/HSEClk
-	#endif
-#else //非PLL的设个0
-	#define RCC_CFGR_PLLMULLx 	0 
-#endif
-
-#if SysClk/AHBClk==1
-    #define  RCC_CFGR_HPRE_DIV  RCC_CFGR_HPRE_DIV1   /*!< SYSCLK not divided */
-#elif SysClk/AHBClk==2
-    #define  RCC_CFGR_HPRE_DIV  RCC_CFGR_HPRE_DIV2   /*!< SYSCLK divided by 2 */
-#elif SysClk/AHBClk==4
-    #define  RCC_CFGR_HPRE_DIV  RCC_CFGR_HPRE_DIV4   /*!< SYSCLK divided by 4 */
-#elif SysClk/AHBClk==8
-    #define  RCC_CFGR_HPRE_DIV  RCC_CFGR_HPRE_DIV8   /*!< SYSCLK divided by 8 */
-#elif SysClk/AHBClk==16
-    #define  RCC_CFGR_HPRE_DIV  RCC_CFGR_HPRE_DIV16  /*!< SYSCLK divided by 16 */
-#elif SysClk/AHBClk==64
-    #define  RCC_CFGR_HPRE_DIV  RCC_CFGR_HPRE_DIV64  /*!< SYSCLK divided by 64 */
-#elif SysClk/AHBClk==128
-    #define  RCC_CFGR_HPRE_DIV  RCC_CFGR_HPRE_DIV128 /*!< SYSCLK divided by 128 */
-#elif SysClk/AHBClk==256
-    #define  RCC_CFGR_HPRE_DIV  RCC_CFGR_HPRE_DIV256 /*!< SYSCLK divided by 256 */
-#elif SysClk/AHBClk==512
-    #define  RCC_CFGR_HPRE_DIV  RCC_CFGR_HPRE_DIV512 /*!< SYSCLK divided by 512 */
-#else
-    #error      Invalid SysClk/APBClk rate
-#endif
-
-#if AHBClk/APB1Clk==1
-    #define     RCC_CFGR_PPRE1_DIV  RCC_CFGR_PPRE1_DIV1  /*!< HCLK not divided */
-#elif AHBClk/APB1Clk==2
-    #define     RCC_CFGR_PPRE1_DIV  RCC_CFGR_PPRE1_DIV2  /*!< HCLK divided by 2 */
-#elif AHBClk/APB1Clk==4
-    #define     RCC_CFGR_PPRE1_DIV  RCC_CFGR_PPRE1_DIV4  /*!< HCLK divided by 4 */
-#elif AHBClk/APB1Clk==8
-    #define     RCC_CFGR_PPRE1_DIV  RCC_CFGR_PPRE1_DIV8  /*!< HCLK divided by 8 */
-#elif AHBClk/APB1Clk==16
-    #define     RCC_CFGR_PPRE1_DIV  RCC_CFGR_PPRE1_DIV16 /*!< HCLK divided by 16 */
-#else
-    #error      Invalid SysClk/APB1Clk rate
-#endif
-
-
-#if AHBClk/APB2Clk==1
-    #define     RCC_CFGR_PPRE2_DIV  RCC_CFGR_PPRE1_DIV1  /*!< HCLK not divided */
-#elif AHBClk/APB2Clk==2
-    #define     RCC_CFGR_PPRE2_DIV  RCC_CFGR_PPRE1_DIV2  /*!< HCLK divided by 2 */
-#elif AHBClk/APB2Clk==4
-    #define     RCC_CFGR_PPRE2_DIV  RCC_CFGR_PPRE1_DIV4  /*!< HCLK divided by 4 */
-#elif AHBClk/APB2Clk==8
-    #define     RCC_CFGR_PPRE2_DIV  RCC_CFGR_PPRE1_DIV8  /*!< HCLK divided by 8 */
-#elif AHBClk/APB2Clk==16
-    #define     RCC_CFGR_PPRE2_DIV  RCC_CFGR_PPRE1_DIV16 /*!< HCLK divided by 16 */
-#else
-    #error      Invalid SysClk/APB2Clk rate
-#endif
+//Bit Banding
 
 #if AHBClk == APB1Clk
     #define TIMXCLK (APB1Clk*1) //to TIM2,3,4,5,6,7,12,13,14
 #else
     #define TIMXCLK (APB1Clk*2) //to TIM2,3,4,5,6,7,12,13,14
 #endif
- 
-#if AHBClk == APB2Clk
-    #define TIMxCLK (APB2Clk*1) //to TIM1,8,9,10,11
-#else
-    #define TIMxCLK (APB2Clk*2) //to TIM1,8,9,10,11
-#endif 
- 
-void ClockSwith_HSI(void);
-void ClockInit_HSE_PLL (void);
-void ClockInit_HSE (void);
-void ClockInit_HSI (void);
-void ClockInit_HSEBypass_PLL (void);
-int ClockSwitch_HSI272M(void);
-void ClockSwitch_72M2HSI(void);
-
-/////////////////////////////////////////////////////////////
-///
-
-//GPIO类型码. ST的库弄的太复杂了
-#define GPO_10M     0x1u
-#define GPO_02M     0x2u
-#define GPO_50M     0x3u
-#define GPO_OD_10M  0x5u
-#define GPO_OD_02M  0x6u
-#define GPO_OD_50M  0x7u
-#define AFO_10M     0x9u
-#define AFO_02M     0xAu
-#define AFO_50M     0xBu
-#define AFO_OD_10M  0xDu
-#define AFO_OD_02M  0xEu
-#define AFO_OD_50M  0xFu
-#define GPI_AI      0x0u
-#define GPI_IF      0x4u
-#define GPI_IP      0x8u //包括PULL-down和pull-up, 要设ODR
-
-//用于设置GPIO_CR1/GPIO_CR2的宏, 高位在前，低位在后
-#define GPIO_CR(IO7,IO6,IO5,IO4,IO3,IO2,IO1,IO0) \
-    ((IO7)<<28 | (IO6)<<24| (IO5)<<20| (IO4)<<16| (IO3)<<12| (IO2)<<8| (IO1)<<4 | (IO0))
-
-//用systick做通用延时器
-#define SYSTICK_MAXCOUNT 	SysTick_LOAD_RELOAD_Msk
-__INLINE void InitSysTick(){
-    SysTick->LOAD  =  SYSTICK_MAXCOUNT;                    /* set reload register */
-    SysTick->VAL   =  (0x00);                              /* Load the SysTick Counter Value */
-    #if AHBClk == 72000000 || AHBClk == 70000000
-    //主频较高时用ABH clock/8
-    SysTick->CTRL = (0 << SysTick_CTRL_CLKSOURCE_Pos) //0: AHB clock/8, 1: AHB clock
-                | (0<<SysTick_CTRL_TICKINT_Pos)  
-                | (1<<SysTick_CTRL_ENABLE_Pos);   /* Enable SysTick IRQ and SysTick Timer */
-    #elif AHBClk == 36000000 || AHBClk == 32000000
-    SysTick->CTRL = (0 << SysTick_CTRL_CLKSOURCE_Pos) //0: AHB clock/8, 1: AHB clock
-                | (0<<SysTick_CTRL_TICKINT_Pos)  
-                | (1<<SysTick_CTRL_ENABLE_Pos);   /* Enable SysTick IRQ and SysTick Timer */
-    #elif AHBClk == 8000000 || AHBClk ==16000000
-    //主频较低时用ABH clock/8
-    SysTick->CTRL = (1 << SysTick_CTRL_CLKSOURCE_Pos) //0: AHB clock/8, 1: AHB clock
-                | (0<<SysTick_CTRL_TICKINT_Pos)  
-                | (1<<SysTick_CTRL_ENABLE_Pos);   /* Enable SysTick IRQ and SysTick Timer */
-    #else
-        #error please define the ABH clock
-    #endif
-}
-
-//不同总线时钟下的延时换算系数
-#if AHBClk == 72000000
-    #define SYSTICK2us      9       //systick与us的换算系数
-    #define SYSTICK2ms      9000    //systick与ms的换算系数
-    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计1864ms
-#elif AHBClk == 36000000
-    #define SYSTICK2us      9/2       //systick与us的换算系数，这个值不准
-    #define SYSTICK2ms      4500    //systick与ms的换算系数
-    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计3728ms
-#elif AHBClk == 32000000
-    #define SYSTICK2us      4       //systick与us的换算系数，这个值不准
-    #define SYSTICK2ms      4000    //systick与ms的换算系数
-    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计4196ms
-#elif AHBClk == 8000000
-    #define SYSTICK2us      8       //systick与us的换算系数
-    #define SYSTICK2ms      8000    //systick与ms的换算系数
-    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计2097ms
-#elif AHBClk ==16000000
-    #define SYSTICK2us      16       //systick与us的换算系数
-    #define SYSTICK2ms      16000    //systick与ms的换算系数
-    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计1048ms
-#elif AHBClk == 70000000
-    #define SYSTICK2us      9       //systick与us的换算系数
-    #define SYSTICK2ms      8750    //systick与ms的换算系数
-    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计1864ms
-#else
-    #error please define the ABH clock
-#endif
-
-
-#define SYSTICK_COUNTFLAG  0x10000 //倒计到0时变1, 对SysTick->CTRL写任何值清0
-//延时计数器, systick自由跑, 每个延时计数器需要一个变量记录开始值, 与当前值比较是否超时
-#define GetTimerCount()     (SysTick->VAL)
-#define _IsTimeOut(TReg,Count)     (((TReg+SYSTICK_MAXCOUNT+1-GetTimerCount())& SYSTICK_MAXCOUNT)>(Count))
-#define IsTimeOut_ms(TReg,ms)     (_IsTimeOut(TReg,ms*SYSTICK2ms))
-#define IsTimeOut_us(TReg,us)     (_IsTimeOut(TReg,us*SYSTICK2us))
-#define Delay_ms(ms)     {u32 TReg=GetTimerCount();    while(!IsTimeOut_ms(TReg,ms));}
-#define Delay_us(us)     {u32 TReg=GetTimerCount();    while(!IsTimeOut_us(TReg,us));}
-#define ResetTimeOut(TReg) 	{TReg=GetTimerCount();}
-
-void Delay_100ms(int i);
-
-//Bit Banding
 
 #define BB_Periph_addr(addr,bit) (PERIPH_BB_BASE + ((addr)-PERIPH_BASE)*32 + (bit)*4)
 #define BB_Periph(addr,bit) *(volatile uint32_t*)(BB_Periph_addr(addr,bit))
 #define BB_SRAM(addr,bit) *((volatile uint32_t*)(SRAM_BB_BASE + ((addr-SRAM_BASE)*32) + (bit*4)))
 #define BitBanding_NVIC
-int GetKey(void);
-void ClearKey(void);
 
 
 #define EnableINT(x)   NVIC->ISER[(x) >> 0x05] = (uint32_t)0x01 << (x & (uint8_t)0x1F)
 #define DisableINT(x)  NVIC->ICER[(x) >> 0x05] = (uint32_t)0x01 << (x & (uint8_t)0x1F)
-void InitINT(uint8_t NVIC_IRQChannel, uint8_t Priority, uint8_t SubPriority);
-void InitINTDisabled(uint8_t NVIC_IRQChannel, uint8_t Priority, uint8_t SubPriority);
 
-#define GPIO_IDR 0x08 //GPIO寄存器IDR的偏移地址
-#define GPIO_ODR 0x08 //GPIO寄存器IDR的偏移地址
-
-//USART1状态位
-#define USART1_CTS    BB_Periph(USART1_BASE+0,9) //This bit is set by hardware when the nCTS input toggles,
-#define USART1_LBD    BB_Periph(USART1_BASE+0,8) //LIN break detection flag
-#define USART1_TXE    BB_Periph(USART1_BASE+0,7) //Transmit data register empty
-#define USART1_TC     BB_Periph(USART1_BASE+0,6) //Transmission complete
-#define USART1_RXNE   BB_Periph(USART1_BASE+0,5) //Read data register not empty
-#define USART1_IDLE   BB_Periph(USART1_BASE+0,4) //IDLE line detected
-#define USART1_ORE    BB_Periph(USART1_BASE+0,3) //Overrun error
-#define USART1_NE     BB_Periph(USART1_BASE+0,3) //Noise error flag
-#define USART1_FE     BB_Periph(USART1_BASE+0,2) //Framing error
-#define USART1_PE     BB_Periph(USART1_BASE+0,1) //Parity error
-
-
-//USART2状态位
-#define USART2_CTS    BB_Periph(USART2_BASE+0,9) //This bit is set by hardware when the nCTS input toggles,
-#define USART2_LBD    BB_Periph(USART2_BASE+0,8) //LIN break detection flag
-#define USART2_TXE    BB_Periph(USART2_BASE+0,7) //Transmit data register empty
-#define USART2_TC     BB_Periph(USART2_BASE+0,6) //Transmission complete
-#define USART2_RXNE   BB_Periph(USART2_BASE+0,5) //Read data register not empty
-#define USART2_IDLE   BB_Periph(USART2_BASE+0,4) //IDLE line detected
-#define USART2_ORE    BB_Periph(USART2_BASE+0,3) //Overrun error
-#define USART2_NE     BB_Periph(USART2_BASE+0,3) //Noise error flag
-#define USART2_FE     BB_Periph(USART2_BASE+0,2) //Framing error
-#define USART2_PE     BB_Periph(USART2_BASE+0,1) //Parity error
-
-
-//USART3状态位
-#define USART3_CTS    BB_Periph(USART3_BASE+0,9) //This bit is set by hardware when the nCTS input toggles,
-#define USART3_LBD    BB_Periph(USART3_BASE+0,8) //LIN break detection flag
-#define USART3_TXE    BB_Periph(USART3_BASE+0,7) //Transmit data register empty
-#define USART3_TC     BB_Periph(USART3_BASE+0,6) //Transmission complete
-#define USART3_RXNE   BB_Periph(USART3_BASE+0,5) //Read data register not empty
-#define USART3_IDLE   BB_Periph(USART3_BASE+0,4) //IDLE line detected
-#define USART3_ORE    BB_Periph(USART3_BASE+0,3) //Overrun error
-#define USART3_NE     BB_Periph(USART3_BASE+0,3) //Noise error flag
-#define USART3_FE     BB_Periph(USART3_BASE+0,2) //Framing error
-#define USART3_PE     BB_Periph(USART3_BASE+0,1) //Parity error
-
-//SPI1控制位
-#define SPI1_BIDIOE    BB_Periph(SPI1_BASE+0,14) //This bit is set by hardware when the nCTS input toggles,
-//SPI2控制位
-#define SPI2_BIDIOE    BB_Periph(SPI2_BASE+0,14) //This bit is set by hardware when the nCTS input toggles,
+#define GPIO_IDR 0x10 //GPIO寄存器IDR的偏移地址
+#define GPIO_ODR 0x14 //GPIO寄存器ODR的偏移地址
 
 //GPIO位地址定义
-#define GPA_I_Addr(i) 	BB_Periph_addr(GPIOA_BASE+0x08,i)
-#define GPA_O_Addr(i) 	BB_Periph_addr(GPIOA_BASE+0x0C,i)
-#define GPB_I_Addr(i) 	BB_Periph_addr(GPIOB_BASE+0x08,i)
-#define GPB_O_Addr(i) 	BB_Periph_addr(GPIOB_BASE+0x0C,i)
-#define GPC_I_Addr(i) 	BB_Periph_addr(GPIOC_BASE+0x08,i)
-#define GPC_O_Addr(i) 	BB_Periph_addr(GPIOC_BASE+0x0C,i)
-#define GPD_I_Addr(i) 	BB_Periph_addr(GPIOD_BASE+0x08,i)
-#define GPD_O_Addr(i) 	BB_Periph_addr(GPIOD_BASE+0x0C,i)
-#define GPE_I_Addr(i) 	BB_Periph_addr(GPIOE_BASE+0x08,i)
-#define GPE_O_Addr(i) 	BB_Periph_addr(GPIOE_BASE+0x0C,i)
+#define GPA_I_Addr(i) 	BB_Periph_addr(GPIOA_BASE+GPIO_IDR,i)
+#define GPA_O_Addr(i) 	BB_Periph_addr(GPIOA_BASE+GPIO_ODR,i)
+#define GPB_I_Addr(i) 	BB_Periph_addr(GPIOB_BASE+GPIO_IDR,i)
+#define GPB_O_Addr(i) 	BB_Periph_addr(GPIOB_BASE+GPIO_ODR,i)
+#define GPC_I_Addr(i) 	BB_Periph_addr(GPIOC_BASE+GPIO_IDR,i)
+#define GPC_O_Addr(i) 	BB_Periph_addr(GPIOC_BASE+GPIO_ODR,i)
+#define GPD_I_Addr(i) 	BB_Periph_addr(GPIOD_BASE+GPIO_IDR,i)
+#define GPD_O_Addr(i) 	BB_Periph_addr(GPIOD_BASE+GPIO_ODR,i)
+#define GPE_I_Addr(i) 	BB_Periph_addr(GPIOE_BASE+GPIO_IDR,i)
+#define GPE_O_Addr(i) 	BB_Periph_addr(GPIOE_BASE+GPIO_ODR,i)
 
 //GPIO位直接访问
-#define GPA_I(i)		*(volatile uint32_t*)GPA_I_Addr(i)
-#define GPA_O(i)		*(volatile uint32_t*)GPA_O_Addr(i)
-#define GPB_I(i)		*(volatile uint32_t*)GPB_I_Addr(i)
-#define GPB_O(i)		*(volatile uint32_t*)GPB_O_Addr(i)
-#define GPC_I(i)		*(volatile uint32_t*)GPC_I_Addr(i)
-#define GPC_O(i)		*(volatile uint32_t*)GPC_O_Addr(i)
-#define GPD_I(i)		*(volatile uint32_t*)GPD_I_Addr(i)
-#define GPD_O(i)		*(volatile uint32_t*)GPD_O_Addr(i)
-#define GPE_I(i)		*(volatile uint32_t*)GPE_I_Addr(i)
-#define GPE_O(i)		*(volatile uint32_t*)GPE_O_Addr(i)
+#define GPA_I(i)		(*(volatile uint32_t*)GPA_I_Addr(i))
+#define GPA_O(i)		(*(volatile uint32_t*)GPA_O_Addr(i))
+#define GPB_I(i)		(*(volatile uint32_t*)GPB_I_Addr(i))
+#define GPB_O(i)		(*(volatile uint32_t*)GPB_O_Addr(i))
+#define GPC_I(i)		(*(volatile uint32_t*)GPC_I_Addr(i))
+#define GPC_O(i)		(*(volatile uint32_t*)GPC_O_Addr(i))
+#define GPD_I(i)		(*(volatile uint32_t*)GPD_I_Addr(i))
+#define GPD_O(i)		(*(volatile uint32_t*)GPD_O_Addr(i))
+#define GPE_I(i)		(*(volatile uint32_t*)GPE_I_Addr(i))
+#define GPE_O(i)		(*(volatile uint32_t*)GPE_O_Addr(i))
 
 
 //IIC CR1
@@ -442,6 +187,16 @@ void InitINTDisabled(uint8_t NVIC_IRQChannel, uint8_t Priority, uint8_t SubPrior
 #define CC4S_INPUT_TI4  (1<<8)  //CC4 channel is configured as input, IC1 is mapped on TI4
 #define CC4S_INPUT_TI3  (2<<8)  //CC4 channel is configured as input, IC1 is mapped on TI3
 #define CC4S_INPUT_TRC  (3<<8)  //CC4 channel is configured as input, IC1 is mapped on TRC
+
+#ifndef MIN 
+	#define MIN(a, b)        (((a) < (b)) ? (a) : (b))
+#endif	 
+
+#ifndef MAX
+	#define MAX(a, b)        (((a) > (b)) ? (a) : (b))
+#endif		 
+	 
+	 
 
 #ifdef __cplusplus
  }

@@ -20,6 +20,10 @@
         "adc.h": "c",
         "stm32g4xx.h": "c",
         "apppara.h": "c",
-        "cstdint": "c"
+        "cstdint": "c",
+        "spi_io.h": "c",
+        "stm32.h": "c",
+        "board_config.h": "c",
+        "stdint.h": "c"
     }
 }

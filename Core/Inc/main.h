@@ -107,7 +107,9 @@ void Error_Handler(void);
 #define KEY_UP_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
+// My GPIO function define
+//#define GPIOA->ODR(i) (GPIOA->ODR & ~(1<<i)) //GPIOA->ODR(i) = 0
+#define GPA_O(i,x) ((x==1) ? (GPIOA->ODR |= (1<<i)):(GPIOA->ODR &= ~(1<<i)))//GPIOA->ODR(i) = 1
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

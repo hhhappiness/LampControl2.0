@@ -14,12 +14,12 @@
 
 
 
-#define _A0_1 		LCD_A0=1 
-#define _A0_0 		LCD_A0=0
+#define _A0_1 		LCD_A0_Pin_O(1) //LCD_A0=1
+#define _A0_0 		LCD_A0_Pin_O(0) //LCD_A0=0
 #define _BLK_1 		BKLT_SW=1
 #define _BLK_0 		BKLT_SW=0
-#define _RSTB_0 	LCD_RSTB=0
-#define _RSTB_1 	LCD_RSTB=1
+#define _RSTB_0 	LCD_RSTB_Pin_O(0) //LCD_RSTB=0
+#define _RSTB_1 	LCD_RSTB_Pin_O(1) //LCD_RSTB=1
 
 #ifndef BOOTLOADER		//bootloader³ÌÐò²»Êä³öºº×Ö
 	#define OUTPUT_HANZI

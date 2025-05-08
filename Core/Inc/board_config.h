@@ -20,9 +20,9 @@
 #define VSET2 		GPB_O(8) 
 #define POWER_SW 	GPB_O(7)
 #define BKLT_SW		GPB_O(11)
-#define LCD_RSTB	GPA_O(3)
-#define LCD_A0 		GPA_O(6)
-#define LCD_CSB 	GPA_O(4)
+#define LCD_RSTB(x)	LCD_RSTB_Pin_O(x) //RSTB=1 or 0	
+#define LCD_A0(x) 	LCD_A0_Pin_O(x) //A0=1 or 0
+#define LCD_CSB(x) 	LCD_CSB_Pin_O(x) //CSB=0 or 1
 
 // ‰»Îπ‹Ω≈	 
 #define CHARGE_PIN	GPB_I(12)
@@ -42,8 +42,8 @@ __inline void PowerOn(void )  {POWER_SW = 1;}
 __inline void PowerOff(void ) {POWER_SW = 0;}
 __inline void BackLightOn(void )  {BKLT_SW = 1;}
 __inline void BackLightOff(void ) {BKLT_SW = 0;}
-__inline void LcdResetOn(void )  {LCD_RSTB = 0;}
-__inline void LcdResetOff(void ) {LCD_RSTB = 1;}
+__inline void LcdResetOn(void )  {LCD_RSTB(0)       ;}
+__inline void LcdResetOff(void ) {LCD_RSTB(1);}
 
 #define GetChargePin	0
 

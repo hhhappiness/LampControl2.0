@@ -44,14 +44,14 @@ int main(void)
 {
   Init();
   //HAL_WWDG_Refresh(&hwwdg);
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET); //LED ON
+  // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET); //LED ON
   
   while (1){
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET); //LED ON
-    HAL_Delay(1000);
-    HAL_WWDG_Refresh(&hwwdg);
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET); //LED OFF
-    HAL_Delay(1000);
+  //   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET); //LED ON
+  //   HAL_Delay(1000);
+  //   HAL_WWDG_Refresh(&hwwdg);
+  //   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET); //LED OFF
+  //   HAL_Delay(1000);
   }
 
 }
@@ -391,7 +391,7 @@ void HardwareInit()
   MX_ADC2_Init();             //ADC初始化
   MX_WWDG_Init();             //看门狗初始化
   MX_RTC_Init();           //RTC初始化
-  MX_SPI2_Init();
+  MX_SPI2_Init();           //SPI初始化
 
 }
 
