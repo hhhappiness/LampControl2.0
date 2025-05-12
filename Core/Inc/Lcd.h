@@ -15,6 +15,7 @@
 #define CONTRAST_MIN		1
 #define CONTRAST_MAX		10
 
+
 typedef unsigned char Uchar;
 typedef unsigned int Uint;
 

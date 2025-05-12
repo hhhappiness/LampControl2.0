@@ -1125,6 +1125,9 @@
                     <name>$PROJ_DIR$\..\Core\Src\Lcd.c</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\Core\Src\LCD_SPI.c</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\Core\Src\main.c</name>
                 </file>
                 <file>

@@ -29,6 +29,9 @@
         "key_base.h": "c",
         "share.h": "c",
         "fonts.h": "c",
-        "cstdlib": "c"
+        "cstdlib": "c",
+        "cstddef": "c",
+        "zimu.h": "c",
+        "lcd_stc.h": "c"
     }
 }

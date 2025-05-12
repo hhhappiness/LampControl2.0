@@ -14,12 +14,7 @@ extern SPI_HandleTypeDef hspi2;
 #define MIN(A,B) ((A)<(B)?(A):(B))
 
 
-#define _A0_1 		GPB_O(14,1) //LCD_A0=1
-#define _A0_0 		GPB_O(14,0) //LCD_A0=0
-#define _BLK_1 		BKLT_SW(1)
-#define _BLK_0 		BKLT_SW(0)
-#define _RSTB_0 	GPA_O(8,0) //LCD_RSTB=0
-#define _RSTB_1 	GPA_O(8,1) //LCD_RSTB=1
+
 
 #ifndef BOOTLOADER		//bootloader程序不输出汉字
 	#define OUTPUT_HANZI
@@ -36,6 +31,7 @@ static void Spi_WriteByte(unsigned char dat)
 #else
 void Spi_WriteByte(unsigned char dat)
 {
+	//LCD_CSB(0);
 	SPI2->DR = dat;	//写入数据
 	__NOP5()//至少加4个nop保证开始发送
 	while(SPI2->SR & SPI_FLAG_BSY);	//判断发送完成。不能用TXE，只是缓冲区空
@@ -81,6 +77,7 @@ void LcmFill( u8 x, u8 y, u8 w, u8 h, u8 color )
 
 void LcmInit( void )
 {
+	LCD_CSB(0); //LCD_CSB=0
 	WriteCommand(0xAE); //Display OFF
 	WriteCommand(0xA2); //1/64 Duty 1/9 Bias
 	WriteCommand(0xA0); //ADC select S0->S131(玻璃设计用 S1-S128)
@@ -97,10 +94,30 @@ void LcmInit( void )
 	WriteCommand(0x00); //Set Column Address 4 lower bits = 1 , from IC SEG1 -> SEG128
 	LcmClear(0);
 	WriteCommand(0xAF); //Display ON
-	LCD_CSB(0); //LCD_CSB=0
+	
 
 }
 
+void LcdInit(void)
+{
+	WriteCommand(0xe3); //Set Power Control
+	WriteCommand(0xa3); //Set LCD Bias
+	WriteCommand(0xa0); //Set ADC
+	WriteCommand(0xc8); //Set COM Output select
+	WriteCommand(0x2f); //Set Power Control
+	WriteCommand(0x21); //Set Register ratio Rb/Ra
+	WriteCommand(0x81); //Set volume
+	WriteCommand(0x55); //vop
+	WriteCommand(0xf8); //x4
+	WriteCommand(0x08); //x4
+	WriteCommand(0xb0); //Set Page Address
+	WriteCommand(0x10); //Set Column Address 4 higher bits
+	WriteCommand(0x00); //Set Column Address 4 lower bits
+	for(int i=0;i<8;i++){
+		WriteData(0x00); //Clear Page
+	}
+	WriteCommand(0xaf); //Display ON
+}
 
 
 #if 1
@@ -334,14 +351,14 @@ void LcmPutBmpRect(u8 x,u8 y, const u8 *bmp,u8 w, const Rect8_t * rect)
 
 void LcmReset(void)
 {
+	LCD_RSTB(1);
+	Delay_ms(10);
 	LCD_RSTB(0);
 	//wdg();
-	Delay_ms(100);
-	//wdg();
-	Delay_ms(100);
+	Delay_ms(20);
 	//wdg();
 	LCD_RSTB(1);
-	Delay_ms(50);	
+	Delay_ms(10);	
 	//wdg();
 }
 

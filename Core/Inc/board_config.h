@@ -32,6 +32,13 @@
 #define LCD_A0(x) 	GPB_O(14,x) //A0=1 or 0
 #define LCD_CSB(x) 	GPB_O(12,x) //CSB=0 or 1
 
+#define _A0_1 		GPB_O(14,1) //LCD_A0=1
+#define _A0_0 		GPB_O(14,0) //LCD_A0=0
+#define _BLK_1 		BKLT_SW(1)
+#define _BLK_0 		BKLT_SW(0)
+#define _RSTB_0 	GPA_O(8,0) //LCD_RSTB=0
+#define _RSTB_1 	GPA_O(8,1) //LCD_RSTB=1
+
 // ‰»Îπ‹Ω≈	 
 #define CHARGE_PIN	GPB_I(12)
 #define GPI_KEY_POWER GPA_I(0)

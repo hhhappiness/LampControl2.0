@@ -44,16 +44,13 @@ void Init(void);
 int main(void)
 {
   Init();
-  //HAL_WWDG_Refresh(&hwwdg);
-  // HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET); //LED ON
-  
-  
-  while (1){
-    
- 
-    LcdFullFill();
-    //LcmFill(0, 24, 128, 16,0);
-  }
+#if 0          // stc例程移植调试
+  lcd_init();
+	while(1)
+	{
+		display();
+	}
+#endif
 
 }
 
@@ -399,11 +396,12 @@ void SysInit()
 }
 
 void Init(void){
-  SysInit();
+  SysInit();        //CubeMX配置的系统初始化  
+  InitSysTick();         //初始化SysTick定时器
   Status_MCU = Status_idle;
-  LcmReset(); 
-  LcmInit();
-  BackLightOn();
+  // LcmReset();          //LCD复位
+  // LcmInit();            //LCD初始化(按照数据手册)
+  //BackLightOn();       //背光打开
 }
 /* USER CODE END 4 */
 
