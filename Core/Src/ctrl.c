@@ -110,7 +110,7 @@ void StartToFlash(void)
 			TrigAngle = AngleCov(AppPara.Delay_SinglePulse);
 		}
 		*/
-		BoostOn();
+		//BoostOn();
 		OpenAllTimer();
 		TIM_Init();
 		Updata_OutPusle();
@@ -149,7 +149,7 @@ void StartToFlash(void)
 
 void StopToFlash(void)
 {
-	BoostOff();
+	//BoostOff();
 	CloseAllTimer();
 	Status_MCU = Status_WorkStall;
 	//停止输出的时候，需要控制Strobe的状态，Led和灯管的不同

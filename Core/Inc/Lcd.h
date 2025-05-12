@@ -35,7 +35,7 @@ void LcmPutChar_r(Uchar col,Uchar page,Uchar Order);
 void LcmPutStr(Uchar col,Uchar page,char *puts);
 void LcmPutStr_r(Uchar col,Uchar page,char *puts);
 void LcmPutNum(Uchar col,Uchar page,Uchar Num);
-void TestLcm( void );
+void LcdFullFill( void );
 BOOL LcdSetContrast(int val);
 
 void LcmFill( u8 x, u8 y, u8 w, u8 h, u8 color );

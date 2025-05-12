@@ -1109,6 +1109,9 @@
             <name>User</name>
             <group>
                 <name>Core</name>
+                <group>
+                    <name>GUI</name>
+                </group>
                 <file>
                     <name>$PROJ_DIR$\..\Core\Src\AppPara.c</name>
                 </file>
@@ -1117,6 +1120,9 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Core\Src\ctrl_common.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Core\Src\Lcd.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Core\Src\main.c</name>
@@ -1195,10 +1201,10 @@
                 <name>$PROJ_DIR$\..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_hal_rtc_ex.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$/../Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_spi.c</name>
+                <name>$PROJ_DIR$\..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_hal_spi.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$/../Drivers/STM32G4xx_HAL_Driver/Src/stm32g4xx_hal_spi_ex.c</name>
+                <name>$PROJ_DIR$\..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_hal_spi_ex.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_hal_wwdg.c</name>

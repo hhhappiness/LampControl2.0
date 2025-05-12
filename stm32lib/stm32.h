@@ -2,6 +2,7 @@
 #define _STM_32_H_
 
 #include "stm32g4xx.h"
+#include "core_config.h"
 #include "stdint.h"
 
 #ifdef __cplusplus
@@ -17,14 +18,84 @@
     #define NULL 0
 #endif
 
-//Bit Banding
-
 #if AHBClk == APB1Clk
     #define TIMXCLK (APB1Clk*1) //to TIM2,3,4,5,6,7,12,13,14
 #else
     #define TIMXCLK (APB1Clk*2) //to TIM2,3,4,5,6,7,12,13,14
 #endif
+//用systick做通用延时器
+#define SYSTICK_MAXCOUNT 	SysTick_LOAD_RELOAD_Msk
+__INLINE void InitSysTick(){
+    SysTick->LOAD  =  SYSTICK_MAXCOUNT;                    /* set reload register */
+    SysTick->VAL   =  (0x00);                              /* Load the SysTick Counter Value */
+    #if AHBClk == 72000000 || AHBClk == 70000000 || AHBClk == 168000000
+    //主频较高时用ABH clock/8
+    SysTick->CTRL = (0 << SysTick_CTRL_CLKSOURCE_Pos) //0: AHB clock/8, 1: AHB clock
+                | (0<<SysTick_CTRL_TICKINT_Pos)  
+                | (1<<SysTick_CTRL_ENABLE_Pos);   /* Enable SysTick IRQ and SysTick Timer */
+    #elif AHBClk == 36000000 || AHBClk == 32000000
+    SysTick->CTRL = (0 << SysTick_CTRL_CLKSOURCE_Pos) //0: AHB clock/8, 1: AHB clock
+                | (0<<SysTick_CTRL_TICKINT_Pos)  
+                | (1<<SysTick_CTRL_ENABLE_Pos);   /* Enable SysTick IRQ and SysTick Timer */
+                
+    #elif AHBClk == 8000000 || AHBClk ==16000000
+    //主频较低时用ABH clock/8
+    SysTick->CTRL = (1 << SysTick_CTRL_CLKSOURCE_Pos) //0: AHB clock/8, 1: AHB clock
+                | (0<<SysTick_CTRL_TICKINT_Pos)  
+                | (1<<SysTick_CTRL_ENABLE_Pos);   /* Enable SysTick IRQ and SysTick Timer */
+    #else
+        #error please define the ABH clock
+    #endif
+}
 
+//不同总线时钟下的延时换算系数
+#if AHBClk == 72000000
+    #define SYSTICK2us      9       //systick与us的换算系数
+    #define SYSTICK2ms      9000    //systick与ms的换算系数
+    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计1864ms
+#elif AHBClk == 168000000
+    #define SYSTICK2us      21       //systick与us的换算系数，这个值不准
+    #define SYSTICK2ms      21000    //systick与ms的换算系数
+    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计3728ms
+#elif AHBClk == 36000000
+    #define SYSTICK2us      9/2       //systick与us的换算系数，这个值不准
+    #define SYSTICK2ms      4500    //systick与ms的换算系数
+    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计3728ms
+#elif AHBClk == 32000000
+    #define SYSTICK2us      4       //systick与us的换算系数，这个值不准
+    #define SYSTICK2ms      4000    //systick与ms的换算系数
+    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计4196ms
+#elif AHBClk == 8000000
+    #define SYSTICK2us      8       //systick与us的换算系数
+    #define SYSTICK2ms      8000    //systick与ms的换算系数
+    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计2097ms
+#elif AHBClk ==16000000
+    #define SYSTICK2us      16       //systick与us的换算系数
+    #define SYSTICK2ms      16000    //systick与ms的换算系数
+    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计1048ms
+#elif AHBClk == 70000000
+    #define SYSTICK2us      9       //systick与us的换算系数
+    #define SYSTICK2ms      8750    //systick与ms的换算系数
+    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计1864ms
+#else
+    #error please define the ABH clock
+#endif
+
+
+
+
+#define SYSTICK_COUNTFLAG  0x10000 //倒计到0时变1, 对SysTick->CTRL写任何值清0
+//延时计数器, systick自由跑, 每个延时计数器需要一个变量记录开始值, 与当前值比较是否超时
+#define GetTimerCount()     (SysTick->VAL)
+#define _IsTimeOut(TReg,Count)     (((TReg+SYSTICK_MAXCOUNT+1-GetTimerCount())& SYSTICK_MAXCOUNT)>(Count))
+#define IsTimeOut_ms(TReg,ms)     (_IsTimeOut(TReg,ms*SYSTICK2ms))
+#define IsTimeOut_us(TReg,us)     (_IsTimeOut(TReg,us*SYSTICK2us))
+#define Delay_ms(ms)     HAL_Delay(ms);//{u32 TReg=GetTimerCount();    while(!IsTimeOut_ms(TReg,ms));}
+#define Delay_us(us)     {u32 TReg=GetTimerCount();    while(!IsTimeOut_us(TReg,us));}
+#define ResetTimeOut(TReg) 	{TReg=GetTimerCount();}
+
+
+//Bit Banding
 #define BB_Periph_addr(addr,bit) (PERIPH_BB_BASE + ((addr)-PERIPH_BASE)*32 + (bit)*4)
 #define BB_Periph(addr,bit) *(volatile uint32_t*)(BB_Periph_addr(addr,bit))
 #define BB_SRAM(addr,bit) *((volatile uint32_t*)(SRAM_BB_BASE + ((addr-SRAM_BASE)*32) + (bit*4)))
@@ -50,10 +121,10 @@
 #define GPE_O_Addr(i) 	BB_Periph_addr(GPIOE_BASE+GPIO_ODR,i)
 
 //GPIO位直接访问
-#define GPA_I(i)		(*(volatile uint32_t*)GPA_I_Addr(i))
-#define GPA_O(i)		(*(volatile uint32_t*)GPA_O_Addr(i))
-#define GPB_I(i)		(*(volatile uint32_t*)GPB_I_Addr(i))
-#define GPB_O(i)		(*(volatile uint32_t*)GPB_O_Addr(i))
+// #define GPA_I(i)		(*(volatile uint32_t*)GPA_I_Addr(i))
+// #define GPA_O(i)		(*(volatile uint32_t*)GPA_O_Addr(i))
+// #define GPB_I(i)		(*(volatile uint32_t*)GPB_I_Addr(i))
+// #define GPB_O(i)		(*(volatile uint32_t*)GPB_O_Addr(i))
 #define GPC_I(i)		(*(volatile uint32_t*)GPC_I_Addr(i))
 #define GPC_O(i)		(*(volatile uint32_t*)GPC_O_Addr(i))
 #define GPD_I(i)		(*(volatile uint32_t*)GPD_I_Addr(i))

@@ -2,24 +2,24 @@
 #include "bsp.h"
 #include "board_config.h"
 #include "SpiMaster.h"
-#include "LCD.h"
+#include "Lcd.h"
 #include "fonts.h"
 #include "type.h"
 #include "share.h"
 #include "spi_io.h"
 #include "core_config.h"
 #include "ctrl_common.h"
+extern SPI_HandleTypeDef hspi2;
 
 #define MIN(A,B) ((A)<(B)?(A):(B))
 
 
-
-#define _A0_1 		LCD_A0_Pin_O(1) //LCD_A0=1
-#define _A0_0 		LCD_A0_Pin_O(0) //LCD_A0=0
-#define _BLK_1 		BKLT_SW=1
-#define _BLK_0 		BKLT_SW=0
-#define _RSTB_0 	LCD_RSTB_Pin_O(0) //LCD_RSTB=0
-#define _RSTB_1 	LCD_RSTB_Pin_O(1) //LCD_RSTB=1
+#define _A0_1 		GPB_O(14,1) //LCD_A0=1
+#define _A0_0 		GPB_O(14,0) //LCD_A0=0
+#define _BLK_1 		BKLT_SW(1)
+#define _BLK_0 		BKLT_SW(0)
+#define _RSTB_0 	GPA_O(8,0) //LCD_RSTB=0
+#define _RSTB_1 	GPA_O(8,1) //LCD_RSTB=1
 
 #ifndef BOOTLOADER		//bootloader程序不输出汉字
 	#define OUTPUT_HANZI
@@ -34,14 +34,15 @@ static void Spi_WriteByte(unsigned char dat)
 	LCD_CSB = 1;
 }
 #else
-static void Spi_WriteByte(unsigned char dat)
+void Spi_WriteByte(unsigned char dat)
 {
-	LCD_CSB = 0;
-	SPI1->DR = dat;
-	__nop();__nop();__nop();__nop();__nop();//至少加4个nop保证开始发送
-	while(SPI1->SR & SPI_I2S_FLAG_BSY);	//判断发送完成。不能用TXE，只是缓冲区空
+	SPI2->DR = dat;	//写入数据
+	__NOP5()//至少加4个nop保证开始发送
+	while(SPI2->SR & SPI_FLAG_BSY);	//判断发送完成。不能用TXE，只是缓冲区空
 //	Delay_us(1);
-	LCD_CSB = 1;
+	//LCD_CSB(1);
+	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET); //LCD_CSB=0
+
 }
 #endif
 
@@ -57,13 +58,16 @@ static __inline void WriteData( Uchar DataByte )
 	Spi_WriteByte(DataByte);
 }
 
-__inline _SetPos(u8 page, u8 col)
+static __inline void _SetPos(u8 page, u8 col)
 {
 	WriteCommand(page|0xB0); //Set Page Address
 	WriteCommand( ((col)>>4) | 0x10); //Set Column Address High Byte
 	WriteCommand( (col)&0x0F ); //Low Byte Colum from S128 -> S1 auto add
 }
-
+void LcdFullFill(){
+  //WriteCommand(0xAF);
+  WriteCommand(0xAF); //all pixel ON
+}
 void LcmFill( u8 x, u8 y, u8 w, u8 h, u8 color )
 {
 	u8 i,j;
@@ -93,7 +97,11 @@ void LcmInit( void )
 	WriteCommand(0x00); //Set Column Address 4 lower bits = 1 , from IC SEG1 -> SEG128
 	LcmClear(0);
 	WriteCommand(0xAF); //Display ON
+	LCD_CSB(0); //LCD_CSB=0
+
 }
+
+
 
 #if 1
 void LcmPutChar(Uchar col,Uchar page,Uchar Order)
@@ -326,15 +334,15 @@ void LcmPutBmpRect(u8 x,u8 y, const u8 *bmp,u8 w, const Rect8_t * rect)
 
 void LcmReset(void)
 {
-	LCD_RSTB=0;
-	wdg();
+	LCD_RSTB(0);
+	//wdg();
 	Delay_ms(100);
-	wdg();
+	//wdg();
 	Delay_ms(100);
-	wdg();
-	LCD_RSTB=1;
+	//wdg();
+	LCD_RSTB(1);
 	Delay_ms(50);	
-	wdg();
+	//wdg();
 }
 
 //add by gongj

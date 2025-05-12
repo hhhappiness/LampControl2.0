@@ -15,6 +15,7 @@ char *BootloaderVersionStr = (char *) BOOTLOADER_VERSION_ADDR;
 //mcu调试寄存器
 #define DBGMCU_CR    (*((volatile unsigned long *)0xE0042004)) 
 
+#if 0
 ///上电缓起动流程
 void PowerSeq(void)
 {
@@ -30,7 +31,7 @@ void PowerSeq(void)
 	}
 }
 
-#if 0
+
 ///判断关机是否超过一定时间，以分钟为单位，暂时一直判定为TRUE
 BOOL TestLongShutDown(int minutes)
 {

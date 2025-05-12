@@ -204,7 +204,7 @@ void SysTick_Handler(void)
 void RTC_WKUP_IRQHandler(void)
 {
   /* USER CODE BEGIN RTC_WKUP_IRQn 0 */
-  GPA_O(15,1); //LED ON
+
   /* USER CODE END RTC_WKUP_IRQn 0 */
   HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);
   /* USER CODE BEGIN RTC_WKUP_IRQn 1 */

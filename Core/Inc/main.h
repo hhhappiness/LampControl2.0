@@ -28,6 +28,8 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32g4xx_hal.h"
+#include "bsp.h"
+
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -107,9 +109,11 @@ void Error_Handler(void);
 #define KEY_UP_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-// My GPIO function define
-//#define GPIOA->ODR(i) (GPIOA->ODR & ~(1<<i)) //GPIOA->ODR(i) = 0
-#define GPA_O(i,x) ((x==1) ? (GPIOA->ODR |= (1<<i)):(GPIOA->ODR &= ~(1<<i)))//GPIOA->ODR(i) = 1
+#define LCD_CSB_Pin_O(x)		((x==0) ? (GPIOB->ODR & ~LCD_CSB_Pin) : (GPIOB->ODR | LCD_CSB_Pin))
+#define LCD_SCL_Pin_O(x)		((x==0) ? (GPIOB->ODR & ~LCD_SCL_Pin) : (GPIOB->ODR | LCD_SCL_Pin))
+#define LCD_SDA_Pin_O(x)		((x==0) ? (GPIOB->ODR & ~LCD_SDA_Pin) : (GPIOB->ODR | LCD_SDA_Pin))
+#define LCD_RSTB_Pin_O(x)		((x==0) ? (GPIOA->ODR & ~LCD_RSTB_Pin) : (GPIOA->ODR | LCD_RSTB_Pin))
+#define LCD_A0_Pin_O(x)		((x==0) ? (GPIOB->ODR & ~LDC_A0_Pin) : (GPIOB->ODR | LDC_A0_Pin))
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
