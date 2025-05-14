@@ -102,7 +102,7 @@ void LineSpeed2Clocks(void)
 	NextTrigClks = TIM2_Hz2clk(tmp);
 	#endif
 }
-
+#if 0
 void StartToFlash(void)
 {
 		/*
@@ -156,7 +156,7 @@ void StopToFlash(void)
 	SwitchStrobeGPIO();
 	WorkEn = 0;
 }
-#if 0
+
 void EnterStandby(void)
 {
 

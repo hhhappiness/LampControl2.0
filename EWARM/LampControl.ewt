@@ -1451,13 +1451,19 @@
                     <name>$PROJ_DIR$\..\Core\Src\ctrl_common.c</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\Core\Src\KeyAndKnob_lamp2.c</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\Core\Src\Lcd.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\Core\Src\LCD_SPI.c</name>
+                    <name>$PROJ_DIR$\..\Core\Src\lcd_stc.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Core\Src\main.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Core\Src\rtc_int.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Core\Src\stm32g4xx_hal_msp.c</name>

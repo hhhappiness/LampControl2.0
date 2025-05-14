@@ -22,6 +22,12 @@
 #include "ctrl.h"
 #include "stm32.h"
 #include "Lcd.h"
+#include "AppParaCommon.h"
+#include "rtc_int.h"
+#include "SysParaCommon.h"
+#include "SysPara.h"
+//include for test
+
 
 ADC_HandleTypeDef hadc2;
 RTC_HandleTypeDef hrtc;
@@ -36,7 +42,7 @@ static void MX_RTC_Init(void);
 static void MX_SPI2_Init(void);
 void SysInit(void);
 void Init(void);
-
+u32 key;
 /**
   * @brief  The application entry point.
   * @retval int
@@ -51,6 +57,11 @@ int main(void)
 		display();
 	}
 #endif
+  while(1)
+  {
+    //BackLightOn();
+    key = getKeyBuf();
+  }
 
 }
 
@@ -197,7 +208,7 @@ static void MX_RTC_Init(void)
   }
   /* USER CODE BEGIN RTC_Init 2 */
 /** Enable the WakeUp*/
-if (HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 0, RTC_WAKEUPCLOCK_CK_SPRE_16BITS) != HAL_OK) //秒中断
+if (HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 63, RTC_WAKEUPCLOCK_RTCCLK_DIV16) != HAL_OK) //秒中断
 {
   Error_Handler();
 }
@@ -397,11 +408,25 @@ void SysInit()
 
 void Init(void){
   SysInit();        //CubeMX配置的系统初始化  
-  InitSysTick();         //初始化SysTick定时器
   Status_MCU = Status_idle;
+  // LoadSysConfig();//先加载SysPara，因为部分AppPara的参数转换需要知道灯管类型
+  // LoadConfig();
+  InitKey();        //按键初始化
+  InitSysTick();         //初始化SysTick定时器
+  
   // LcmReset();          //LCD复位
   // LcmInit();            //LCD初始化(按照数据手册)
   //BackLightOn();       //背光打开
+  //初始化完毕，允许输出
+	Status_MCU =  Status_WorkStall;
+  {
+		if(AppPara.PowerKey == PwrKey_Hit)
+		{
+			//StopToFlash();
+			WorkEn = 0;
+			PwrHitFlag = PwrHit_WORK;
+		}
+	}
 }
 /* USER CODE END 4 */
 

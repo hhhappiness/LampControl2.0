@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32g4xx_it.h"
+#include "rtc_int.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -203,13 +204,16 @@ void SysTick_Handler(void)
   */
 void RTC_WKUP_IRQHandler(void)
 {
-  /* USER CODE BEGIN RTC_WKUP_IRQn 0 */
+  HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);   //clear RTC wake up counter flag
 
-  /* USER CODE END RTC_WKUP_IRQn 0 */
-  HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);
-  /* USER CODE BEGIN RTC_WKUP_IRQn 1 */
+  KeyInput(); //按键输入检测
+  
+  AnyKeyPressed_Control();//检测到任意键按下需要的处理
+  
+  //CloseDelay_Handler();//无操作状态下，延时关机处理
+  
+  Blk_Control();//背光控制处理
 
-  /* USER CODE END RTC_WKUP_IRQn 1 */
 }
 /* USER CODE BEGIN 1 */
 

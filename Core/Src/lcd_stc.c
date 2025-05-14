@@ -150,7 +150,7 @@ void display(void)
 	{
 		for(i=0;i<8;i++)
 		{
-			display_zimu(i,j,&zimu8[i+j][0],8);
+			display_zimu(i,j,(uchar *)zimu8[i+j][0],8);
 		}
 	}
 	delay_ms(500);
@@ -159,7 +159,7 @@ void display(void)
 	{
 		for(i=0;i<8;i++)			//64X64图片 兔斯基
 		{
-			display_zimu(i,j*64,&zimu64[i+j*8][0],64);
+			display_zimu(i,j*64,(uchar *)zimu64[i+j*8][0],64);
 		}
 	}
 	delay_ms(1000);

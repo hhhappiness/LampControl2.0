@@ -1,6 +1,6 @@
 #include "AppParaCommon.h"
 #include "utility.h"
-#include "stm32f10x_flash.h"
+#include "stm32g4xx_hal_flash.h"
 #include "string.h"
 #include "ctrl_common.h"
 

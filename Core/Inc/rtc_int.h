@@ -5,7 +5,7 @@
  extern "C" {
 #endif 
 #include "stm32.h"
-
+#include "type.h"
 
 enum {
 	PwrKey_Idle,
@@ -53,6 +53,15 @@ extern volatile u8 AnyKeyPressedFlag ;
 
 //³äµçÏÔÊ¾×´Ì¬
 extern volatile u8 ChargeFlag ;
+u32 getKeyBuf();
+__inline void PwrKeyHit_Handler(void);
+__inline void PwrKeyPress_Handler(void);
+__inline void PwrKey_Detector(void);
+__inline void CloseDelay_Handler(void);
+ void Blk_Control(void);
+__inline void Scan_Control(void);
+__inline void MainScan_Control(void);
+void AnyKeyPressed_Control(void);
 
 void ReInitSysTick(u8 freq);
 

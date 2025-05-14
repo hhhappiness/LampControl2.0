@@ -7,8 +7,8 @@
 #include "timer.h"
 #include "adc.h"
 #include "ctrl.h"
-#include "RTT\Segger_RTT.h"
-#include "utility.h"
+//#include "RTT\Segger_RTT.h"
+//#include "utility.h"
 
 //定时器20Hz, 50mS,实测40mS,每秒25.  LSI时钟模式下。
 //后面改成了HSE/128分频，比较准些。实测50mS一次，比较准
@@ -99,14 +99,7 @@ extern void EnterStandby(void);
 extern unsigned char code_HZ[];
 extern void SwitchStrobeAFIO(void);
 
-__inline static void PwrKeyHit_Handler(void);
-__inline static void PwrKeyPress_Handler(void);
-__inline static void PwrKey_Detector(void);
-__inline static void CloseDelay_Handler(void);
-__inline static void Blk_Control(void);
-__inline static void Scan_Control(void);
-__inline static void MainScan_Control(void);
-__inline static void AnyKeyPressed_Control(void);
+
 //__inline static void GPIOTest(void);
 #ifdef RTT
 __inline static void rtt_printf(void) ;
@@ -114,9 +107,10 @@ __inline static void rtt_printf(void) ;
 void ForceToStop(void) ;
 int GetSpeedHz(void) ;
 
-
 void RTC_IRQHandler(void)
 {
+#if 0
+
   if (RTC_GetITStatus(RTC_IT_SEC) != RESET)
   {
     /* Clear the RTC Second interrupt */
@@ -125,69 +119,68 @@ void RTC_IRQHandler(void)
 	if(RtcCnt >= RTC_FREQ/20) {
 		RtcCnt = 0;
 
-	//电源按键检测
-	PwrKey_Detector();
-	//组合按键Enter + Mode + Power 进入Standby模式
-	if((PwrKey_Status == PwrKey_Pressed)&&(!GPI_KEY_MODE)&&(!GPI_KEY_ENTER)){
+		//电源按键检测
+		PwrKey_Detector();
+		//组合按键Enter + Mode + Power 进入Standby模式
+		if((PwrKey_Status == PwrKey_Pressed)&&(!GPI_KEY_MODE)&&(!GPI_KEY_ENTER)){
 
 			EnterStandby();
-	}
-	//前面板的按键检测
-	KeyInput();
+		}
+		//前面板的按键检测
+		KeyInput();
 
-	//检测到任意键按下需要的处理
-	AnyKeyPressed_Control();
+		//检测到任意键按下需要的处理
+		AnyKeyPressed_Control();
 
-	//Stop状态下，延时关机处理
-	CloseDelay_Handler();
+		//Stop状态下，延时关机处理
+		CloseDelay_Handler();
 
-	//背光控制处理
-	Blk_Control();
+		//背光控制处理
+		Blk_Control();
 
-	//充电状态检测
-	ChargeFlag = GetChargePin;
+		//充电状态检测
+		ChargeFlag = GetChargePin;
 
-	//只有所有的系统初始化完毕后，才允许输出
-	if(Status_MCU != Status_idle) {
-		//控制闪光输出的处理
-		if((EnterScanFlag == 0)&&(MainScanFlag == 0)) {
-		//if(IsTrigMode(Trig_Internal)||IsTrigMode(Trig_SinglePulse)||(IsTrigMode(Trig_Perimeter)))
-		{
-			switch(AppPara.PowerKey)
-				{
-					case PwrKey_Hit:
-						PwrKeyHit_Handler();
-						break;
-					case PwrKey_Press:
-						PwrKeyPress_Handler();
-						break;
-					default:
-						break;
-				}				
+		//只有所有的系统初始化完毕后，才允许输出
+		if(Status_MCU != Status_idle) {
+			//控制闪光输出的处理
+			if((EnterScanFlag == 0)&&(MainScanFlag == 0)) {
+			//if(IsTrigMode(Trig_Internal)||IsTrigMode(Trig_SinglePulse)||(IsTrigMode(Trig_Perimeter)))
+			{
+				switch(AppPara.PowerKey)
+					{
+						case PwrKey_Hit:
+							PwrKeyHit_Handler();
+							break;
+						case PwrKey_Press:
+							PwrKeyPress_Handler();
+							break;
+						default:
+							break;
+					}				
+				}
+
 			}
+			//处理进入自动扫描模式
+			Scan_Control();
+			//处理主界面频率调整模式
+			MainScan_Control();
 
+	#ifdef	RTT
+			rtt_printf();
+	#endif
 		}
-		//处理进入自动扫描模式
-		Scan_Control();
-		//处理主界面频率调整模式
-		MainScan_Control();
-
-#ifdef	RTT
-		rtt_printf();
-#endif
-		}
-
-	//测试GPIO,测量RTC频率
-	//GPIOTest();
+		//测试GPIO,测量RTC频率
+		//GPIOTest();
 	
-		}
+	}
   }
 
 	//960Hz的电池电压采集处理
 	AdcSamp();
 	//测试GPIO,测量RTC频率
 	//GPIOTest();
-
+#endif
 }
 
 
@@ -207,16 +200,19 @@ void ReInitSysTick(u8 freq)
 
 void SwitchStrobeGPIO(void)
 {
+#if 0
+
 	//如果是LED类型的，要求关闭闪光的输出时候，为常0
 	GPIOB->CRL  &= ~0xF;
 	GPIOB->CRL |= GPO_02M;
 	GPB_O(0) = 0;
+#endif
 }
 
 //已经在初始化GPIO的时候设置了，这个函数没有用
 void SwitchStrobeHz(void)
 {
-#if 1
+#if 0
 	//配置Strobe引脚为高阻抗输入模式
 	GPIOB->CRL  &= ~0xF;
 	GPIOB->CRL |= GPI_IF;
@@ -225,7 +221,7 @@ void SwitchStrobeHz(void)
 
 void SwitchStrobeAFIO(void)
 {
-#if 1
+#if 0
 	//配置Strobe引脚为AFIO模式
 	GPIOB->CRL  &= ~0xF;
 	GPIOB->CRL |= AFO_50M;
@@ -245,13 +241,6 @@ void SwitchStrobeAFIO(void)
 #define LEVEL3	2	//550V  (45Hz+)
 
 
-void SetVoutLevel(u8 level)
-{
-	// led fixed
-	VSET1 = 0;
-	VSET2 = 0;
-
-}
 
 int UpdateVout(void)
 {
@@ -259,7 +248,7 @@ int UpdateVout(void)
 	return -1;
 }
 
-__inline static void PwrKeyHit_Handler(void)
+__inline void PwrKeyHit_Handler(void)
 {
 	//if((PwrKey_Status == PwrKey_Pressed)&&(!PwrKeyDisableFlag ))
 	if((PwrKey_FreeCnt >= 1)&&(!PwrKeyDisableFlag )&&(large3 == 0))
@@ -303,9 +292,7 @@ __inline static void PwrKeyHit_Handler(void)
 		PwrHitCnt = 0;// 如果按下了电源键，就清0
 	}
 }
-
-
-__inline static void PwrKeyPress_Handler(void)
+__inline void PwrKeyPress_Handler(void)
 {
 	//if(PwrKeyPressedCnt >= 2*KeyPushTimes)//检测到Pwr键按下
 	if(PwrKey_Status == PwrKey_Pressed)
@@ -330,9 +317,7 @@ __inline static void PwrKeyPress_Handler(void)
 			
 						}
 }
-
-
-__inline static void PwrKey_Detector(void)
+__inline void PwrKey_Detector(void)
 {
 	if(GPA_I(0))  	//PwrKey Pressed
 	{
@@ -387,13 +372,7 @@ __inline static void PwrKey_Detector(void)
 			large3 = 0;
 	}
 }
-
-
-
-
-
-
-__inline static void CloseDelay_Handler(void)
+__inline void CloseDelay_Handler(void)
 {
 	//暂停状态开始计数，延时关机
 	if(Status_MCU == Status_WorkStall)
@@ -403,16 +382,16 @@ __inline static void CloseDelay_Handler(void)
 		if(CloseCnt >= TimeGainMin*AppPara.PowerOffDly)
 			{
 				//关闭系统
-				EnterStandby();
+				//EnterStandby();
 			}
 	}
 	else
 		CloseCnt = 0;
 }
 
-
-__inline static void Blk_Control(void)
+ void Blk_Control(void)
 {
+	AppPara.BackLightDelay = 10;
 		//系统初始化完毕后，才使能背光的控制
 		if(Status_MCU != Status_idle)
 		{
@@ -432,7 +411,7 @@ __inline static void Blk_Control(void)
 }
 
 
-__inline static void Scan_Control(void)
+__inline void Scan_Control(void)
 {
 	if((EnterScanFlag == 1) &&(ScanControlEn == 0)){
 		if(IsTrigMode(Trig_Internal))
@@ -488,7 +467,7 @@ __inline static void Scan_Control(void)
 	}
 }
 
-__inline static void MainScan_Control(void)
+__inline void MainScan_Control(void)
 {
 	//如果检测到主页面按下4个键(+,-,*,/)
 	//如果没有开始闪光，就要打开
@@ -559,27 +538,27 @@ __inline static void MainScan_Control(void)
 }
 
 //任意键按下时候需要执行的操作
-__inline static void AnyKeyPressed_Control(void)
+ void AnyKeyPressed_Control(void)
 {
 	//发生了按下任意键
 	if(AnyKeyPressedFlag == 1) {
-			AnyKeyPressedFlag = 0;
-			//手动调频的延时计数要清零
-			MainScanDlyCnt = 0;
-			//关机延时计数，不管什么状态，直接清零
-			CloseCnt = 0;
+		AnyKeyPressedFlag = 0;
+		//手动调频的延时计数要清零
+		MainScanDlyCnt = 0;
+		//关机延时计数，不管什么状态，直接清零
+		CloseCnt = 0;
 
-			//任意键按下的时候背光的处理
-			if(BlkStatus == BLK_ON) 
-				{BlkCtrlCnt = 0;}
-			else {
-					//任意键唤醒背光
-					BlkStatus = BLK_ON;
-					BackLightOn();
-					BlkCtrlCnt = 0;
-				}
-
+		//任意键按下的时候背光的处理
+		if(BlkStatus == BLK_ON) 
+			{BlkCtrlCnt = 0;}
+		else {
+			//任意键唤醒背光
+			BlkStatus = BLK_ON;
+			BackLightOn();
+			BlkCtrlCnt = 0;
 		}
+
+	}
 
 	//2016.1.8
 	//因为修改了按键，没有了KeyRepeatNum

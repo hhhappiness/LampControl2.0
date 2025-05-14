@@ -32,6 +32,12 @@
         "cstdlib": "c",
         "cstddef": "c",
         "zimu.h": "c",
-        "lcd_stc.h": "c"
+        "lcd_stc.h": "c",
+        "rtc_int.h": "c",
+        "key_config.h": "c",
+        "sysparacommon.h": "c",
+        "stm32g4xx_it.h": "c",
+        "syspara.h": "c",
+        "utility.h": "c"
     }
 }

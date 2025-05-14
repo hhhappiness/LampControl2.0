@@ -22,7 +22,8 @@
 //#define GPIOA->ODR(i) (GPIOA->ODR & ~(1<<i)) //GPIOA->ODR(i) = 0
 #define GPA_O(i,x) ((x==1) ? (GPIOA->ODR |= (1<<i)):(GPIOA->ODR &= ~(1<<i)))
 #define GPB_O(i,x) ((x==1) ? (GPIOB->ODR |= (1<<i)):(GPIOB->ODR &= ~(1<<i)))
-
+#define GPA_I(i) ((GPIOA->IDR & (1<<i)) ? 1 : 0)
+#define GPB_I(i) ((GPIOB->IDR & (1<<i)) ? 1 : 0)
 
 //Êä³ö¹Ü½Å
 

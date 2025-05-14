@@ -1,6 +1,6 @@
 //#include "stm32f10x_it.h"
-#include "stm32f10x.h"
-#include "stm32f10x_tim.h"
+#include "stm32g4xx.h"
+#include "stm32g4xx_hal_rtc_ex.h"
 #include "bsp.h"
 #include "key_config.h"
 #include "RTC.h"
@@ -8,18 +8,6 @@
 #include "Key_Base.h"
 
 
-//#include "AppParaCommon.h"
-/*
-#define  KeyPushTimes           2 //     //单击键盘时间间隔次数
-#define  KeyLongPushTimes       12 //   //长压键盘时间间隔
-#define  KeyRunTimes            10 //    //自动触发时间间隔
-*/
-
-#define  KeyPushTimes           2 //     //确定按下、释放的检测次数，至少是2次
-#define  KeyLongPushTimes      (600/KEY_DETECT_PERIOD) //长压键盘时间间隔次数
-#define  KeyRunTimes           (250/KEY_DETECT_PERIOD) //自动触发时间间隔次数
-#define  DbKeyPressTime        (180/KEY_DETECT_PERIOD) //双击功能启用时，第一次按压的时间最大值，160-200ms换算
-#define  DbKeyReleaseTime      (180/KEY_DETECT_PERIOD) //双击功能启用时，第一次释放到第2次压下的时间最大值，跟上一个值差不多
 
 //按键状态机
 typedef enum{
@@ -58,17 +46,10 @@ typedef enum{
 s16 Encode;
 s16 EncodeLast;
 
-//不同板子用得不同定时器
-#define DisableKeyTimInt() DisableINT(RTC_IRQn) //禁按键定时器中断
-#define EnableKeyTimInt()  EnableINT(RTC_IRQn) //开按键定时器中断
 
 
-//使用4个键的缓冲区, 用union便于移位和清空
-//Stm32对于字节处理有优化，变量可以使用字节而不影响性能
-typedef union{
-    u32 Word;
-    u8 Key[4];
-}KEY_BUF;
+
+
 
 KEY_BUF KeyBuf;
 #define KeyOutBuf KeyBuf.Key[3] //键码输出字节
@@ -84,10 +65,13 @@ u8   ShiftState=0;  //shift键状态，0或KEY_SHIFT
 //u16         KeyRepeatNumRead;    //已读重复键数
 //u16         KeyRepeatNumReadSum; //累计已读重复键数
 
-
+u32 getKeyBuf()
+{
+    return KeyBuf.Word;  
+}
 //键值存入缓冲区
 //0=>1=>2=>3
-__INLINE void InKeyBuf(u8 x){
+ void InKeyBuf(u8 x){
     switch (KeyBufNum) {
     case 1:
         KeyBuf.Key[2]=x;
@@ -215,7 +199,7 @@ int KeyInput(void)
     u8 PressCnt,ReleaseCnt,State,KeyMode;
     int InP;
     for(i=0;i<KeyRowNum;i++) {//每个周期只做一个扫描线
-		InP=*((volatile u32 *)KeyI[KeyScanId][i]);  //读按键电平
+        InP=KeyI(i);  //读按键电平
         PressCnt = PressCount[KeyScanId][i];       //取压键次数
         ReleaseCnt  = ReleaseCount[KeyScanId][i];
         State = KeyState[KeyScanId][i];
