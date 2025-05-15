@@ -28,7 +28,6 @@
 #include "SysPara.h"
 //include for test
 
-
 ADC_HandleTypeDef hadc2;
 RTC_HandleTypeDef hrtc;
 SPI_HandleTypeDef hspi2;
@@ -62,7 +61,6 @@ int main(void)
     //BackLightOn();
     key = getKeyBuf();
   }
-
 }
 
 /**
@@ -409,8 +407,8 @@ void SysInit()
 void Init(void){
   SysInit();        //CubeMX配置的系统初始化  
   Status_MCU = Status_idle;
-  // LoadSysConfig();//先加载SysPara，因为部分AppPara的参数转换需要知道灯管类型
-  // LoadConfig();
+  LoadSysConfig();//先加载SysPara，因为部分AppPara的参数转换需要知道灯管类型
+  LoadConfig();
   InitKey();        //按键初始化
   InitSysTick();         //初始化SysTick定时器
   

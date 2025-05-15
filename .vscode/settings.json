@@ -38,6 +38,12 @@
         "sysparacommon.h": "c",
         "stm32g4xx_it.h": "c",
         "syspara.h": "c",
-        "utility.h": "c"
+        "utility.h": "c",
+        "stm32g4xx_hal_def.h": "c",
+        "string.h": "c",
+        "stm32g4xx_hal_flash.h": "c",
+        "cstring": "c",
+        "iutility": "c",
+        "iosfwd": "c"
     }
 }

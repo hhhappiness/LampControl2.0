@@ -45,7 +45,8 @@ extern volatile u8 NeedSaveFlag ;		//±Íº«≤Œ ˝±Ì «∑Ò“™±£¥Ê£¨ø…“‘”√’‚∏ˆFlag£¨“≤ø…”
 }
 void LoadDefaultConfig(void);
 void SaveDefaultConfig(void);
-void FlashPara(u32 addr,u32 *pDat,u32 len);
+void FlashParaOld(u32 addr,u32 *pDat,u32 len);
+void Flash_ProgramWord(u32 Address, u32 *Data);
 void LoadConfig(void);
 void SaveConfig(void);
 void VerifyParas(void);

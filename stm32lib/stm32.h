@@ -81,6 +81,17 @@ __INLINE void InitSysTick(){
     #error please define the ABH clock
 #endif
 
+#if AHBClk == APB1Clk
+    #define TIMXCLK (APB1Clk*1) //to TIM2,3,4,5,6,7,12,13,14
+#else
+    #define TIMXCLK (APB1Clk*2) //to TIM2,3,4,5,6,7,12,13,14
+#endif
+ 
+#if AHBClk == APB2Clk
+    #define TIMxCLK (APB2Clk*1) //to TIM1,8,9,10,11
+#else
+    #define TIMxCLK (APB2Clk*2) //to TIM1,8,9,10,11
+#endif 
 
 
 

@@ -4,7 +4,8 @@
 #include "adc.h"
 #include "rtc_int.h"
 #include "ctrl.h"
-
+#include "stm32g4xx.h"
+#include "stm32g4xx_hal_tim.h"
 #define MAJOR_VERSION 	1
 #define MID_VERSION 	0
 #define MINOR_VERSION 	0
@@ -76,7 +77,6 @@ unsigned short FlashWidth = FLASH_WIDTH_DEFAULT;
 
 #define CLOCK_US TIM1_Hz2clk(100000000) 
 
-#define MIN(a,b) 	(a<b)?a:b
 
 
 unsigned int LastTrigPos=0;
@@ -159,7 +159,7 @@ void TIM_ResetAll(void)
 
 
 
-
+#if 0
 void TIM_Init_Ori(void)
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
@@ -278,26 +278,26 @@ void TIM_Init(void)
 	TIM_Init_Ori();
 
 }
-
+#endif
 
 __inline void ActiveTrigPoint(void)
 {
 	//设定当TIM2_CH3当CNT=CCR3时输出变高，然后在中断里拉低。
-	TIM2->CCMR2 = (TIM_OCMode_Timing | TIM_OCPreload_Disable)<<8 //通道4的模式
-				| (TIM_OCMode_Active | TIM_OCPreload_Disable)<<0; //通道3的模式	
+	// TIM2->CCMR2 = (TIM_OCMode_Timing | TIM_OCPreload_Disable)<<8 //通道4的模式
+	// 			| (TIM_OCMode_Active | TIM_OCPreload_Disable)<<0; //通道3的模式	
 }
 
 __inline void ActiveCCR3Int(void)
 {
-	TIM2->SR = (uint16_t)~TIM_IT_CC3; //清除中断标志 
-	TIM2->DIER |= TIM_IT_CC3;	
+	// TIM2->SR = (uint16_t)~TIM_IT_CC3; //清除中断标志 
+	// TIM2->DIER |= TIM_IT_CC3;	
 }
 void DeactiveTrigPoint(void)
 {
 	//设定当TIM2_CH3当CNT=CCR3时输出变高，然后在中断里拉低。
-	TIM2->CCMR2 = (TIM_OCMode_Timing | TIM_OCPreload_Disable)<<8 //通道4的模式
-				| (TIM_ForcedAction_InActive | TIM_OCPreload_Disable)<<0; //通道3的模式	
-	TIM2->DIER &= (uint16_t)~TIM_IT_CC3;	
+	// TIM2->CCMR2 = (TIM_OCMode_Timing | TIM_OCPreload_Disable)<<8 //通道4的模式
+	// 			| (TIM_ForcedAction_InActive | TIM_OCPreload_Disable)<<0; //通道3的模式	
+	// TIM2->DIER &= (uint16_t)~TIM_IT_CC3;	
 }
 
 //计算触发点相对于脉冲边缘的时钟数
@@ -312,7 +312,9 @@ __inline void CalcTrigPoint(void)
 	TrigClks = ((unsigned long long)AvgPulseWidth*TrigAngle)>> 32;//触发角度换算成时钟延时
 }
 
-
+#define  TIM1_100ns2clk(ns) ((ns)*(TIMxCLK/1000000)/10)
+#define  TIM1_us2clk(us) 	((us)*(TIMxCLK/1000000))
+#define  Hz2Us(hz)	(1000*1000*100 + hz/2)/hz
 
 
 
@@ -427,7 +429,7 @@ void TIM2_IRQHandler_Int(void)
 {
 //	unsigned long long tmp;
 //	static unsigned int num = 4;
-
+#if 0
 	if ((TIM2->DIER & TIM_IT_CC2) && (TIM2->SR & TIM_IT_CC2))  //检查CC2中断发生与否，外触发才有
 	{
 		TIM2->SR = (uint16_t)~TIM_IT_CC2; //清除CC2中断标志 
@@ -462,7 +464,7 @@ void TIM2_IRQHandler_Int(void)
 		TIM2->SR = (uint16_t)~TIM_IT_Update; //清除中断标志 
 		
 	}	
-
+#endif
 }
 
 
@@ -480,9 +482,7 @@ unsigned int GetPulsePos(void)
 }
 
 
-#define  TIM1_100ns2clk(ns) ((ns)*(TIMxCLK/1000000)/10)
-#define  TIM1_us2clk(us) 	((us)*(TIMxCLK/1000000))
-#define  Hz2Us(hz)	(1000*1000*100 + hz/2)/hz
+
 
 void SetFlash_PulseWidth(u16 width_clk)
 {
@@ -514,6 +514,7 @@ int TestFreq = 60;//1
 
 void CloseAllTimer(void)
 {
+	#if 0
 	TIM_ITConfig(TIM2,TIM_IT_Update,DISABLE); 
 	TIM2->SR = 0;
 	TIM_Cmd(TIM2,DISABLE);
@@ -538,7 +539,7 @@ void CloseAllTimer(void)
 	//RCC->APB1ENR &= ~RCC_APB1Periph_TIM4;
 #endif
 	SwitchStrobeGPIO();
-	
+	#endif
 }
 
 void OpenAllTimer(void)
@@ -645,16 +646,16 @@ void Updata_OutPusle(void)
 
 }
 
-void gpio_test(void) {
-	static u8 gpio_flag =  0;
-	if(gpio_flag) {
-		gpio_flag = 0;
-		GPA_O(12) =  0;
-		}
-	else {
-		gpio_flag = 1;
-		GPA_O(12) =  1;
-		}
-}
+// void gpio_test(void) {
+// 	static u8 gpio_flag =  0;
+// 	if(gpio_flag) {
+// 		gpio_flag = 0;
+// 		GPA_O(12) =  0;
+// 		}
+// 	else {
+// 		gpio_flag = 1;
+// 		GPA_O(12) =  1;
+// 		}
+// }
 
 

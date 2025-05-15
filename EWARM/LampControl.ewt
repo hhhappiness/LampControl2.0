@@ -1435,6 +1435,21 @@
             </file>
         </group>
         <group>
+            <name>stm32lib</name>
+            <file>
+                <name>$PROJ_DIR$\..\stm32lib\AppParaCommon.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\stm32lib\flash.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\stm32lib\SysParaCommon.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\stm32lib\utility.c</name>
+            </file>
+        </group>
+        <group>
             <name>User</name>
             <group>
                 <name>Core</name>
@@ -1473,6 +1488,9 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Core\Src\SysPara.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Core\Src\timer.c</name>
                 </file>
             </group>
         </group>

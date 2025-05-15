@@ -1,7 +1,7 @@
 #include "SysParaCommon.h"
 #include "AppParaCommon.h"
 #include "utility.h"
-#include "stm32g4xx_hal_flash.h"
+//#include "stm32g4xx_hal_flash.h"
 #include "string.h"
 #include "bsp.h"
 
@@ -38,7 +38,7 @@ void SaveSysConfig(void){
 	SysPara.nCCoff = ~SysPara.CCoff;
 	SysPara.nUID= ~SysPara.UID;
 
-	FlashPara(SYS_PARA_ADDRESS,(u32 *)&SysPara,(sizeof(SysPara)+3)/4);	
+	SaveUserData(SYS_PARA_ADDRESS,(u32 *)&SysPara,sizeof(SysPara));	
 	NeedSaveSysFlag = 0;
 }
 

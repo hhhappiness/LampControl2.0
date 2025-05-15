@@ -104,6 +104,7 @@ typedef struct{
 	
 	u32 Reserved[APP_PARA_SIZE/4-29];
 	u32 Sum;		 //check sum
+	u32 crc;		 //crc–£—È∫Õ
 }APP_PARA;
 
 extern const int SpeedUnitList[SpeedUnitNum];

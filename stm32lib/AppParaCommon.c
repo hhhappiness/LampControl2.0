@@ -1,13 +1,13 @@
 #include "AppParaCommon.h"
 #include "utility.h"
+#include "stm32g4xx.h"
 #include "stm32g4xx_hal_flash.h"
 #include "string.h"
 #include "ctrl_common.h"
 
 volatile u8 NeedSaveFlag = 0;
-
-
-__inline u32 CheckSumPara(void)
+HAL_StatusTypeDef FlashPara(u32 addr,u32 *pDat,u32 len);
+static inline u32 CheckSumPara(void)
 {
 	return SumU32((u32*)&AppPara, sizeof(APP_PARA)/4 -1);
 }
@@ -15,10 +15,11 @@ __inline u32 CheckSumPara(void)
 void SaveConfig(void){
 	//FlashPara(0x08000000+(u32)&FlashSave,(u32 *)&AppPara,(sizeof(AppPara)+3)/4);
 	//FlashPara(0x03fff000, (u32 *)&AppPara,(sizeof(AppPara)+3)/4);
-
-	AppPara.Sum = CheckSumPara();
 	
-	FlashPara(APP_PARA_ADDRESS,(u32 *)&AppPara,(sizeof(AppPara)+3)/4);	
+	AppPara.Sum = CheckSumPara();
+	/* 保存数据 */
+    SaveUserData(APP_PARA_ADDRESS,(u32 *)&AppPara,sizeof(AppPara));
+    
 	NeedSaveFlag = 0;
 }
 
@@ -79,8 +80,19 @@ BOOL CmpAppParam(void)
 		return FALSE;
 }
 
+void Flash_ProgramWord(u32 Address, u32 *Data){
+	  /* Check the parameters */
+  assert_param(IS_FLASH_PROGRAM_ADDRESS(Address));
+
+  /* Set PG bit */
+  SET_BIT(FLASH->CR, FLASH_CR_PG);
+  
+  /* Program first word */
+  *(uint32_t *)Address = *Data;
+}
 //参数表写入Flash，擦除整个Page
-void FlashPara(u32 addr,u32 *pDat,u32 len){
+void FlashParaOld(u32 addr,u32 *pDat,u32 len){
+	#if 0 
 	u32 Address;
 	volatile FLASH_Status FLASHStatus;
 	wdg();
@@ -103,8 +115,67 @@ void FlashPara(u32 addr,u32 *pDat,u32 len){
 		while(FLASHStatus!=FLASH_COMPLETE) ;
 	}
 	wdg();
+	#endif
 }
 
+HAL_StatusTypeDef FlashPara(u32 addr,u32 *pDat,u32 len){
+	u32 Addresses;
+	HAL_StatusTypeDef status;
+  	uint32_t prog_bit = 0;
+	HAL_FLASH_Unlock();
+	/* Check the parameters */
+	assert_param(IS_FLASH_TYPEPROGRAM(TypeProgram));
+
+	/* Process Locked */
+	__HAL_LOCK(&pFlash);
+
+	/* Wait for last operation to be completed */
+	status = FLASH_WaitForLastOperation((uint32_t)FLASH_TIMEOUT_VALUE);
+
+	if (status == HAL_OK)
+	{
+		pFlash.ErrorCode = HAL_FLASH_ERROR_NONE;
+
+		/* Deactivate the data cache if they are activated to avoid data misbehavior */
+		if(READ_BIT(FLASH->ACR, FLASH_ACR_DCEN) != 0U)
+		{
+		/* Disable data cache  */
+		__HAL_FLASH_DATA_CACHE_DISABLE();
+		pFlash.CacheToReactivate = FLASH_CACHE_DCACHE_ENABLED;
+		}
+		else
+		{
+		pFlash.CacheToReactivate = FLASH_CACHE_DISABLED;
+		}
+		
+		for(Addresses = addr;Addresses < addr + len*4; Addresses += 4) {
+			/* Program double-word (64-bit) at a specified address */
+			Flash_ProgramWord(Addresses, pDat++);
+				/* Barrier to ensure programming is performed in 2 steps, in right order
+				(independently of compiler optimization behavior) */
+			__ISB();
+			/* Wait for last operation to be completed */
+			while(FLASH_WaitForLastOperation((uint32_t)FLASH_TIMEOUT_VALUE));
+		}
+		prog_bit = FLASH_CR_PG;
+		
+
+		/* If the program operation is completed, disable the PG or FSTPG Bit */
+		if (prog_bit != 0U)
+		{
+			CLEAR_BIT(FLASH->CR, prog_bit);
+		}
+
+		/* Flush the caches to be sure of the data consistency */
+		FLASH_FlushCaches();
+
+		}
+		/* Process Unlocked */
+	__HAL_UNLOCK(&pFlash);
+	HAL_FLASH_Lock();
+	/* return status */
+	return status;
+}
 void VerifyParaList(int * pVal, const int * pValList, int ListNum, int DefaultId)
 {
 	int i;
