@@ -1137,6 +1137,9 @@
                     <name>$PROJ_DIR$\..\Core\Src\ctrl_common.c</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\Core\Src\encoder.c</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\Core\Src\KeyAndKnob_lamp2.c</name>
                 </file>
                 <file>
@@ -1232,6 +1235,12 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_hal_spi_ex.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_hal_tim.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_hal_tim_ex.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_hal_wwdg.c</name>

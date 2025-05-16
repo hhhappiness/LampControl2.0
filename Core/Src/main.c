@@ -26,12 +26,15 @@
 #include "rtc_int.h"
 #include "SysParaCommon.h"
 #include "SysPara.h"
+#include "Encoder.h"
 //include for test
-
+#include <stdio.h>
 ADC_HandleTypeDef hadc2;
 RTC_HandleTypeDef hrtc;
 SPI_HandleTypeDef hspi2;
 WWDG_HandleTypeDef hwwdg;
+TIM_HandleTypeDef htim3,htim4;
+
 
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
@@ -39,8 +42,13 @@ static void MX_ADC2_Init(void);
 static void MX_WWDG_Init(void);
 static void MX_RTC_Init(void);
 static void MX_SPI2_Init(void);
+static void MX_TIM3_Init(void);
+static void MX_TIM4_Init(void);
+
 void SysInit(void);
 void Init(void);
+void PWM_SetDuty(uint8_t percentage);
+
 u32 key;
 /**
   * @brief  The application entry point.
@@ -58,9 +66,124 @@ int main(void)
 #endif
   while(1)
   {
-    //BackLightOn();
-    key = getKeyBuf();
+   /* 更新编码器状态 */
+    Encoder_Update();
+    
+    /* 打印编码器状态（调试用） */
+    printf("Counter: %d, Total Steps: %d, Difference: %d, Direction: %d\n",
+           encoderState.counter,
+           encoderState.totalSteps,
+           encoderState.difference,
+           encoderState.direction);
+    
+    Delay_ms(100);  // 延时100ms
   }
+}
+void PWM_SetDuty(uint8_t percentage)
+{
+  if (percentage > 100) percentage = 100;  // 限制最大值
+  
+  uint32_t pulse = (htim3.Init.Period + 1) * percentage / 100 - 1;
+  if (percentage == 100) pulse = htim3.Init.Period;
+  
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, pulse);
+}
+/* USER CODE BEGIN 4 */
+/** 
+  * @brief  硬件初始化
+  * @param  None
+  * @retval None
+  */
+void SysInit()
+{
+  /**
+ * HAL_Init()
+ * 配置闪存缓存
+ * 设置中断优先级分组：NVIC_PriorityGroup_4
+ * 配置Systick定时器
+ * 底层硬件初始化
+**/
+  HAL_Init();    
+  SystemClock_Config();        //RCC配置振荡器和时钟
+  MX_GPIO_Init();             //GPIO初始化
+  MX_ADC2_Init();             //ADC初始化
+  //MX_WWDG_Init();             //看门狗初始化
+  MX_RTC_Init();           //RTC初始化
+  MX_SPI2_Init();           //SPI初始化
+  MX_TIM3_Init();             //TIM3初始化
+  MX_TIM4_Init();             //TIM4初始化
+}
+
+void Init(void){
+  SysInit();        //CubeMX配置的系统初始化  
+  Status_MCU = Status_idle;
+  LoadSysConfig();//先加载SysPara，因为部分AppPara的参数转换需要知道灯管类型
+  LoadConfig();
+  InitKey();        //按键初始化
+  InitSysTick();         //初始化SysTick定时器
+  Encoder_Init(); //编码器初始化
+  // LcmReset();          //LCD复位
+  // LcmInit();            //LCD初始化(按照数据手册)
+  //BackLightOn();       //背光打开
+  //初始化完毕，允许输出
+	Status_MCU =  Status_WorkStall;
+  {
+		if(AppPara.PowerKey == PwrKey_Hit)
+		{
+			//StopToFlash();
+			WorkEn = 0;
+			PwrHitFlag = PwrHit_WORK;
+		}
+	}
+}
+
+/**
+  * @brief TIM4 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM4_Init(void)
+{
+
+  /* USER CODE BEGIN TIM4_Init 0 */
+
+  /* USER CODE END TIM4_Init 0 */
+
+  TIM_Encoder_InitTypeDef sConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM4_Init 1 */
+
+  /* USER CODE END TIM4_Init 1 */
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 0;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim4.Init.Period = 65535;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
+  sConfig.IC1Polarity = TIM_ICPOLARITY_FALLING;
+  sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
+  sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
+  sConfig.IC1Filter = 15;
+  sConfig.IC2Polarity = TIM_ICPOLARITY_FALLING;
+  sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
+  sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
+  sConfig.IC2Filter = 15;
+  if (HAL_TIM_Encoder_Init(&htim4, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM4_Init 2 */
+
+  /* USER CODE END TIM4_Init 2 */
+
 }
 
 /**
@@ -329,13 +452,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : DRIVER_STROBE_Pin */
-  GPIO_InitStruct.Pin = DRIVER_STROBE_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
-  HAL_GPIO_Init(DRIVER_STROBE_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : KEY_POWER_Pin KEY_RIGHT_Pin KEY_DOWN_Pin KEY_ENTER_Pin
                            KEY_LEFT_Pin KEY_UP_Pin */
@@ -345,13 +461,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : CHG_STS_Pin */
-  GPIO_InitStruct.Pin = CHG_STS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
-  HAL_GPIO_Init(CHG_STS_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DRIVER_ON_N_Pin LDC_A0_Pin */
   GPIO_InitStruct.Pin = DRIVER_ON_N_Pin|LCD_CSB_Pin|LDC_A0_Pin;
@@ -359,73 +468,69 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  // /*Configure GPIO pins : LCD_CSB_Pin LCD_SCL_Pin LCD_SDA_Pin */
-  // GPIO_InitStruct.Pin = LCD_CSB_Pin|LCD_SCL_Pin|LCD_SDA_Pin;
-  // GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  // GPIO_InitStruct.Pull = GPIO_NOPULL;
-  // GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  // GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
-  // HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : KEY_CHA_Pin KEY_CHB_Pin */
-  GPIO_InitStruct.Pin = KEY_CHA_Pin|KEY_CHB_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
   /* USER CODE END MX_GPIO_Init_2 */
 }
-
-/* USER CODE BEGIN 4 */
-/** 
-  * @brief  硬件初始化
-  * @param  None
+/**
+  * @brief TIM3 Initialization Function
+  * @param None
   * @retval None
   */
-void SysInit()
+static void MX_TIM3_Init(void)
 {
-  /**
- * HAL_Init()
- * 配置闪存缓存
- * 设置中断优先级分组：NVIC_PriorityGroup_4
- * 配置Systick定时器
- * 底层硬件初始化
-**/
-  HAL_Init();    
-  SystemClock_Config();        //RCC配置振荡器和时钟
-  MX_GPIO_Init();             //GPIO初始化
-  MX_ADC2_Init();             //ADC初始化
-  //MX_WWDG_Init();             //看门狗初始化
-  MX_RTC_Init();           //RTC初始化
-  MX_SPI2_Init();           //SPI初始化
 
-}
+  /* USER CODE BEGIN TIM3_Init 0 */
 
-void Init(void){
-  SysInit();        //CubeMX配置的系统初始化  
-  Status_MCU = Status_idle;
-  LoadSysConfig();//先加载SysPara，因为部分AppPara的参数转换需要知道灯管类型
-  LoadConfig();
-  InitKey();        //按键初始化
-  InitSysTick();         //初始化SysTick定时器
-  
-  // LcmReset();          //LCD复位
-  // LcmInit();            //LCD初始化(按照数据手册)
-  //BackLightOn();       //背光打开
-  //初始化完毕，允许输出
-	Status_MCU =  Status_WorkStall;
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 41;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 49;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
   {
-		if(AppPara.PowerKey == PwrKey_Hit)
-		{
-			//StopToFlash();
-			WorkEn = 0;
-			PwrHitFlag = PwrHit_WORK;
-		}
-	}
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 24;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
+  HAL_TIM_MspPostInit(&htim3);
+
 }
+
 /* USER CODE END 4 */
 
 /**

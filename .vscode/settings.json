@@ -44,6 +44,8 @@
         "stm32g4xx_hal_flash.h": "c",
         "cstring": "c",
         "iutility": "c",
-        "iosfwd": "c"
+        "iosfwd": "c",
+        "stm32g4xx_hal_tim.h": "c",
+        "compare": "c"
     }
 }

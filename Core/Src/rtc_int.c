@@ -219,14 +219,6 @@ void SwitchStrobeHz(void)
 #endif
 }
 
-void SwitchStrobeAFIO(void)
-{
-#if 0
-	//配置Strobe引脚为AFIO模式
-	GPIOB->CRL  &= ~0xF;
-	GPIOB->CRL |= AFO_50M;
-#endif
-}
 
 
 #define FREQ_LV1		2000 //0~20Hz

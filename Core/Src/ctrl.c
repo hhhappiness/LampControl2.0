@@ -102,7 +102,7 @@ void LineSpeed2Clocks(void)
 	NextTrigClks = TIM2_Hz2clk(tmp);
 	#endif
 }
-#if 0
+
 void StartToFlash(void)
 {
 		/*
@@ -112,9 +112,8 @@ void StartToFlash(void)
 		*/
 		//BoostOn();
 		OpenAllTimer();
-		TIM_Init();
 		Updata_OutPusle();
-	
+		HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 		if(IsTrigMode(Trig_Internal)) {
 			if(AppPara.SpeedUnit == Unit_Hz) {
 				NextTrigClks = TIM2_Hz2clk(AppPara.LampFreq);
@@ -156,7 +155,7 @@ void StopToFlash(void)
 	SwitchStrobeGPIO();
 	WorkEn = 0;
 }
-
+#if 0
 void EnterStandby(void)
 {
 

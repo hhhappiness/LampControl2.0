@@ -213,7 +213,8 @@ void RTC_WKUP_IRQHandler(void)
   //CloseDelay_Handler();//无操作状态下，延时关机处理
   
   Blk_Control();//背光控制处理
-
+  u32 key = GetKey(); //获取按键值
+  StartToFlash(); //开始闪烁
 }
 /* USER CODE BEGIN 1 */
 

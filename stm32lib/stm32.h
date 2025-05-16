@@ -101,7 +101,7 @@ __INLINE void InitSysTick(){
 #define _IsTimeOut(TReg,Count)     (((TReg+SYSTICK_MAXCOUNT+1-GetTimerCount())& SYSTICK_MAXCOUNT)>(Count))
 #define IsTimeOut_ms(TReg,ms)     (_IsTimeOut(TReg,ms*SYSTICK2ms))
 #define IsTimeOut_us(TReg,us)     (_IsTimeOut(TReg,us*SYSTICK2us))
-#define Delay_ms(ms)     HAL_Delay(ms);//{u32 TReg=GetTimerCount();    while(!IsTimeOut_ms(TReg,ms));}
+#define Delay_ms(ms)     {u32 TReg=GetTimerCount();    while(!IsTimeOut_ms(TReg,ms));}
 #define Delay_us(us)     {u32 TReg=GetTimerCount();    while(!IsTimeOut_us(TReg,us));}
 #define ResetTimeOut(TReg) 	{TReg=GetTimerCount();}
 

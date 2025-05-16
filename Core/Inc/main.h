@@ -30,7 +30,7 @@ extern "C" {
 #include "stm32g4xx_hal.h"
 #include "bsp.h"
 
-
+extern TIM_HandleTypeDef htim3,htim4;
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -50,6 +50,7 @@ extern "C" {
 /* USER CODE BEGIN EM */
 
 /* USER CODE END EM */
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);

@@ -158,128 +158,6 @@ void TIM_ResetAll(void)
 
 
 
-
-#if 0
-void TIM_Init_Ori(void)
-{
-	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-	TIM_OCInitTypeDef TIM_OCInitStructure;
-	TIM_ICInitTypeDef TIM_ICInitStructure;
-	NVIC_InitTypeDef NVIC_InitStructure;
-
-	
-	
-	TIM_ResetAll();
-	
-	//各TIM基础初始化
-	TIM_TimeBaseStructure.TIM_Prescaler=0;             //不分频
-	TIM_TimeBaseStructure.TIM_Period=0xFFFF;                 //暂时全F，SetFlash里设置具体值
-	TIM_TimeBaseStructure.TIM_ClockDivision=TIM_CKD_DIV1; //
-	TIM_TimeBaseStructure.TIM_CounterMode=TIM_CounterMode_Up; 
-	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
-	TIM_TimeBaseInit(TIM2,&TIM_TimeBaseStructure);
-	TIM_TimeBaseInit(TIM3,&TIM_TimeBaseStructure);
-	TIM_TimeBaseInit(TIM1,&TIM_TimeBaseStructure);
-	//TIM1多一个单脉冲模式
-	TIM1->CR1 |= TIM_OPMode_Single;				
-
-	//TIM2_CH2输入脉冲
-	TIM_ICInitStructure.TIM_Channel = TIM_Channel_2;
-	TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
-	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;	
-	TIM_ICInitStructure.TIM_ICFilter = 0;
-	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising; 
-	TIM_ICInit(TIM2,&TIM_ICInitStructure);
-	//TIM3_CH1输入脉冲
-	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising; 
-	TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;
-	TIM_ICInit(TIM3,&TIM_ICInitStructure);	
-
-	/*
-	if(IsTrigMode(Trig_Encoder)) {
-		//TIM3_CH2输入脉冲
-		TIM_ICInitStructure.TIM_Channel = TIM_Channel_2;
-		TIM_ICInit(TIM3,&TIM_ICInitStructure);	
-		//TIM3_CH2的中断使能
-		TIM3->SR &= ~TIM_IT_CC2; 
-		TIM3->DIER |= TIM_IT_CC2;	
-	}
-	*/
-	
-	//TIM2_CH1溢出脉冲->TRGO
-	TIM_OCInitStructure.TIM_OCMode= TIM_OCMode_PWM2;		//PWM模式2
-	TIM_OCInitStructure.TIM_Pulse=0xFFFF; 					//
-	TIM_OCInitStructure.TIM_OutputState=TIM_OutputState_Disable;	 //使能输出比较
-	TIM_OCInitStructure.TIM_OCPolarity=TIM_OCPolarity_High;		//输出极性
-	TIM_OC1Init(TIM2, &TIM_OCInitStructure);			
-	
-	TIM_SelectOutputTrigger(TIM2,TIM_TRGOSource_OC1Ref);
-	//TIM_SelectOutputTrigger(TIM2,TIM_TRGOSource_Update);
-
-	//TIM2_CH3，曝光输出
-	TIM_OCInitStructure.TIM_OCMode = TIM_ForcedAction_InActive; //先Force Inactive，需要时再设成Active
-	TIM_OCInitStructure.TIM_Pulse=0xFF; 					//现在可以随便设
-	TIM_OCInitStructure.TIM_OutputState=TIM_OutputState_Enable;	 //输出
-	TIM_OCInitStructure.TIM_OCPolarity=TIM_OCPolarity_High;		//输出极性
-	TIM_OC3Init(TIM2, &TIM_OCInitStructure);
-	
-	//TIM2->TIM3 Gated
-	TIM3->SMCR = TIM_SlaveMode_Gated //TIM_SlaveMode_External1
-				| TIM_TS_ITR1;//TIM2->TIM3
-	//TIM3_CH1输入脉冲
-	TIM_ICInitStructure.TIM_Channel = TIM_Channel_1;
-	TIM_ICInit(TIM3,&TIM_ICInitStructure);
-
-	//TIM2->TIM1 Triger
-	TIM1->SMCR = TIM_SlaveMode_Trigger
-				| TIM_TS_TI1FP1;// TI1 Edge Detector 
-
-	//TIM1_CH2N输出
-	TIM_OCInitStructure.TIM_OCMode=TIM_OCMode_PWM2;	
-	TIM_OCInitStructure.TIM_OutputState=TIM_OutputState_Disable;	 //使能输出比较
-	TIM_OCInitStructure.TIM_OCPolarity=TIM_OCPolarity_High;		//输出极性
-	TIM_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable;
-	TIM_OCInitStructure.TIM_OCNPolarity=TIM_OCPolarity_High;
-	TIM_OCInitStructure.TIM_OCIdleState =TIM_OCIdleState_Reset;
-	TIM_OCInitStructure.TIM_OCNIdleState =TIM_OCNIdleState_Reset;
-	TIM_OCInitStructure.TIM_Pulse = CCR2_WIDTH;
-	TIM_OC2Init(TIM1, &TIM_OCInitStructure);	
-	TIM1->BDTR = 0x8000;//Main output enable
-
-//	if(!IsTrigInt()) { //外触发类型的设备才有
-//		if(!IsTrigMode(Trig_Internal)){
-//			TIM_ITConfig(TIM2,TIM_IT_Update | TIM_IT_CC2,ENABLE ); //使能指定的TIM3中断,允许更新中断
-//		}
-//	}
-	//中断优先级NVIC设置
-	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;  //TIM3中断
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;  //先占优先级0级
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;  //从优先级3级
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //IRQ通道被使能
-	NVIC_Init(&NVIC_InitStructure);  //初始化NVIC寄存器
-
-	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;  //TIM3中断
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;  //先占优先级0级
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;  //从优先级3级
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //IRQ通道被使能
-	NVIC_Init(&NVIC_InitStructure);  //初始化NVIC寄存器
-
-//	TIM_ARRPreloadConfig(TIM3,ENABLE);					
-	TIM_Cmd(TIM2,ENABLE);								//使能
-	TIM_Cmd(TIM3,ENABLE);								//使能
-
-	TrigState = Idle;
-	TrigCnt = 0;
-	PulseCnt = 0;
-}
-
-void TIM_Init(void)
-{
-	TIM_Init_Ori();
-
-}
-#endif
-
 __inline void ActiveTrigPoint(void)
 {
 	//设定当TIM2_CH3当CNT=CCR3时输出变高，然后在中断里拉低。
@@ -424,58 +302,6 @@ void StartInternalTrig()
 }
 
 
-//定时器2中断服务程序
-void TIM2_IRQHandler_Int(void)   
-{
-//	unsigned long long tmp;
-//	static unsigned int num = 4;
-#if 0
-	if ((TIM2->DIER & TIM_IT_CC2) && (TIM2->SR & TIM_IT_CC2))  //检查CC2中断发生与否，外触发才有
-	{
-		TIM2->SR = (uint16_t)~TIM_IT_CC2; //清除CC2中断标志 
-		
-	}	
-	if((TIM2->DIER & TIM_IT_CC3) &&  (TIM2->SR & TIM_IT_CC3)){//内外触发都有
-		TIM2->SR = (uint16_t)~TIM_IT_CC3; //清除CC3中断标志 
-		if(TIM2->DIER & TIM_IT_CC3){
-			if(TrigState == TrigWait){
-				if(TrigClks<=WaitStep){
-					TIM2->CCR3 += (uint16_t)TrigClks;
-					ActiveTrigPoint();
-					TrigState = TrigPrepared;
-				}else {//设置中断位，下次再判断
-					TIM2->CCR3 += (uint16_t)WaitStep;
-					TrigClks -= WaitStep;
-				}				
-			}else if(TrigState == TrigPrepared){
-				DeactiveTrigPoint();//将TIM2_CH3的输出拉低
-				//if(IsTrigMode(Trig_Internal)){
-				if(IsTrigMode(Trig_Internal) ){
-					StartInternalTrig();
-				}
-				else{
-					TrigState = Triged;
-				}
-			}	
-		}
-	}
-	if ((TIM2->DIER & TIM_IT_Update) &&  (TIM2->SR & TIM_IT_Update))  //检查中断发生与否，外触发才有
-	{
-		TIM2->SR = (uint16_t)~TIM_IT_Update; //清除中断标志 
-		
-	}	
-#endif
-}
-
-
-void TIM2_IRQHandler (void)   
-{
-
-	TIM2_IRQHandler_Int();
-}
-
-
-
 unsigned int GetPulsePos(void)
 {
 	return (TIM3->CCR1 << 16 | TIM2->CCR2);
@@ -549,8 +375,8 @@ void OpenAllTimer(void)
 	RCC->APB2ENR |= RCC_APB2Periph_TIM1;
 	RCC->APB1ENR |= RCC_APB1Periph_TIM2;
 	RCC->APB1ENR |= RCC_APB1Periph_TIM3;
-	#endif
-	SwitchStrobeAFIO();
+#endif
+__HAL_RCC_TIM3_CLK_ENABLE();
 }
 
 
