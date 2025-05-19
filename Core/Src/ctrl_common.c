@@ -15,22 +15,44 @@ char *BootloaderVersionStr = (char *) BOOTLOADER_VERSION_ADDR;
 //mcu调试寄存器
 #define DBGMCU_CR    (*((volatile unsigned long *)0xE0042004)) 
 
-#if 0
+int CheckPowerKey(int ms)
+{
+	u32 Treg;
+	int Cnt = ms/50;
+	if(!POWER_PRESSED)//没按就退出
+	{
+		return 0;
+	}	
+	Treg=GetTimerCount();
+	while(1)
+	{
+		if(IsTimeOut_ms(Treg,50))//没按就退出
+		{
+			//wdg();
+			Treg=GetTimerCount();
+			if(!POWER_PRESSED)
+			{
+				return 0;
+			}
+			Cnt --;
+			if(Cnt==0) return 1;
+		}
+	}
+}
 ///上电缓起动流程
 void PowerSeq(void)
 {
 	int i;
-	BoostOff();
 	for (i=1;i<11;i++)
 	{
 		PowerOff();
 		Delay_ms(50);
 		PowerOn();
 		Delay_us(20*i);
-		wdg();
+		//wdg();
 	}
 }
-
+#if 0
 
 ///判断关机是否超过一定时间，以分钟为单位，暂时一直判定为TRUE
 BOOL TestLongShutDown(int minutes)

@@ -29,11 +29,14 @@
 #include "Encoder.h"
 //include for test
 #include <stdio.h>
+#include "key.h"
+
+
 ADC_HandleTypeDef hadc2;
 RTC_HandleTypeDef hrtc;
 SPI_HandleTypeDef hspi2;
 WWDG_HandleTypeDef hwwdg;
-TIM_HandleTypeDef htim3,htim4;
+TIM_HandleTypeDef htim2,htim3,htim4;
 
 
 void SystemClock_Config(void);
@@ -42,14 +45,15 @@ static void MX_ADC2_Init(void);
 static void MX_WWDG_Init(void);
 static void MX_RTC_Init(void);
 static void MX_SPI2_Init(void);
+static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 
 void SysInit(void);
 void Init(void);
-void PWM_SetDuty(uint8_t percentage);
 
-u32 key;
+u32 key,currentHz = 200,currentPeriod;
+u8 flag=1;
 /**
   * @brief  The application entry point.
   * @retval int
@@ -70,24 +74,38 @@ int main(void)
     Encoder_Update();
     
     /* 打印编码器状态（调试用） */
-    printf("Counter: %d, Total Steps: %d, Difference: %d, Direction: %d\n",
-           encoderState.counter,
+    #if 0
+    printf("Hz: %d, Total Steps: %d, Difference: %d, Direction: %d\n",
+           currentPeriod,
            encoderState.totalSteps,
            encoderState.difference,
            encoderState.direction);
+    #endif
+    if(encoderState.difference)
+    {
+      currentHz = 200+encoderState.totalSteps;
+      if(currentHz >200) currentHz = 200;
+      if(currentHz < 0) currentHz = 0;
+      currentPeriod = (u32)(1.0/(currentHz)*1000000); // 计算步数对应的频率
+
+      PWM_Adjust(50,currentPeriod);
+    }
+    Delay_ms(50);  // 延时100ms
+    key = GetKey(); //获取按键值
+    if(POWER_PRESSED||ENTER_PRESSED){
+      if(flag == 0){
+        PWM_Stop(); //停止PWM
+        flag = 1;
+      }else{
+        PWM_Start(50,10000); //开启PWM，50%占空比，100us周期
+        flag = 0;
+      }
+    }
     
-    Delay_ms(100);  // 延时100ms
+    
   }
 }
-void PWM_SetDuty(uint8_t percentage)
-{
-  if (percentage > 100) percentage = 100;  // 限制最大值
-  
-  uint32_t pulse = (htim3.Init.Period + 1) * percentage / 100 - 1;
-  if (percentage == 100) pulse = htim3.Init.Period;
-  
-  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, pulse);
-}
+
 /* USER CODE BEGIN 4 */
 /** 
   * @brief  硬件初始化
@@ -110,20 +128,31 @@ void SysInit()
   //MX_WWDG_Init();             //看门狗初始化
   MX_RTC_Init();           //RTC初始化
   MX_SPI2_Init();           //SPI初始化
+
   MX_TIM3_Init();             //TIM3初始化
   MX_TIM4_Init();             //TIM4初始化
+  MX_TIM2_Init();
 }
 
 void Init(void){
   SysInit();        //CubeMX配置的系统初始化  
+  InitSysTick();         //初始化SysTick定时器
+  if(CheckPowerKey(1000))//电源键按至少2s
+  {
+    PowerSeq(); //上电缓启动
+  }
+  else
+  {
+    ShutDown(); // 关机
+  }		
   Status_MCU = Status_idle;
   LoadSysConfig();//先加载SysPara，因为部分AppPara的参数转换需要知道灯管类型
   LoadConfig();
   InitKey();        //按键初始化
-  InitSysTick();         //初始化SysTick定时器
+  
   Encoder_Init(); //编码器初始化
-  // LcmReset();          //LCD复位
-  // LcmInit();            //LCD初始化(按照数据手册)
+  LcmReset();          //LCD复位
+  LcmInit();            //LCD初始化(按照数据手册)
   //BackLightOn();       //背光打开
   //初始化完毕，允许输出
 	Status_MCU =  Status_WorkStall;
@@ -135,6 +164,51 @@ void Init(void){
 			PwrHitFlag = PwrHit_WORK;
 		}
 	}
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 41;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 99;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+
 }
 
 /**
@@ -437,13 +511,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : SNSR_PWR_Pin */
-  GPIO_InitStruct.Pin = SNSR_PWR_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
-  HAL_GPIO_Init(SNSR_PWR_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : POWER_ALL_ON_Pin SNSR_GPIO_Pin LCD_RSTB_Pin BKLT_ON_Pin */
   GPIO_InitStruct.Pin = POWER_ALL_ON_Pin|SNSR_GPIO_Pin|LCD_RSTB_Pin|BKLT_ON_Pin;
@@ -487,6 +554,7 @@ static void MX_TIM3_Init(void)
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
   TIM_OC_InitTypeDef sConfigOC = {0};
+  TIM_SlaveConfigTypeDef sSlaveConfig = {0};
 
   /* USER CODE BEGIN TIM3_Init 1 */
 
@@ -494,9 +562,9 @@ static void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 41;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 49;
+  htim3.Init.Period = 99;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
   {
     Error_Handler();
@@ -510,6 +578,16 @@ static void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
+  if (HAL_TIM_OnePulse_Init(&htim3, TIM_OPMODE_SINGLE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sSlaveConfig.SlaveMode = TIM_SLAVEMODE_RESET;
+  sSlaveConfig.InputTrigger = TIM_TS_ITR1;
+  if (HAL_TIM_SlaveConfigSynchro(&htim3, &sSlaveConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
@@ -517,7 +595,7 @@ static void MX_TIM3_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 24;
+  sConfigOC.Pulse = 49;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)

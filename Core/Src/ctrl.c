@@ -155,31 +155,24 @@ void StopToFlash(void)
 	SwitchStrobeGPIO();
 	WorkEn = 0;
 }
-#if 0
-void EnterStandby(void)
+
+void ShutDown(void)
 {
 
-	if(CmpAppParam())
-		SaveConfig();
+	// if(CmpAppParam())
+	// 	SaveConfig();
 	//if(CmpSysParam())
 		//SaveSysConfig();
 
 
 	BackLightOff();
 	LcdResetOn();
-	LCD_A0 = 0;
-	LCD_CSB = 0;
-	BoostOff();
+	LCD_A0(0);
+	LCD_CSB(0);
 	PowerOff();
-	//Disable RTC 
-	RTC_SetCounter(0);
-	RTC_ITConfig(RTC_IT_OW,  DISABLE);
-	RTC_ITConfig(RTC_IT_ALR, DISABLE);
-	RTC_ITConfig(RTC_IT_SEC, DISABLE);
-	//
-	PWR_EnterSTANDBYMode();
-}
 
+}
+#if 0
 
 void WriteEncrypt(void)  
 {   

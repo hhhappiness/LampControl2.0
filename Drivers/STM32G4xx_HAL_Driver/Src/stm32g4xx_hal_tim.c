@@ -1503,6 +1503,9 @@ HAL_StatusTypeDef HAL_TIM_PWM_Start(TIM_HandleTypeDef *htim, uint32_t Channel)
     tmpsmcr = htim->Instance->SMCR & TIM_SMCR_SMS;
     if (!IS_TIM_SLAVEMODE_TRIGGER_ENABLED(tmpsmcr))
     {
+      // 临时禁用从模式
+      htim->Instance->CR1 &= ~(TIM_CR1_OPM);
+
       __HAL_TIM_ENABLE(htim);
     }
   }

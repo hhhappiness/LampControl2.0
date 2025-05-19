@@ -309,9 +309,9 @@ __inline void PwrKeyPress_Handler(void)
 			
 						}
 }
-__inline void PwrKey_Detector(void)
+void PwrKey_Detector(void)
 {
-	if(GPA_I(0))  	//PwrKey Pressed
+	if(POWER_PRESSED)  	//PwrKey Pressed
 	{
 			PwrKey_Cnt1++;
 			if(PwrKey_FreeCnt < 3)

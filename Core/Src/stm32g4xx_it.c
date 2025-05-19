@@ -57,6 +57,7 @@
 
 /* External variables --------------------------------------------------------*/
 extern RTC_HandleTypeDef hrtc;
+extern TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN EV */
 
@@ -205,7 +206,12 @@ void SysTick_Handler(void)
 void RTC_WKUP_IRQHandler(void)
 {
   HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);   //clear RTC wake up counter flag
-
+//电源按键检测
+	PwrKey_Detector();
+	//组合按键Enter + Mode + Power 进入Standby模式
+	if((PwrKey_Status == PwrKey_Pressed)&&(!GPI_KEY_ENTER)){
+			ShutDown();
+	}
   KeyInput(); //按键输入检测
   
   AnyKeyPressed_Control();//检测到任意键按下需要的处理
@@ -213,9 +219,23 @@ void RTC_WKUP_IRQHandler(void)
   //CloseDelay_Handler();//无操作状态下，延时关机处理
   
   Blk_Control();//背光控制处理
-  u32 key = GetKey(); //获取按键值
-  StartToFlash(); //开始闪烁
+  
+
 }
+/**
+  * @brief This function handles TIM2 global interrupt.
+  */
+void TIM2_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM2_IRQn 0 */
+
+  /* USER CODE END TIM2_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim2);
+  /* USER CODE BEGIN TIM2_IRQn 1 */
+
+  /* USER CODE END TIM2_IRQn 1 */
+}
+
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */

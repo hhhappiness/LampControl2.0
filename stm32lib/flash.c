@@ -190,15 +190,15 @@ void SaveUserData(u32 addr,u32* data,u32 len)
     
     /* 读取数据进行校验 */
     /* 直接从Flash地址读取数据 */
-    memcpy(read_data, (void*)addr, len);
+    // memcpy(read_data, (void*)addr, len);
     
-    /* 验证CRC ,改为累计和*/
-    read_data_crc = SumU32(read_data, len/4 -1);//CalculateCRC((uint8_t*)data, len - sizeof(uint32_t));
-    if (user_data_crc != read_data_crc)
-    {
-        /* CRC校验失败，处理错误 */
-        Error_Handler();
-    }
+    // /* 验证CRC ,改为累计和*/
+    // read_data_crc = SumU32(read_data, len/4 -1);//CalculateCRC((uint8_t*)data, len - sizeof(uint32_t));
+    // if (user_data_crc != read_data_crc)
+    // {
+    //     /* CRC校验失败，处理错误 */
+    //     Error_Handler();
+    // }
 }
 
 /**

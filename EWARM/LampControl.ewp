@@ -1152,6 +1152,9 @@
                     <name>$PROJ_DIR$\..\Core\Src\main.c</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\Core\Src\pwm.c</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\Core\Src\rtc_int.c</name>
                 </file>
                 <file>
