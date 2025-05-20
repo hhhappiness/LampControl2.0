@@ -49,37 +49,11 @@ __INLINE void InitSysTick(){
 }
 
 //不同总线时钟下的延时换算系数
-#if AHBClk == 72000000
-    #define SYSTICK2us      9       //systick与us的换算系数
-    #define SYSTICK2ms      9000    //systick与ms的换算系数
-    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计1864ms
-#elif AHBClk == 168000000
-    #define SYSTICK2us      21       //systick与us的换算系数，这个值不准
-    #define SYSTICK2ms      21000    //systick与ms的换算系数
-    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计3728ms
-#elif AHBClk == 36000000
-    #define SYSTICK2us      9/2       //systick与us的换算系数，这个值不准
-    #define SYSTICK2ms      4500    //systick与ms的换算系数
-    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计3728ms
-#elif AHBClk == 32000000
-    #define SYSTICK2us      4       //systick与us的换算系数，这个值不准
-    #define SYSTICK2ms      4000    //systick与ms的换算系数
-    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计4196ms
-#elif AHBClk == 8000000
-    #define SYSTICK2us      8       //systick与us的换算系数
-    #define SYSTICK2ms      8000    //systick与ms的换算系数
-    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计2097ms
-#elif AHBClk ==16000000
-    #define SYSTICK2us      16       //systick与us的换算系数
-    #define SYSTICK2ms      16000    //systick与ms的换算系数
-    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计1048ms
-#elif AHBClk == 70000000
-    #define SYSTICK2us      9       //systick与us的换算系数
-    #define SYSTICK2ms      8750    //systick与ms的换算系数
-    #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计1864ms
-#else
-    #error please define the ABH clock
-#endif
+
+#define SYSTICK_us      SystemCoreClock/8000000       //systick与us的换算系数
+#define SYSTICK_ms      SYSTICK_us*1000    //systick与ms的换算系数
+#define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计3728ms
+
 
 #if AHBClk == APB1Clk
     #define TIMXCLK (APB1Clk*1) //to TIM2,3,4,5,6,7,12,13,14
@@ -99,8 +73,8 @@ __INLINE void InitSysTick(){
 //延时计数器, systick自由跑, 每个延时计数器需要一个变量记录开始值, 与当前值比较是否超时
 #define GetTimerCount()     (SysTick->VAL)
 #define _IsTimeOut(TReg,Count)     (((TReg+SYSTICK_MAXCOUNT+1-GetTimerCount())& SYSTICK_MAXCOUNT)>(Count))
-#define IsTimeOut_ms(TReg,ms)     (_IsTimeOut(TReg,ms*SYSTICK2ms))
-#define IsTimeOut_us(TReg,us)     (_IsTimeOut(TReg,us*SYSTICK2us))
+#define IsTimeOut_ms(TReg,ms)     (_IsTimeOut(TReg,ms*SYSTICK_ms))
+#define IsTimeOut_us(TReg,us)     (_IsTimeOut(TReg,us*SYSTICK_us))
 #define Delay_ms(ms)     {u32 TReg=GetTimerCount();    while(!IsTimeOut_ms(TReg,ms));}
 #define Delay_us(us)     {u32 TReg=GetTimerCount();    while(!IsTimeOut_us(TReg,us));}
 #define ResetTimeOut(TReg) 	{TReg=GetTimerCount();}

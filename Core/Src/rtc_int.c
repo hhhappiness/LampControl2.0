@@ -200,13 +200,8 @@ void ReInitSysTick(u8 freq)
 
 void SwitchStrobeGPIO(void)
 {
-#if 0
-
 	//如果是LED类型的，要求关闭闪光的输出时候，为常0
-	GPIOB->CRL  &= ~0xF;
-	GPIOB->CRL |= GPO_02M;
-	GPB_O(0) = 0;
-#endif
+	GPA_O(4,0);
 }
 
 //已经在初始化GPIO的时候设置了，这个函数没有用

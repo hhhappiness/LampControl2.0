@@ -136,7 +136,6 @@ void SysInit()
 
 void Init(void){
   SysInit();        //CubeMX配置的系统初始化  
-  InitSysTick();         //初始化SysTick定时器
   if(CheckPowerKey(1000))//电源键按至少2s
   {
     PowerSeq(); //上电缓启动
@@ -149,17 +148,19 @@ void Init(void){
   LoadSysConfig();//先加载SysPara，因为部分AppPara的参数转换需要知道灯管类型
   LoadConfig();
   InitKey();        //按键初始化
+  InitSysTick();         //初始化SysTick定时器
   
   Encoder_Init(); //编码器初始化
   LcmReset();          //LCD复位
   LcmInit();            //LCD初始化(按照数据手册)
-  //BackLightOn();       //背光打开
+  BackLightOn();       //背光打开
+
   //初始化完毕，允许输出
 	Status_MCU =  Status_WorkStall;
   {
 		if(AppPara.PowerKey == PwrKey_Hit)
 		{
-			//StopToFlash();
+			StopToFlash();    //初始化暂停闪烁
 			WorkEn = 0;
 			PwrHitFlag = PwrHit_WORK;
 		}

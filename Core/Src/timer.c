@@ -6,6 +6,8 @@
 #include "ctrl.h"
 #include "stm32g4xx.h"
 #include "stm32g4xx_hal_tim.h"
+
+extern TIM_HandleTypeDef htim2, htim3, htim4;
 #define MAJOR_VERSION 	1
 #define MID_VERSION 	0
 #define MINOR_VERSION 	0
@@ -340,32 +342,23 @@ int TestFreq = 60;//1
 
 void CloseAllTimer(void)
 {
-	#if 0
-	TIM_ITConfig(TIM2,TIM_IT_Update,DISABLE); 
-	TIM2->SR = 0;
-	TIM_Cmd(TIM2,DISABLE);
 
-	TIM_ITConfig(TIM3,TIM_IT_Update,DISABLE); 
-	TIM3->SR = 0;
-	TIM_Cmd(TIM3,DISABLE);
-
-	TIM_ITConfig(TIM1,TIM_IT_Update,DISABLE); 
-	TIM1->SR = 0;
-	TIM_Cmd(TIM1,DISABLE);
-
+	  /* Disable the TIM Update interrupt */
+	__HAL_TIM_DISABLE_IT(&htim2, TIM_IT_UPDATE);
+	__HAL_TIM_DISABLE_IT(&htim3, TIM_IT_UPDATE);
+	__HAL_TIM_DISABLE_IT(&htim4, TIM_IT_UPDATE);
 	
-	TIM_ITConfig(TIM4,TIM_IT_Update,DISABLE); 
-	TIM4->SR = 0;
-	TIM_Cmd(TIM4,DISABLE);
 
-#if 0
-	RCC->APB2ENR &= ~RCC_APB2Periph_TIM1;
-	RCC->APB1ENR &= ~RCC_APB1Periph_TIM2;
-	RCC->APB1ENR &= ~RCC_APB1Periph_TIM3;
-	//RCC->APB1ENR &= ~RCC_APB1Periph_TIM4;
-#endif
-	SwitchStrobeGPIO();
-	#endif
+	/* Disable the Peripheral CCER and CEN ºƒ¥Ê∆˜∏¥Œª*/
+	__HAL_TIM_DISABLE(&htim2);
+	__HAL_TIM_DISABLE(&htim3);
+	__HAL_TIM_DISABLE(&htim4);
+	//◊¥Ã¨ºƒ¥Ê∆˜∏¥Œª
+	TIM2->SR = 0;
+	TIM3->SR = 0;
+	TIM4->SR = 0;
+
+	RCC->APB1ENR1 &= ~(RCC_APB1ENR1_TIM2EN|RCC_APB1ENR1_TIM3EN|RCC_APB1ENR1_TIM4EN);  //πÿ±’TIM2,3,4 ±÷”
 }
 
 void OpenAllTimer(void)

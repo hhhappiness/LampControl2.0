@@ -170,6 +170,7 @@ void ShutDown(void)
 	LCD_A0(0);
 	LCD_CSB(0);
 	PowerOff();
+	while(1); //断电后若程序未停止，则死循环
 
 }
 #if 0

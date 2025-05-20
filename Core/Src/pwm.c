@@ -3,15 +3,14 @@
  * @brief 级联定时器PWM控制函数
  */
 
+#include "pwm.h"
+#include "main.h"
 #include "stm32g4xx.h"
 #include "stm32g4xx_hal_tim.h"
-
 /* 外部变量声明 */
 extern TIM_HandleTypeDef htim2;  // 主定时器句柄
 extern TIM_HandleTypeDef htim3;  // 从定时器句柄
 
-HAL_StatusTypeDef PWM_Start(uint32_t pulse_width_us, uint32_t period_us);
-HAL_StatusTypeDef PWM_Adjust(uint32_t pulse_width_us, uint32_t period_us);
 
 /**
  * @brief 启动PWM输出
@@ -22,7 +21,7 @@ HAL_StatusTypeDef PWM_Adjust(uint32_t pulse_width_us, uint32_t period_us);
  * @note 此函数配置并启动级联定时器PWM输出
  *       TIM2控制周期，TIM3控制脉宽
  */
-HAL_StatusTypeDef PWM_Start(uint32_t pulse_width_us, uint32_t period_us)
+void PWM_Start(uint32_t pulse_width_us, uint32_t period_us)
 {
     HAL_StatusTypeDef status = HAL_OK;
     uint32_t timer_clock = 1000000; // 定时器时钟频率1MHz (42MHz/42)
@@ -30,7 +29,7 @@ HAL_StatusTypeDef PWM_Start(uint32_t pulse_width_us, uint32_t period_us)
     /* 参数检查 */
     if (pulse_width_us > period_us || period_us == 0)
     {
-        return HAL_ERROR;
+        Error_Handler();
     }
     
     /* 停止定时器（如果已经运行） */
@@ -41,7 +40,7 @@ HAL_StatusTypeDef PWM_Start(uint32_t pulse_width_us, uint32_t period_us)
     uint32_t tim2_period = period_us - 1;
     if (tim2_period > 0xFFFF) // 检查是否超出16位定时器范围
     {
-        return HAL_ERROR;
+        Error_Handler();
     }
     
     /* 计算TIM3脉宽值 */
@@ -59,14 +58,8 @@ HAL_StatusTypeDef PWM_Start(uint32_t pulse_width_us, uint32_t period_us)
     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, tim3_pulse);
     
     /* 启动定时器 */
-    status = HAL_TIM_Base_Start(&htim2);
-    if (status != HAL_OK)
-    {
-        return status;
-    }
-    
-    status = HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-    return status;
+    HAL_TIM_Base_Start(&htim2);
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 }
 
 /**
@@ -78,15 +71,14 @@ HAL_StatusTypeDef PWM_Start(uint32_t pulse_width_us, uint32_t period_us)
  * @note 此函数动态调整PWM的脉宽和周期
  *       如果只需调整其中一个参数，可以将另一个参数设为0保持不变
  */
-HAL_StatusTypeDef PWM_Adjust(uint32_t pulse_width_us, uint32_t period_us)
+void PWM_Adjust(uint32_t pulse_width_us, uint32_t period_us)
 {
     HAL_StatusTypeDef status = HAL_OK;
-    uint32_t current_period;
-    uint32_t current_pulse;
+    uint32_t current_period,current_pulse;
     /* 参数检查 */
     if (pulse_width_us > period_us)
     {
-        return HAL_ERROR;
+        Error_Handler();
     }
     /* 获取当前参数 */
     current_period = __HAL_TIM_GET_AUTORELOAD(&htim2) + 1;
@@ -100,7 +92,7 @@ HAL_StatusTypeDef PWM_Adjust(uint32_t pulse_width_us, uint32_t period_us)
 
     if (tim2_period > 0xFFFF) // 检查是否超出16位定时器范围
     {
-        return HAL_ERROR;
+        Error_Handler();
     }
     
     /* 判断是否需要重启定时器 */    
@@ -117,21 +109,15 @@ HAL_StatusTypeDef PWM_Adjust(uint32_t pulse_width_us, uint32_t period_us)
         __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, tim3_pulse);
         
         /* 重启定时器 */
-        status = HAL_TIM_Base_Start(&htim2);
-        if (status != HAL_OK)
-        {
-            return status;
-        }
-        
-        status = HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+        HAL_TIM_Base_Start(&htim2);
+        HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
     }
     else
     {
         /* 只更新脉宽，不需要重启 */
         __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, tim3_pulse);
     }
-    
-    return status;
+
 }
 
 void PWM_Stop(void)
