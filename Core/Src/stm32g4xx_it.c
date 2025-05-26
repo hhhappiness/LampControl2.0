@@ -20,9 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32g4xx_it.h"
-#include "rtc_int.h"
-#include "encoder.h"
-#include <stdio.h>
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -202,29 +200,7 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32g4xx.s).                    */
 /******************************************************************************/
-/**
-  * @brief This function handles RTC wake-up interrupt through EXTI line 20.
-  */
-void RTC_WKUP_IRQHandler(void)  //50ms为周期
-{
-  static u8 encoder_wakeup_flag = 0;
-  HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);   //clear RTC wake up counter flag
-//电源按键检测
-	PwrKey_Detector();
-	//组合按键Enter + Mode + Power 进入Standby模式
-	if((PwrKey_Status == PwrKey_Pressed)&&(!GPI_KEY_ENTER)){
-			ShutDown();
-	}
-  KeyInput(); //按键输入检测
-  
-  AnyKeyPressed_Control();//检测到任意键按下需要的处理
-  
-  //CloseDelay_Handler();//无操作状态下，延时关机处理
-  
-  Blk_Control();//背光控制处理
-  //encoder_test_pwmAdjust(); //编码器测试函数
 
-}
 /**
   * @brief This function handles TIM2 global interrupt.
   */

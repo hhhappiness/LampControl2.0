@@ -21,8 +21,6 @@
 
 
 u32 nWorkTime;
-extern  u8   KeyRepeatNum; //重复键数
-
 //电源按键检测控制
 u16 PwrKey_Cnt1 = 0;
 u16 PwrKey_Cnt0 = 0;
@@ -91,6 +89,8 @@ u8 RtcCnt = 0;
 //#ifdef RTT
 extern u8 _MainDispBuf[];
 extern u8 _SecondDispBuf[];
+extern  u8   KeyRepeatNum; //重复键数
+extern RTC_HandleTypeDef hrtc;
 //#endif
 
 
@@ -107,82 +107,55 @@ __inline static void rtt_printf(void) ;
 void ForceToStop(void) ;
 int GetSpeedHz(void) ;
 
-void RTC_IRQHandler(void)
+
+/**
+  * @brief This function handles RTC wake-up interrupt through EXTI line 20.
+  */
+void RTC_WKUP_IRQHandler(void)  //50ms为周期
 {
-#if 0
-
-  if (RTC_GetITStatus(RTC_IT_SEC) != RESET)
-  {
-    /* Clear the RTC Second interrupt */
-    RTC_ClearITPendingBit(RTC_IT_SEC);
-	RtcCnt++;
-	if(RtcCnt >= RTC_FREQ/20) {
-		RtcCnt = 0;
-
-		//电源按键检测
-		PwrKey_Detector();
-		//组合按键Enter + Mode + Power 进入Standby模式
-		if((PwrKey_Status == PwrKey_Pressed)&&(!GPI_KEY_MODE)&&(!GPI_KEY_ENTER)){
-
-			EnterStandby();
-		}
-		//前面板的按键检测
-		KeyInput();
-
-		//检测到任意键按下需要的处理
-		AnyKeyPressed_Control();
-
-		//Stop状态下，延时关机处理
-		CloseDelay_Handler();
-
-		//背光控制处理
-		Blk_Control();
-
-		//充电状态检测
-		ChargeFlag = GetChargePin;
-
-		//只有所有的系统初始化完毕后，才允许输出
-		if(Status_MCU != Status_idle) {
-			//控制闪光输出的处理
-			if((EnterScanFlag == 0)&&(MainScanFlag == 0)) {
-			//if(IsTrigMode(Trig_Internal)||IsTrigMode(Trig_SinglePulse)||(IsTrigMode(Trig_Perimeter)))
-			{
-				switch(AppPara.PowerKey)
-					{
-						case PwrKey_Hit:
-							PwrKeyHit_Handler();
-							break;
-						case PwrKey_Press:
-							PwrKeyPress_Handler();
-							break;
-						default:
-							break;
-					}				
-				}
-
-			}
-			//处理进入自动扫描模式
-			Scan_Control();
-			//处理主界面频率调整模式
-			MainScan_Control();
-
-	#ifdef	RTT
-			rtt_printf();
-	#endif
-		}
-		//测试GPIO,测量RTC频率
-		//GPIOTest();
-	
+  static u8 encoder_wakeup_flag = 0;
+  HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);   //clear RTC wake up counter flag
+//电源按键检测
+	PwrKey_Detector();
+	//组合按键Enter + Mode + Power 进入Standby模式
+	if((PwrKey_Status == PwrKey_Pressed)&&(!GPI_KEY_ENTER)){
+			ShutDown();
 	}
-  }
+  KeyInput(); //按键输入检测
+  
+  AnyKeyPressed_Control();//检测到任意键按下需要的处理
+  
+  CloseDelay_Handler();//无操作状态下，延时关机处理
+  
+  Blk_Control();//背光控制处理
+  //encoder_test_pwmAdjust(); //编码器测试函数
+  //只有所有的系统初始化完毕后，才允许输出
+	if(Status_MCU != Status_idle) {
+		//控制闪光输出的处理
+		if((EnterScanFlag == 0)&&(MainScanFlag == 0)) {
+		//if(IsTrigMode(Trig_Internal)||IsTrigMode(Trig_SinglePulse)||(IsTrigMode(Trig_Perimeter)))
+		{
+			switch(AppPara.PowerKey)
+				{
+					case PwrKey_Hit:
+						PwrKeyHit_Handler();
+						break;
+					case PwrKey_Press:
+						PwrKeyPress_Handler();
+						break;
+					default:
+						break;
+				}				
+			}
 
-	//960Hz的电池电压采集处理
-	AdcSamp();
-	//测试GPIO,测量RTC频率
-	//GPIOTest();
-#endif
+		}
+		//处理进入自动扫描模式
+		Scan_Control();
+		//处理主界面频率调整模式
+		MainScan_Control();
+	}
+
 }
-
 
 void ReInitSysTick(u8 freq)
 {
@@ -304,7 +277,7 @@ __inline void PwrKeyPress_Handler(void)
 			
 						}
 }
-void PwrKey_Detector(void)
+__inline void PwrKey_Detector(void)
 {
 	if(POWER_PRESSED)  	//PwrKey Pressed
 	{
@@ -369,14 +342,14 @@ __inline void CloseDelay_Handler(void)
 		if(CloseCnt >= TimeGainMin*AppPara.PowerOffDly)
 			{
 				//关闭系统
-				//EnterStandby();
+				ShutDown();
 			}
 	}
 	else
 		CloseCnt = 0;
 }
 
- void Blk_Control(void)
+__inline void Blk_Control(void)
 {
 	AppPara.BackLightDelay = 10;
 		//系统初始化完毕后，才使能背光的控制
@@ -525,7 +498,7 @@ __inline void MainScan_Control(void)
 }
 
 //任意键按下时候需要执行的操作
- void AnyKeyPressed_Control(void)
+__inline void AnyKeyPressed_Control(void)
 {
 	//发生了按下任意键
 	if(AnyKeyPressedFlag == 1) {
@@ -560,21 +533,6 @@ __inline void MainScan_Control(void)
 		}
 
 }
-
-#if 0
-__inline static void GPIOTest(void)
-{
-	static u8 GpioFlag = 0;
-	if(GpioFlag == 0) {
-		GpioFlag = 1;
-		GPA_O(10) = 0;
-		}
-	else {
-		GpioFlag = 0;
-		GPA_O(10) = 1;
-		}
-}
-#endif
 
 #ifdef RTT
 __inline static void rtt_printf(void) {

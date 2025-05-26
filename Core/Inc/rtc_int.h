@@ -56,12 +56,12 @@ extern volatile u8 ChargeFlag ;
 u32 getKeyBuf();
 __inline void PwrKeyHit_Handler(void);
 __inline void PwrKeyPress_Handler(void);
- void PwrKey_Detector(void);
+__inline void PwrKey_Detector(void);
 __inline void CloseDelay_Handler(void);
- void Blk_Control(void);
+__inline void Blk_Control(void);
 __inline void Scan_Control(void);
 __inline void MainScan_Control(void);
-void AnyKeyPressed_Control(void);
+__inline void AnyKeyPressed_Control(void);
 
 void ReInitSysTick(u8 freq);
 
