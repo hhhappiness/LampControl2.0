@@ -46,6 +46,10 @@
         "iutility": "c",
         "iosfwd": "c",
         "stm32g4xx_hal_tim.h": "c",
-        "compare": "c"
+        "compare": "c",
+        "encoder.h": "c",
+        "stdio.h": "c",
+        "key.h": "c",
+        "pwm.h": "c"
     }
 }

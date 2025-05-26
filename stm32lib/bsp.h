@@ -19,6 +19,10 @@
 #endif 
    
 
+enum error_code{
+    ERROR_PWM
+};
+
 
 
 void InitUart(USART_TypeDef * uart,uint32_t BaudRate);

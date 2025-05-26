@@ -21,6 +21,8 @@
 #include "main.h"
 #include "stm32g4xx_it.h"
 #include "rtc_int.h"
+#include "encoder.h"
+#include <stdio.h>
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
@@ -203,8 +205,9 @@ void SysTick_Handler(void)
 /**
   * @brief This function handles RTC wake-up interrupt through EXTI line 20.
   */
-void RTC_WKUP_IRQHandler(void)
+void RTC_WKUP_IRQHandler(void)  //50ms为周期
 {
+  static u8 encoder_wakeup_flag = 0;
   HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);   //clear RTC wake up counter flag
 //电源按键检测
 	PwrKey_Detector();
@@ -219,7 +222,7 @@ void RTC_WKUP_IRQHandler(void)
   //CloseDelay_Handler();//无操作状态下，延时关机处理
   
   Blk_Control();//背光控制处理
-  
+  //encoder_test_pwmAdjust(); //编码器测试函数
 
 }
 /**
@@ -228,8 +231,8 @@ void RTC_WKUP_IRQHandler(void)
 void TIM2_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM2_IRQn 0 */
-
   /* USER CODE END TIM2_IRQn 0 */
+  htim3.Instance->CR1 |= TIM_CR1_CEN; // 启动定时器3
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
 

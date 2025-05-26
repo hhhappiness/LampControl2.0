@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-#include "stdint.h"
+#include "type.h"
 
 /**
  * @brief 启动PWM输出
@@ -21,7 +21,7 @@ extern "C" {
  * @note 此函数配置并启动级联定时器PWM输出
  *       TIM2控制周期，TIM3控制脉宽
  */
-void PWM_Start(uint32_t pulse_width_us, uint32_t period_us);
+void PWM_Start(u32 pulse_width_us, u32 period_us);
 
 /**
  * @brief 调整PWM参数
@@ -32,7 +32,7 @@ void PWM_Start(uint32_t pulse_width_us, uint32_t period_us);
  * @note 此函数动态调整PWM的脉宽和周期
  *       如果只需调整其中一个参数，可以将另一个参数设为0保持不变
  */
-void PWM_Adjust(uint32_t pulse_width_us, uint32_t period_us);
+void PWM_Adjust(u32 pulse_width_us, u32 period_us);
 
 /**
  * @brief 停止PWM输出

@@ -2,10 +2,24 @@
 #include "main.h"
 #include "stm32g4xx_hal_tim.h"
 #include "encoder.h"
+#include "pwm.h"
+#include "stdio.h"
+#include "bsp.h"
 
-
+// 优化后的整数幂函数，防止b为负数且更安全
+static inline int pow_int(int base, int exp) {
+  int result = 1;
+  if (exp < 0) return 0; // 不支持负指数
+  while (exp--) result *= base;
+  return result;
+}
 EncoderState_t encoderState = {0};
+uint32_t counterMax;
 
+float currentHz = 100,exponent_result = 0;
+u32 currentPeriod_us;
+u16 key = 0;
+u8 flag=1;
 /* 编码器初始化函数 */
 void Encoder_Init(void)
 {
@@ -14,59 +28,88 @@ void Encoder_Init(void)
   
   /* 初始化状态变量 */
   encoderState.counter = 0;
-  encoderState.lastCounter = 0;
   encoderState.totalSteps = 0;
   encoderState.difference = 0;
   encoderState.direction = 0;
-  
+  encoderState.delta_diff = 0;
   /* 设置初始计数值 */
   if (IS_TIM_32B_COUNTER_INSTANCE(htim4.Instance)) {  // 32位定时器
     __HAL_TIM_SET_COUNTER(&htim4, 0x7FFFFFFF);
-    encoderState.totalSteps = -(s32)0x7FFFFFFF;  // 设置初始值以抵消diffrence初始值
+    counterMax = 0xFFFFFFFF;
   } else {                                            // 16位定时器
     __HAL_TIM_SET_COUNTER(&htim4, 0x7FFF);
-    encoderState.totalSteps = -(s32)0x7FFF;  
+    counterMax = 0xFFFF;
   }
 }
 
+
+void encoder_test_pwmAdjust()
+{
+/* 更新编码器状态 */
+  Encoder_Update();
+  
+  /* 打印编码器状态（调试用） */
+  #ifdef DEBUG
+  printf("Hz: %f, Total Steps: %d, diff: %u Delta Diff': %u \n",
+          currentHz,
+          encoderState.totalSteps,
+          encoderState.difference,
+          encoderState.delta_diff);
+  #endif
+  if(encoderState.difference)
+  {
+    if(encoderState.difference<=5 || encoderState.delta_diff <=5)
+      currentHz += (encoderState.difference/100.0 * (float)encoderState.direction);  //小数点后两位开始加
+    else if(encoderState.delta_diff <=15)
+      currentHz += ((encoderState.difference-5)/10.0 * (float)encoderState.direction);  //小数点后一位开始加
+    else if(encoderState.delta_diff <=50)
+      currentHz += ((encoderState.difference-15.0) * (float)encoderState.direction);  //个位开始加
+    else if(encoderState.delta_diff <=70)
+      currentHz += ((encoderState.difference-50.0)*2* (float)encoderState.direction);  //十位开始加
+    else currentHz += (encoderState.difference * (float)encoderState.direction);  //百位开始加
+
+    if(currentHz >200) 
+      currentHz = 200;
+    if(currentHz < 1) 
+      currentHz = 1;
+    currentPeriod_us = (u32)(1.0/(currentHz)*1000000); // 将频率换算成对应的周期（us）
+    PWM_Adjust(50,currentPeriod_us);
+  }
+
+  key = GetKey(); //获取按键值
+  if(POWER_PRESSED||ENTER_PRESSED){
+    if(flag == 0){
+      PWM_Stop(); //停止PWM
+      flag = 1;
+    }else{
+      PWM_Start(50,10000); //开启PWM，50%占空比，10000us周期（100hz）
+      flag = 0;
+    }
+  }
+}
 /* 更新编码器状态 */
 void Encoder_Update(void)
 {
-  uint32_t counterMax;
-  
-  /* 确定计数器最大值 */
-  if (IS_TIM_32B_COUNTER_INSTANCE(htim4.Instance)) {  // 32位定时器
-    counterMax = 0xFFFFFFFF;
-  } else {                                            // 16位定时器
-    counterMax = 0xFFFF;
-  }
-  
+  static s32 lastCounter=0x7fff;
+  static u32 lastDiff=0;  //初始化lastcounter值
   /* 获取当前计数值 */
   encoderState.counter = __HAL_TIM_GET_COUNTER(&htim4);
-  
-  /* 计算变化量（处理溢出） */
-  encoderState.difference = encoderState.counter - encoderState.lastCounter;
-  
-  /* 处理溢出情况 */
-  if (encoderState.difference > (int32_t)(counterMax / 2)) {
-    encoderState.difference -= (counterMax + 1);
-  } else if (encoderState.difference < -(int32_t)(counterMax / 2)) {
-    encoderState.difference += (counterMax + 1);
-  }
-  
-  /* 更新总步数 */
-  encoderState.totalSteps += encoderState.difference ;  // 0x7FFF是编码器的初始值
-  
   /* 确定方向 */
-  if (encoderState.difference > 0)
-    encoderState.direction = 1;
-  else if (encoderState.difference < 0)
-    encoderState.direction = -1;
-  else
-    encoderState.direction = 0;
+  encoderState.direction = ((encoderState.counter - lastCounter)>0)?1:-1;
+  /* 计算变化量绝对值 */
+  encoderState.difference = (encoderState.counter - lastCounter) >= 0 ? (encoderState.counter - lastCounter) : -(encoderState.counter - lastCounter);
+  /* 处理溢出情况 */
+  if (encoderState.difference > (s32)(counterMax / 2)) encoderState.difference = (counterMax/2);
+  /* 更新总步数 */
+  encoderState.totalSteps += encoderState.direction*encoderState.difference ;  // 0x7FFF是编码器的初始值
   
+
+  /* 计算变化速率 */
+  s32 diff = encoderState.difference - lastDiff;
+  encoderState.delta_diff = diff>0?(u32)diff:(u32)(-diff);
   /* 更新上次计数值 */
-  encoderState.lastCounter = encoderState.counter;
+  lastCounter = encoderState.counter;
+  lastDiff = encoderState.difference;
 }
 
 
@@ -124,6 +167,7 @@ int encode_main(void)
   }
 }
 
+#if 0
 /* 阈值滤波 - 忽略短时间内的小变化 */
 void Encoder_Update_WithThreshold(void)
 {
@@ -269,3 +313,4 @@ void Encoder_Update_Median(void)
   // 更新上次计数值
   encoderState.lastCounter = medianValue;
 }
+#endif
