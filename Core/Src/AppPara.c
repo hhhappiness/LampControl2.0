@@ -128,7 +128,7 @@ const APP_PARA AppParaMin=		//最小值
 	5,				//int WorkTime;
 	
 	/* project params set */
-	100,			//int FreqLimit_Led;	 //LED频率上限
+	200,			//int FreqLimit_Led;	 //LED频率上限
 	2000,			//int FreqLimit_Tube;	 //灯管频率上限
 
 	0,				//int LightType;
@@ -236,10 +236,9 @@ void VerifyParas(void)
 
 ///部分参数需要转换后使用，这里将参数表里的参数转换成实际使用的变量
 void OnLoadConfig(void)
-{
-	TrigLimitWidth = TIM2_Hz2clk(100*AppPara.FreqLimit_Led);
-
+{	
 	image_num = AppPara.ImagePerPlate ;
 
 	max_strobe_power = 100*AppPara.MaxPower;
+
 }

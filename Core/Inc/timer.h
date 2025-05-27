@@ -42,11 +42,11 @@ extern TrigState_t TrigState  ;
 
 extern void DeactiveTrigPoint(void) ;
 
-
+//将频率转换为时钟周期数
 #define TIM1_Hz2clk(hz) ((TIMxCLK*10+hz/20)/(hz/10))	 //0.01Hz
-#define TIM2_Hz2clk(hz) ((TIMXCLK*100+hz/2)/(hz))	//0.01Hz
-//#define TIM2_rpm2clk(rpm) ((TIMXCLK*60+rpm/2)/rpm)	//rmp
-#define TIM2_rpm2clk(rpm) (((uint64_t)(TIMXCLK)*600+rpm/2)/rpm)	//0.1rmp
+
+#define TIM2_Hz2clk(hz) ((100*TIMxCLK/(TIM2->PSC+1)+hz/2)/(hz))	//输入的hz是原先100倍：输入的10000实则为100hz
+#define TIM2_rpm2clk(rpm) TIM2_Hz2clk(rpm/6)	//0.1rmp
 
 
 #define TIM2_clk2Hz(clk)	((TIMXCLK*100+clk/2)/(clk))
@@ -70,20 +70,11 @@ extern volatile u32 image_period_per ; //每个版的周期
 extern volatile u32	max_strobe_power;
 
 
-void TIM_Init(void);
 void TIM_Reset(TIM_TypeDef * TIM);
-unsigned int GetPulsePos(void);
-void SetFlash(void);
-void SetFlash_PulseWidth(u16 width_clk);
+inline void SetFlash_PulseWidth(u16 width_clk);
 void StartInternalTrig(void);
-void InitTestSignal(void);
 
-void OpenAllTimer(void);
-void CloseAllTimer(void);
 void Updata_OutPusle(void);
-void Updata_FixPusle(void);
-void InitTim4(void);
-void CalcExternalSpeed_Wifi(void) ;
 
 
 #ifdef __cplusplus

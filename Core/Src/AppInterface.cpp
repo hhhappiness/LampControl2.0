@@ -194,7 +194,7 @@ bool OnOkPowerKey(int new_val)
 			WorkEn = 0;
 			PwrHitCnt = 0;
 			//根据当前的电源键的状态是否打开闪光
-			if(GPA_I(0))
+			if(POWER_PRESSED)
 			{
 				PwrPress_FlagOFF = 0;
 				if(PwrPress_FlagON == 0)
@@ -211,7 +211,6 @@ bool OnOkPowerKey(int new_val)
 				PwrPress_FlagOFF = 1;
 				//重新置位用于超时的计数和标志
 				StopToFlash();
-				SwitchStrobeGPIO();
 				}
 			}
 		}

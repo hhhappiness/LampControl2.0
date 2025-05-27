@@ -65,8 +65,6 @@ __inline void AnyKeyPressed_Control(void);
 
 void ReInitSysTick(u8 freq);
 
-void SwitchStrobeGPIO(void);
-
 void SwitchStrobeHz(void);
 
 

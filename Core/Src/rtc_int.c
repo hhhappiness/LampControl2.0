@@ -171,11 +171,6 @@ void ReInitSysTick(u8 freq)
 }
 
 
-void SwitchStrobeGPIO(void)
-{
-	//如果是LED类型的，要求关闭闪光的输出时候，为常0
-	GPA_O(4,0);
-}
 
 //已经在初始化GPIO的时候设置了，这个函数没有用
 void SwitchStrobeHz(void)
@@ -242,7 +237,6 @@ __inline void PwrKeyHit_Handler(void)
 			WorkEn = 0;
 			StopToFlash();
 			PwrHitFlag = PwrHit_STALL; 
-			SwitchStrobeGPIO();
 			//EnterStandby();
 			Status_MCU = Status_WorkStall;
 		}
@@ -272,7 +266,6 @@ __inline void PwrKeyPress_Handler(void)
 			PwrPress_FlagOFF = 1;
 			//重新置位用于超时的计数和标志
 			StopToFlash();
-			SwitchStrobeGPIO();
 			}
 			
 						}
@@ -574,7 +567,6 @@ void ForceToStop(void) {
 		WorkEn = 0;
 		StopToFlash();
 		PwrHitFlag = PwrHit_STALL; 
-		SwitchStrobeGPIO();
 		//EnterStandby();
 		Status_MCU = Status_WorkStall;
 	}

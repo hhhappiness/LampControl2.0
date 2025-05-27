@@ -17,7 +17,7 @@
 //int Status_MCU = Status_WorkStall;
 
 Status_MCU_t Status_MCU;
-
+extern TIM_HandleTypeDef htim2, htim3, htim4;
 #define ENCRYPT_BASE 0x0800FC00
 
 
@@ -102,18 +102,40 @@ void LineSpeed2Clocks(void)
 	NextTrigClks = TIM2_Hz2clk(tmp);
 	#endif
 }
+inline void ClosePwmTimer(void)
+{
+
+	  /* Disable the TIM Update interrupt */
+	__HAL_TIM_DISABLE_IT(&htim2, TIM_IT_UPDATE);
+	__HAL_TIM_DISABLE_IT(&htim3, TIM_IT_UPDATE);
+
+    TIM_CCxChannelCmd(htim3.Instance, TIM_CHANNEL_2, TIM_CCx_DISABLE);  //关闭通道2的输出
+
+	/* Disable the Peripheral CCER and CEN 寄存器复位*/
+	__HAL_TIM_DISABLE(&htim2);
+	__HAL_TIM_DISABLE(&htim3);
+	//状态寄存器复位
+	TIM2->SR = 0;
+	TIM3->SR = 0;
+
+	RCC->APB1ENR1 &= ~(RCC_APB1ENR1_TIM2EN|RCC_APB1ENR1_TIM3EN);  //关闭TIM2,3,4时钟
+}
+
+
+inline void OpenPwmTimer(void)
+{
+
+	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN|RCC_APB1ENR1_TIM3EN; //打开TIM2,3时钟，Enable和通道2开启在后续函数中设置
+
+}
 
 void StartToFlash(void)
 {
-		/*
-		if(IsTrigMode(Trig_SinglePulse)) {
-			TrigAngle = AngleCov(AppPara.Delay_SinglePulse);
-		}
-		*/
-		//BoostOn();
-		OpenAllTimer();
+		
+		// 打开所有定时器
+		OpenPwmTimer();
+		// 更新输出脉冲
 		Updata_OutPusle();
-		HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 		if(IsTrigMode(Trig_Internal)) {
 			if(AppPara.SpeedUnit == Unit_Hz) {
 				NextTrigClks = TIM2_Hz2clk(AppPara.LampFreq);
@@ -122,14 +144,21 @@ void StartToFlash(void)
 			} else {
 				LineSpeed2Clocks();
 			}
-		}
-			
-		if(IsTrigMode(Trig_Internal)) {
+
 			StartInternalTrig();
 		}
+		Status_MCU = Status_WorkFlash; // 设置状态为工作状态
+		// 函数OnChangeLineSpeed用于改变线速度
+		// 将新的线速度赋值给AppPara.LineSpeed
+			
+	// 调用LineSpeed2Clocks函数，将线速度转换为时钟周期
+	// 计算转速，公式为(AppPara.LineSpeed*100 + AppPara.PlateLen/2)/ AppPara.PlateLen
 		/*
+	// 调用Rpm2Hz函数，将转速转换为频率
 		else if(IsTrigMode(Trig_Wifi)) {
+	// 调用Updata_OutPusle函数，更新输出脉冲
 				if(wifi_recv_flag ) {
+	// 返回true
 					NextTrigClks = TIM2_Hz2clk(wifi_freq);
 					StartInternalTrig();
 				}
@@ -142,17 +171,20 @@ void StartToFlash(void)
 		}
 
 		*/
-		Status_MCU = Status_WorkFlash;
+		
 
 }
+	// 重置定时器1
 
+	// 重置定时器2
 void StopToFlash(void)
+	// 重置定时器3
 {
-	//BoostOff();
-	CloseAllTimer();
+	/* 停止定时器（如果已经运行） */
+	ClosePwmTimer();
 	Status_MCU = Status_WorkStall;
 	//停止输出的时候，需要控制Strobe的状态，Led和灯管的不同
-	SwitchStrobeGPIO();
+	GPA_O(4,0); //关闭Strobe输出
 	WorkEn = 0;
 }
 

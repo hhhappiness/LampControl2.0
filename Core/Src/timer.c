@@ -20,7 +20,8 @@ extern TIM_HandleTypeDef htim2, htim3, htim4;
 
 #define MAX_STEP 	65536	//设定下一个比较器值时的递增值必须<=65536。本来65535是安全值，但进中断时CNT肯定超过CCR值了，所以65536也没问题，比较好计算
 #define CalcAvgPulseWidth() AvgPulseWidth = PulseWidth[0]*2 + PulseWidth[1] + PulseWidth[2] //加权计算平均脉冲宽度
-
+#define MaxCounterLimit TIM2_Hz2clk(AppParaMin.LampFreq)//TIM2 period上限；理論上周期最大值在hz为最小值1时，周期为1000000us
+#define MinCounterLimit TIM2_Hz2clk(AppParaMax.LampFreq) //TIM2 period下限
 
 #define MIN_PULSE_FREQ 	1	//外触发检测的最小频率
 unsigned int AvgPulseWidth;	//平均脉冲间隔
@@ -137,15 +138,8 @@ volatile u8 Trig_Ext_On_Wifi = 0;
 #define PULSE_WIDTH_OFFSET  1
 volatile u32	max_strobe_power = MAX_STROB_POWER ;
 
-
-
-void TIM_Init(void);
 void TIM_Reset(TIM_TypeDef * TIM);
-unsigned int GetPulsePos(void);
-void SetFlash(void);
-void NVIC_Configuration(void);
 void StartInternalTrig(void);
-void gpio_test(void) ;
 
 
 
@@ -158,39 +152,6 @@ void TIM_ResetAll(void)
 	TIM_Reset(TIM4);
 }
 
-
-
-__inline void ActiveTrigPoint(void)
-{
-	//设定当TIM2_CH3当CNT=CCR3时输出变高，然后在中断里拉低。
-	// TIM2->CCMR2 = (TIM_OCMode_Timing | TIM_OCPreload_Disable)<<8 //通道4的模式
-	// 			| (TIM_OCMode_Active | TIM_OCPreload_Disable)<<0; //通道3的模式	
-}
-
-__inline void ActiveCCR3Int(void)
-{
-	// TIM2->SR = (uint16_t)~TIM_IT_CC3; //清除中断标志 
-	// TIM2->DIER |= TIM_IT_CC3;	
-}
-void DeactiveTrigPoint(void)
-{
-	//设定当TIM2_CH3当CNT=CCR3时输出变高，然后在中断里拉低。
-	// TIM2->CCMR2 = (TIM_OCMode_Timing | TIM_OCPreload_Disable)<<8 //通道4的模式
-	// 			| (TIM_ForcedAction_InActive | TIM_OCPreload_Disable)<<0; //通道3的模式	
-	// TIM2->DIER &= (uint16_t)~TIM_IT_CC3;	
-}
-
-//计算触发点相对于脉冲边缘的时钟数
-__inline void CalcTrigPoint(void)
-{
-	
-	//对于单脉冲，最大频率来自于外部频率的计算
-	//对于标长周长，最大频率来自于外部频率的计算* 标长/周长比值
-
-	//*4 是因为AvgPulseWidth没有除4
-	TrigDiv = 4*TrigLimitWidth/AvgPulseWidth + 1;
-	TrigClks = ((unsigned long long)AvgPulseWidth*TrigAngle)>> 32;//触发角度换算成时钟延时
-}
 
 #define  TIM1_100ns2clk(ns) ((ns)*(TIMxCLK/1000000)/10)
 #define  TIM1_us2clk(us) 	((us)*(TIMxCLK/1000000))
@@ -211,111 +172,44 @@ __inline int VerifyInterval(void)
 		return 0; //可以触发
 }
 
-//设定触发点
-__inline void SetTrigPoint(void)
+u32 VerifyInterFreq(u32 counter)
 {
-	//如果TrigClks<=65535,可以直接设曝光输出位置，否则按<=65536的步进中断，直到最后一步再设曝光输出位置
-	//WaitStep = TrigClks/(TrigClks/MAX_STEP+1);	
-	WaitStep = TrigClks/((TrigClks+MAX_STEP-1)/MAX_STEP)+1;
-	if(TrigClks<=WaitStep){
-		//允许输出和中断
-		TIM2->CCR3 = TIM2->CCR2 + (uint16_t)TrigClks;
-		ActiveTrigPoint();
-		ActiveCCR3Int();
-		TrigState = TrigPrepared;
-	}else{
-		//设置中断位，下次再判断
-		TIM2->CCR3 = TIM2->CCR2 + (uint16_t)WaitStep;
-		TrigClks -= WaitStep;
-		ActiveCCR3Int();
-		TrigState = TrigWait;
-	}
-}
-
-__inline void SetTrigPointInternal(void)
-{
-	//如果TrigClks<=65535,可以直接设曝光输出位置，否则按<=65536的步进中断，直到最后一步再设曝光输出位置
-	//WaitStep = TrigClks/(TrigClks/MAX_STEP+1);	
-	WaitStep = TrigClks/((TrigClks+MAX_STEP-1)/MAX_STEP)+1;
-	if(TrigClks<=WaitStep){
-		//允许输出和中断
-		TIM2->CCR3 = TIM2->CCR3 + (uint16_t)TrigClks;
-		ActiveTrigPoint();
-		TrigState = TrigPrepared;
-		ActiveCCR3Int();
-		
-	}else{
-		//设置中断位，下次再判断
-		TIM2->CCR3 = TIM2->CCR3 + (uint16_t)WaitStep;
-		TrigClks -= WaitStep;
-		TrigState = TrigWait;
-		ActiveCCR3Int();
-		
-	}
-}
-
-#if 0
-void StartInternalTrig()
-{
-	TrigClks = NextTrigClks;
-	SetTrigPointInternal();
-}
-#endif
-
-u32 VerifyInterFreq(u32 clk, u32 minclk)
-{
-//	int i;
-	if(clk < minclk) {
-		int rate = (minclk +clk-1)/clk;
-		
-		return clk*rate;
-	}
-	else 
-		return clk;
-}
-
-u32 VerifyExtHz(u32 hz, u32 maxhz)
-{
-	int i;
-	if(hz > maxhz)
-	{
-		for(i=2;i<10000;i++)
-		{
-			if(maxhz*i > hz)
-			{
-				return	(( hz+i/2)/i);
-			}
-		}
-		return hz;
-	}
-	else 
-		return hz;
-}
-
-void StartInternalTrig()
-{
-	//TrigClks = NextTrigClks;
 	//对输出频率进行限制
-	TrigClks = VerifyInterFreq(NextTrigClks,TrigLimitWidth);
-
-	real_int_freq = TIM2_clk2Hz(TrigClks);
-
-	SetTrigPointInternal();
+	/* 参数检查 */
+    if (counter > MaxCounterLimit) 
+		return MaxCounterLimit ; //如果超过了最大值，设置为最大
+	if (counter < MinCounterLimit) 
+		return MinCounterLimit ; //如果小于最小值，设置为最小
+	return counter;
 }
 
-
-unsigned int GetPulsePos(void)
+void StartInternalTrig()
 {
-	return (TIM3->CCR1 << 16 | TIM2->CCR2);
+	/* 配置TIM2周期 */
+	TrigClks = VerifyInterFreq(NextTrigClks);
+    __HAL_TIM_SET_AUTORELOAD(&htim2, TrigClks-1);  //period= TrigClks-1
+    TIM_CCxChannelCmd(htim3.Instance, TIM_CHANNEL_2, TIM_CCx_ENABLE); //开启通道2的输出
+    __HAL_TIM_ENABLE(&htim2); //TIM3trigger mode, TIM2作为触发器
+}
+/**
+  * @brief This function handles TIM2 global interrupt.
+  */
+void TIM2_IRQHandler(void)
+{
+  HAL_TIM_IRQHandler(&htim2);//标志位之类的
+  if(IsTrigMode(Trig_Internal)) StartInternalTrig();   //内触发模式,定期将更新的内触发频率设置为TIM2的period
 }
 
-
-
-
-void SetFlash_PulseWidth(u16 width_clk)
+inline void SetFlash_PulseWidth(u16 width_clk)
 {
-	TIM1->ARR = width_clk;
-	TIM1->CCR2 = CCR2_WIDTH;
+	#if 0
+	//不确定是否存在要先停止输出再设置脉宽的情况
+	TIM_CCxChannelCmd(htim3.Instance, TIM_CHANNEL_2, TIM_CCx_DISABLE);
+    __HAL_TIM_DISABLE(&htim2);
+	#endif
+	/* 配置TIM3脉宽*/
+    // 无需配置TIM3周期，因為one pulse mode，脈寬結束後不久就一直為低電平了，沿用初始化周期即可
+    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, width_clk-1); //CCR2= PwmPulseWidth_us-1
 }
 
 void TIM_Reset(TIM_TypeDef * TIM)
@@ -332,92 +226,13 @@ void TIM_Reset(TIM_TypeDef * TIM)
 	TIM->SR =0;	//清中断状态位
 }
 
-
 int TestFreq = 60;//1
 #define TIM4_CLK 60000	
 
 
 
-
-
-void CloseAllTimer(void)
-{
-
-	  /* Disable the TIM Update interrupt */
-	__HAL_TIM_DISABLE_IT(&htim2, TIM_IT_UPDATE);
-	__HAL_TIM_DISABLE_IT(&htim3, TIM_IT_UPDATE);
-	__HAL_TIM_DISABLE_IT(&htim4, TIM_IT_UPDATE);
-	
-
-	/* Disable the Peripheral CCER and CEN 寄存器复位*/
-	__HAL_TIM_DISABLE(&htim2);
-	__HAL_TIM_DISABLE(&htim3);
-	__HAL_TIM_DISABLE(&htim4);
-	//状态寄存器复位
-	TIM2->SR = 0;
-	TIM3->SR = 0;
-	TIM4->SR = 0;
-
-	RCC->APB1ENR1 &= ~(RCC_APB1ENR1_TIM2EN|RCC_APB1ENR1_TIM3EN|RCC_APB1ENR1_TIM4EN);  //关闭TIM2,3,4时钟
-}
-
-void OpenAllTimer(void)
-{
-
-#if 0
-	RCC->APB2ENR |= RCC_APB2Periph_TIM1;
-	RCC->APB1ENR |= RCC_APB1Periph_TIM2;
-	RCC->APB1ENR |= RCC_APB1Periph_TIM3;
-#endif
-__HAL_RCC_TIM3_CLK_ENABLE();
-}
-
-
-
-
 //MAX Power:16W
 //800W*2% = 16W
-
-#if 0
-void Updata_OutPusle(void)
-{
-	//from Min=5us to Max 50us
-	static int max_pulse;
-	u32 Linespeed2Rpm;	
-	//if(SysPara.LightType == Light_LED)
-	if(IsTypeLed())
-		{
-				if((AppPara.SpeedUnit == Unit_Hz)&&(AppPara.LampFreq > 0)){
-					max_pulse =( Hz2Us(AppPara.LampFreq) + 25)/50; // 2 % 
-					}
-				else if((AppPara.SpeedUnit == Unit_rpm)&&(AppPara.Rpm > 0)){
-					max_pulse =( Hz2Us(AppPara.Rpm*60) + 25)/50; // 2 % 
-					}
-				else if((AppPara.SpeedUnit == Unit_mpmin)&&(AppPara.LineSpeed > 0))
-					{
-					Linespeed2Rpm =( (AppPara.LineSpeed + AppPara.PlateLen/2)/ AppPara.PlateLen) ;
-					max_pulse =( Hz2Us(Linespeed2Rpm) + 25)/50; // 2 % 
-					}
-				/*
-				if(max_pulse < AppParaMax.PulseWidth_LED) {
-					AppPara.PulseWidth_LED =MIN(AppPara.PulseWidth_LED, max_pulse);
-					}
-					*/
-				//flash_pulse=TIM1_us2clk(AppPara.PulseWidth_LED);
-				flash_pulse = TIM1_us2clk(MIN(AppPara.PulseWidth_LED, max_pulse));
-				SetFlash_PulseWidth(flash_pulse);
-
-		}
-	else
-		{
-			flash_pulse = TIM1_us2clk(AppPara.PulseWidth_Tube) ;
-			SetFlash_PulseWidth(flash_pulse);
-		}
-		
-}
-#endif
-
-
 
 void Updata_OutPusle(void)
 {
@@ -439,7 +254,7 @@ void Updata_OutPusle(void)
 		else if((AppPara.SpeedUnit == Unit_mpmin)&&(AppPara.LineSpeed > 0))
 			{
 
-			//线速度a： 单位: 0.1m/min, a*100 = mm/min
+			//线速度a： 单位: dm/min, a*100 = mm/min
 			//线速度 折算 转速： a*100 /版长度 =  多少转/min
 			Linespeed2Rpm =( (AppPara.LineSpeed*100 + AppPara.PlateLen/2)/ AppPara.PlateLen) ;
 			//转速换成频率b, 单位0.01Hz，  b = a*100/60s = a*5/3 ;
@@ -449,7 +264,7 @@ void Updata_OutPusle(void)
 
 			//求出实际限制频率后的真实输出频率,然后做功率限制
 			tmp_nextclks = TIM2_Hz2clk(tmp);
-			real_nextclks = VerifyInterFreq(tmp_nextclks,TrigLimitWidth);
+			real_nextclks = VerifyInterFreq(tmp_nextclks);
 			//实际的输出频率
 			tmp = TIM2_clk2Hz(real_nextclks);	
 			max_pulse =( max_strobe_power + tmp/2) /tmp ;
@@ -464,17 +279,5 @@ void Updata_OutPusle(void)
 		}
 
 }
-
-// void gpio_test(void) {
-// 	static u8 gpio_flag =  0;
-// 	if(gpio_flag) {
-// 		gpio_flag = 0;
-// 		GPA_O(12) =  0;
-// 		}
-// 	else {
-// 		gpio_flag = 1;
-// 		GPA_O(12) =  1;
-// 		}
-// }
 
 

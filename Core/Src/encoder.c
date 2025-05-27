@@ -2,7 +2,6 @@
 #include "main.h"
 #include "stm32g4xx_hal_tim.h"
 #include "encoder.h"
-#include "pwm.h"
 #include "stdio.h"
 #include "bsp.h"
 
@@ -42,7 +41,7 @@ void Encoder_Init(void)
   }
 }
 
-
+#if 0
 void encoder_test_pwmAdjust()
 {
 /* 更新编码器状态 */
@@ -87,6 +86,7 @@ void encoder_test_pwmAdjust()
     }
   }
 }
+#endif
 /* 更新编码器状态 */
 void Encoder_Update(void)
 {
