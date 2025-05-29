@@ -1114,6 +1114,9 @@
                 <name>$PROJ_DIR$\..\stm32lib\flash.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\stm32lib\Reset.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\stm32lib\SysParaCommon.c</name>
             </file>
             <file>
@@ -1257,6 +1260,12 @@
                     </file>
                 </group>
                 <file>
+                    <name>$PROJ_DIR$\..\Core\Src\adc.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Core\Src\AppInterface.cpp</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\Core\Src\AppPara.c</name>
                 </file>
                 <file>
@@ -1278,7 +1287,7 @@
                     <name>$PROJ_DIR$\..\Core\Src\lcd_stc.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\Core\Src\main.c</name>
+                    <name>$PROJ_DIR$\..\Core\Src\main.cpp</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Core\Src\rtc_int.c</name>

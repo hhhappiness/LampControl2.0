@@ -10,7 +10,7 @@ u16 adc_buf[Nsamp] = {0};
 volatile u16 adc_result = BAT_LVL4;	//电池电压，单位mV
 volatile u8 AdcFlag = 0;
 volatile int BatLevel = 5;
-
+#if 0
 void AdcModeConfig(void)
 {
     ADC_InitTypeDef adcInitStruct;
@@ -354,3 +354,4 @@ u16 GetVoltage(void)
 	ret = CalcVoltage(avg);
 	return ret;
 }
+#endif

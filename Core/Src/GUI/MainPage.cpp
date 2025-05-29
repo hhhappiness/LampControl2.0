@@ -12,8 +12,10 @@
 #include "timer.h"
 #include "SysPara.h"
 #include "encoder.h"
+#include "flash.h"
+
+
 extern u32 time_on;
-extern FlagStatus FLASH_GetReadOutProtectionStatus(void);
 
 
 namespace gui {

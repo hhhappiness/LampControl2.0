@@ -81,8 +81,9 @@ AboutPage ::AboutPage()
 	GetModelStr();
 	//生成版本的字符串
 	sprintf(VersionStr, "%d.%d.%d ", MAJOR_VERSION, MID_VERSION, MINOR_VERSION);
+	#if 0
 	GetLinkTimeStr_YYMMDD(VersionStr+strlen(VersionStr));//应该不会溢出
-	
+	#endif
 //	ContactStr[CONTACT_NUM-1]=BootloaderVersionStr;
 }
 

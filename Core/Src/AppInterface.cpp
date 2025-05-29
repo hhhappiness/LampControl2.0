@@ -24,11 +24,13 @@ void OnSysIdle(void)
 ///主页空闲操作(与显示无关的部分)
 void OnIdleMainPage(u32 &TReg)
 {
+	#if 0 
 		if(AdcFlag == 1)
 		{
 			AdcFlag = 0;
 			BatLevel = GetBatLevel();
 		}
+		#endif
 }
 
 ///菜单页面空闲操作(与显示无关的部分)

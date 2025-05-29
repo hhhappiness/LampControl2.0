@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "MainPage.hpp"
 #include "type.h"
 #include "ctrl.h"
 #include "stm32.h"
@@ -31,6 +32,8 @@
 #include <stdio.h>
 #include "key.h"
 #include "stm32g4xx_hal_tim.h"
+
+using namespace gui;
 // 创建一个 error_code 类型的变量
 enum error_code my_error;
 
@@ -54,10 +57,7 @@ static void MX_TIM4_Init(void);
 void SysInit(void);
 void Init(void);
 
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
+
 int main(void)
 {
   Init();
@@ -68,10 +68,13 @@ int main(void)
 		display();
 	}
 #endif
+  CMainPage & MainPage= CMainPage::GetInstance();
   while(1)
   {
     Delay_ms(50);  // 延时100ms
-    
+    MainPage.Init();
+    MainPage.Show();
+    MainPage.Loop();
   }
 }
 

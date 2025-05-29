@@ -4,7 +4,8 @@
 #include "AppInterface.hpp"
 #include "ctrl_common.h"
 #include "Reset.h"
-
+//´ýÉ¾³ý
+#include "ctrl.h"
 namespace gui {
 	
 EngineeringSetupPage::EngineeringSetupPage()

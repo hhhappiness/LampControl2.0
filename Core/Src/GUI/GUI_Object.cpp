@@ -8,7 +8,6 @@
 #include "rtc_int.h"
 #include "ByteConstSymbol.h"
 
-extern void Delay_100ms(int i);
 namespace gui {
 	
 

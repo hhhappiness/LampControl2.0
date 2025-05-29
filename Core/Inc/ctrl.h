@@ -28,7 +28,7 @@ extern  Status_MCU_t Status_MCU;
 #define Hz2Rpm(x) 	((x)*6) 	//rpm = (hz/100)*60*10 = hz*6
 #define Rpm2Hz(x)	((x + 3)/6)	//hz = (rpm/60/10)*100 = rpm/6
 
-
+#define wdg()
 //extern  int  Status_MCU;
 
 u32 LineSpeed2Hz001(void);

@@ -218,12 +218,7 @@ int ClockSwitch_HSI272M(void)
 	  return  0;
 }
 #endif
-void Delay_100ms(int i)
-{
-    for(;i>0;i--) {
-        Delay_ms(100);
-    }
-}
+
 
 ///初始化中断，替代库函数里的NVIC_Init(), 省掉定义结构体，并且直接使能(大多数情况下可以适用)
 void InitINT(uint8_t NVIC_IRQChannel, uint8_t Priority, uint8_t SubPriority)
