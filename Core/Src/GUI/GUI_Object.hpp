@@ -182,6 +182,9 @@ public:
 	virtual int OnEditPage();
 	virtual bool OnEdit();
 
+
+	//编码器变速调节
+	
 	///步进某个值step
 	int OnStep(int step);
 	///控件对应值乘以2

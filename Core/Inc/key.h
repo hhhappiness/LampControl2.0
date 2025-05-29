@@ -23,6 +23,7 @@
 #define KEY_ENTER_LONG		(KEY_ENTER_SHOT + 0x40)
 #define KEY_UP_SHOT			6
 #define KEY_UP_LONG			(KEY_UP_SHOT + 0x40)
+#define KEY_ENCODER         7
 
 #define KEY_DIV2_RELEASE	(KEY_DIV2_SHOT + 0x20)
 #define KEY_MULT_RELEASE 	(KEY_MULT_SHOT + 0x20)

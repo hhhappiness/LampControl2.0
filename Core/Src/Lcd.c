@@ -330,11 +330,16 @@ void LcmPutBmp(u8 x,u8 y, const u8 *bmp,u8 w, u8 h)
 }
 
 //显示部分位图，纵向坐标是8的倍数，未做超界检查
+//函数LcmPutBmpRect用于在LCD上显示一个位图矩形区域
 void LcmPutBmpRect(u8 x,u8 y, const u8 *bmp,u8 w, const Rect8_t * rect)
 {
+	//定义变量i,j
 	Uchar i,j;
+	//定义指针pSrc，指向位图矩形区域的起始位置
 	const u8 * pSrc = bmp + rect->y/8 * w + rect->x;
+	//定义指针p
 	const u8 * p;
+	//循环，从y开始，到y+rect->h结束，每次增加8
 	for(i=y;i<(y+rect->h);i+=8)
 	{
 		WriteCommand(0xB0|(i/8)); //Set Page Address

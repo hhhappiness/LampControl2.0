@@ -50,8 +50,13 @@ int CMainPage::Loop()
 			if(Key != KEY_NULL){
 				if(IsTrigMode(Trig_Internal)){//内触发只调频率
 					switch(Key){
+						case KEY_ENCODER:
+							MainScanFlag = 1;
+							SpeedCtrl.OnStep(GetEncoder());
+							SpeedCtrl.Display();
+							SpeedCtrl.Update();
 						case KEY_MODE_LONG:
-								OnKeyMode();
+							OnKeyMode();
 						case KEY_MODE_RELEASE:
 							OnKeyMode();
 							break;

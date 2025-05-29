@@ -6,7 +6,8 @@
 #include "RTC.h"
 #include "rtc_int.h"
 #include "Key_Base.h"
-
+#include "encoder.h"
+#include "key.h"
 
 
 //按键状态机
@@ -144,7 +145,9 @@ int GetKey(){
     //KeyRepeatNumRead保存上次读的值。根据KeyRepeatNum值的大小换算成不同的值
     if (KeyBufNum==0) {
         tmp=KEY_NULL;
-
+        if(encoder_buff_num > 0) {  //这里不禁定时器中断
+            tmp = KEY_ENCODER; 
+        }
     }else {
         tmp=KeyOutBuf;
         KeyBuf.Word=KeyBuf.Word<<8 ; //按键移出缓冲区

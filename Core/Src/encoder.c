@@ -5,6 +5,8 @@
 #include "stdio.h"
 #include "bsp.h"
 
+#define EncoderOutBuf encoderState.encoder_diff.diff[2] //编码器缓冲区输出
+
 // 优化后的整数幂函数，防止b为负数且更安全
 static inline int pow_int(int base, int exp) {
   int result = 1;
@@ -13,6 +15,7 @@ static inline int pow_int(int base, int exp) {
   return result;
 }
 EncoderState_t encoderState = {0};
+u8 encoder_buff_num = 0; // 缓冲区数据个数
 uint32_t counterMax;
 
 float currentHz = 100,exponent_result = 0;
@@ -24,13 +27,7 @@ void Encoder_Init(void)
 {
   /* 启动编码器模式 */
   HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
-  
-  /* 初始化状态变量 */
-  encoderState.counter = 0;
-  encoderState.totalSteps = 0;
-  encoderState.difference = 0;
-  encoderState.direction = 0;
-  encoderState.delta_diff = 0;
+
   /* 设置初始计数值 */
   if (IS_TIM_32B_COUNTER_INSTANCE(htim4.Instance)) {  // 32位定时器
     __HAL_TIM_SET_COUNTER(&htim4, 0x7FFFFFFF);
@@ -90,83 +87,63 @@ void encoder_test_pwmAdjust()
 /* 更新编码器状态 */
 void Encoder_Update(void)
 {
-  static s32 lastCounter=0x7fff;
+  static s32 lastCounter=0x7fff; //counter的初始值
   static u32 lastDiff=0;  //初始化lastcounter值
+  s8 diff=0;
   /* 获取当前计数值 */
   encoderState.counter = __HAL_TIM_GET_COUNTER(&htim4);
-  /* 确定方向 */
-  encoderState.direction = ((encoderState.counter - lastCounter)>0)?1:-1;
-  /* 计算变化量绝对值 */
-  encoderState.difference = (encoderState.counter - lastCounter) >= 0 ? (encoderState.counter - lastCounter) : -(encoderState.counter - lastCounter);
-  /* 处理溢出情况 */
-  if (encoderState.difference > (s32)(counterMax / 2)) encoderState.difference = (counterMax/2);
+  if(encoderState.counter == lastCounter) return; //如果计数值没有变化，则直接返回
+  /* 计算变化量（包含方向） */
+  diff = encoderState.counter - lastCounter;
   /* 更新总步数 */
-  encoderState.totalSteps += encoderState.direction*encoderState.difference ;  // 0x7FFF是编码器的初始值
-  
+  encoderState.totalSteps += diff ;  // 0x7FFF是编码器的初始值
 
-  /* 计算变化速率 */
-  s32 diff = encoderState.difference - lastDiff;
-  encoderState.delta_diff = diff>0?(u32)diff:(u32)(-diff);
   /* 更新上次计数值 */
   lastCounter = encoderState.counter;
-  lastDiff = encoderState.difference;
+  InEncoderBuf(diff); //存入缓冲区
 }
 
-
-/* 获取编码器总步数 */
-int32_t Encoder_GetTotalSteps(void)
+int GetEncoder()
 {
-  return encoderState.totalSteps;
+  /* 返回当前差值 */
+  s8 difference = EncoderOutBuf;
+  s8 delta_diff = EncoderOutBuf - encoderState.encoder_diff.diff[3];  //差值变化率，判断旋钮转动快慢
+  s8 abs_diff = difference>0?difference:-difference;   //取绝对值
+
+  encoderState.encoder_diff.diff_buffer <<= 8; // 左移8位
+  encoder_buff_num--; // 减少缓冲区数据个数
+  if(difference<=5 || delta_diff <=5)
+    return (int)difference;  //小数点后两位开始加
+  else if(delta_diff <=15)
+    return (int)(difference-5)*10 ;  //小数点后一位开始加
+  else if(delta_diff <=50)
+    return (int)(difference-15.0) *100;  //个位开始加
+  else if(delta_diff <=70)
+    return (int)(difference-50.0)*2* 100;  //十位开始加
+  else return (int)difference * 100;  //百位开始加
+
 }
 
-/* 获取编码器变化量 */
-int32_t Encoder_GetDifference(void)
-{
-  return encoderState.difference;
+void InEncoderBuf(u8 x){
+    switch (encoder_buff_num) {
+    case 1:
+      encoderState.encoder_diff.diff[1]=x;
+      encoder_buff_num=2;
+      break;
+    case 2:
+      encoderState.encoder_diff.diff[0]=x;
+      encoder_buff_num=3;
+      break;
+    case 3: //只存三个有效数据，第四位作为历史值用来计算变化速率
+      encoderState.encoder_diff.diff_buffer<<= 8; //按键移位进入缓冲区, 如果有键未读会移出  ori = " >> "
+		  encoderState.encoder_diff.diff[0]=x;
+      break;
+    default:
+      encoderState.encoder_diff.diff[2]=x;  //从第三位往前开始存，第四位作为历史值随整体左移而存在
+      encoder_buff_num=1;
+      break;
+    }
 }
-
-/* 获取编码器方向 */
-int8_t Encoder_GetDirection(void)
-{
-  return encoderState.direction;
-}
-
-/* 重置编码器总步数 */
-void Encoder_ResetTotalSteps(void)
-{
-  encoderState.totalSteps = 0;
-}
-
-/* 主函数 */
-int encode_main(void)
-{
-  /* MCU初始化代码 */
-  HAL_Init();
-  SystemClock_Config();
-  MX_GPIO_Init();
-  MX_TIM2_Init();
-  MX_USART2_UART_Init();  // 假设使用UART输出调试信息
-  
-  /* 初始化编码器 */
-  Encoder_Init();
-  
-  /* 主循环 */
-  while (1)
-  {
-    /* 更新编码器状态 */
-    Encoder_Update();
-    
-    /* 打印编码器状态（调试用） */
-    printf("Counter: %ld, Total Steps: %ld, Difference: %ld, Direction: %d\n",
-           encoderState.counter,
-           encoderState.totalSteps,
-           encoderState.difference,
-           encoderState.direction);
-    
-    HAL_Delay(100);  // 延时100ms
-  }
-}
-
 #if 0
 /* 阈值滤波 - 忽略短时间内的小变化 */
 void Encoder_Update_WithThreshold(void)

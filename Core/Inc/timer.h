@@ -73,7 +73,7 @@ extern volatile u32	max_strobe_power;
 void TIM_Reset(TIM_TypeDef * TIM);
 inline void SetFlash_PulseWidth(u16 width_clk);
 void StartInternalTrig(void);
-
+void TIM4_IRQHandler(void);
 void Updata_OutPusle(void);
 
 

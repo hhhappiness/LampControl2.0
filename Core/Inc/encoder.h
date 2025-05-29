@@ -6,27 +6,30 @@
 
 #include "type.h"
 /* 定义编码器状态结构体 */
+
 typedef struct {
   s32 counter;       // 当前计数值
   s32 totalSteps;    // 总步数（处理溢出）
-  u32 difference;    // 变化量
-  u32 delta_diff; // 变化量的变化速率
-  s8 direction;      // 旋转方向
+  union   //存放历史差值
+  {
+    s8 diff[4];
+    s32 diff_buffer;
+  }encoder_diff;
+  u8 delta_diff;
 } EncoderState_t;
+
+ 
 
 /* 函数声明 */
 void Encoder_Init(void);
 void Encoder_Update(void);
 void encoder_test_pwmAdjust();
-s32 Encoder_GetTotalSteps(void);
-s32 Encoder_GetDifference(void);
-s8 Encoder_GetDirection(void);
-void Encoder_ResetTotalSteps(void);
-int encode_main(void);
+s32 GetEncoder(void);
+void InEncoderBuf(u8 x);
 void Encoder_Update_WithThreshold(void);
 void Encoder_Update_TimeWindow(void);
 void Encoder_Update_Median(void);
 
 //extern EncoderState_t encoderState; // 声明编码器状态变量
-
+extern u8 encoder_buff_num; // 缓冲区数据个数
 #endif /* __ENCODER_H_ */

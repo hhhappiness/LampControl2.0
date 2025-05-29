@@ -1,4 +1,5 @@
 #include "timer.h"
+#include "encoder.h"
 #include "AppParaCommon.h"
 #include "SysParaCommon.h"
 #include "adc.h"
@@ -194,10 +195,11 @@ void StartInternalTrig()
 /**
   * @brief This function handles TIM2 global interrupt.
   */
-void TIM2_IRQHandler(void)
+void TIM4_IRQHandler(void)
 {
-  HAL_TIM_IRQHandler(&htim2);//标志位之类的
+  HAL_TIM_IRQHandler(&htim4);//标志位之类的
   if(IsTrigMode(Trig_Internal)) StartInternalTrig();   //内触发模式,定期将更新的内触发频率设置为TIM2的period
+  Encoder_Update();
 }
 
 inline void SetFlash_PulseWidth(u16 width_clk)
