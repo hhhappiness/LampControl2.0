@@ -52,6 +52,8 @@
         "key.h": "c",
         "pwm.h": "c",
         "gui_speed.hpp": "c",
-        "stm32g4xx_hal_rtc_ex.h": "c"
-    }
+        "stm32g4xx_hal_rtc_ex.h": "c",
+        "typeinfo": "cpp"
+    },
+    "Codegeex.RepoIndex": true
 }

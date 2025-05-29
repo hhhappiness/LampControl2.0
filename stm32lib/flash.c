@@ -1,16 +1,12 @@
 /**
- * @file flash_data_storage.c
+ * @file flash.c
  * @brief STM32G4系列Flash用户数据存储示例
  */
 
-#include "stm32g4xx.h"
-#include "stm32g4xx_hal_flash.h"
-#include "AppPara.h"
+#include "flash.h"
 #include "utility.h"
-/* 定义Flash存储参数 */
-#define FLASH_USER_START_ADDR   0x0800F800   /* Flash起始地址 */
-#define FLASH_USER_END_ADDR     0x0800FFFF   /* Flash结束地址 (根据实际芯片调整) */
-//#define FLASH_PAGE_SIZE         0x800        /* G4系列页大小为2KB */
+#include "main.h"
+
 
 /* 用户数据结构体示例 */
 typedef struct {
@@ -22,7 +18,16 @@ typedef struct {
 } UserData_t;
 
 
-
+FlagStatus FLASH_GetReadOutProtectionStatus(void)
+{
+    uint32_t rdp_level = READ_BIT(FLASH->OPTR, FLASH_OPTR_RDP);
+    
+    if (rdp_level == OB_RDP_LEVEL_0) {
+        return RESET;  // 无读保护
+    } else {
+        return SET;    // 有读保护
+    }
+}
 /**
  * @brief 计算数据的CRC校验和
  * @param data 数据指针
@@ -229,3 +234,4 @@ void FlashStorageExample(void)
     /* 此处可以使用读取的数据 */
     /* 例如: printf("Parameter1: 0xlX\n", read_data.parameter1); */
 }
+

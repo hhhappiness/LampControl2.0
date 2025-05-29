@@ -1,9 +1,11 @@
+
 #include "AppParaCommon.h"
 #include "utility.h"
 #include "stm32g4xx.h"
 #include "stm32g4xx_hal_flash.h"
 #include "string.h"
 #include "ctrl_common.h"
+#include "flash.h"
 
 volatile u8 NeedSaveFlag = 0;
 HAL_StatusTypeDef FlashPara(u32 addr,u32 *pDat,u32 len);
@@ -19,7 +21,6 @@ void SaveConfig(void){
 	AppPara.Sum = CheckSumPara();
 	/* ±£´æÊý¾Ý */
     SaveUserData(APP_PARA_ADDRESS,(u32 *)&AppPara,sizeof(AppPara));
-    
 	NeedSaveFlag = 0;
 }
 

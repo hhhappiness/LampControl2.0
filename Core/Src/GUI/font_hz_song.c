@@ -108,6 +108,7 @@ u8 *FindHZ16(u16 code)
 const Font_t Song16_GB2312 ={
 	16,//u8 WidthMin;	//非等宽字体WidthMin!=WidthMax
 	16,//u8 WidthMax;	//  等宽字体WidthMin =WidthMax
+	16, //u8 WidthDefault //缺省宽度，用于简单计算字符串总宽度
 	16,//u8 Height;		//所有字符高度相同
 	16, //u8 Width;		//当前查找的字符宽度，在Find函数里更新
 	FindHZ16,//u8 * (*Find)(u16 code);	//查找点阵起始位置的函数

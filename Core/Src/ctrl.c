@@ -259,8 +259,8 @@ void Check_Flash(void)
 		FLASH_EnableWriteProtection(FLASH_WRProt_AllPages);
 	}
 } 
-#endif
 
+#endif
 BOOL DecodeDES(void)
 {
 	int i;

@@ -1,13 +1,14 @@
 #ifndef _STM_32_H_
 #define _STM_32_H_
+#ifdef __cplusplus
+ extern "C" {
+#endif 
 
 #include "stm32g4xx.h"
 #include "core_config.h"
 #include "stdint.h"
+#include "type.h"
 
-#ifdef __cplusplus
- extern "C" {
-#endif 
 
 #define __NOP2() {__NOP;__NOP;}
 #define __NOP3() {__NOP;__NOP;__NOP;}

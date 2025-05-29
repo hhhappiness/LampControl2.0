@@ -4,8 +4,10 @@
 //#include "stm32g4xx_hal_flash.h"
 #include "string.h"
 #include "bsp.h"
+#include "flash.h"
 
 volatile u8 NeedSaveSysFlag = 0;
+
 
 
 __inline u32 CheckSumSysPara(void)

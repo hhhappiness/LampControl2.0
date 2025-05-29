@@ -11,8 +11,10 @@
 #include "rtc_int.h"
 #include "timer.h"
 #include "SysPara.h"
-
+#include "encoder.h"
 extern u32 time_on;
+extern FlagStatus FLASH_GetReadOutProtectionStatus(void);
+
 
 namespace gui {
 #define RUN_ICON_X (0)

@@ -1,5 +1,8 @@
 #include "stm32.h"
-
+#ifdef __cplusplus
+ extern "C" {
+#endif 
+#if 0
 //set flash latency depend on AHBClk
 void SetFlashLatency(){
     if(AHBClk<=24000000) {
@@ -214,7 +217,7 @@ int ClockSwitch_HSI272M(void)
 
 	  return  0;
 }
-
+#endif
 void Delay_100ms(int i)
 {
     for(;i>0;i--) {
@@ -269,3 +272,6 @@ void InitINTDisabled(uint8_t NVIC_IRQChannel, uint8_t Priority, uint8_t SubPrior
         
     NVIC->IP[NVIC_IRQChannel] = tmppriority;
 }
+#ifdef __cplusplus
+ }
+#endif 

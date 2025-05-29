@@ -32,4 +32,8 @@ void Encoder_Update_Median(void);
 
 //extern EncoderState_t encoderState; // 声明编码器状态变量
 extern u8 encoder_buff_num; // 缓冲区数据个数
+
+#ifdef __cplusplus
+}
+#endif
 #endif /* __ENCODER_H_ */
