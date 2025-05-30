@@ -18,7 +18,6 @@
 extern volatile u8 AdcFlag ;
 extern volatile int BatLevel ;
 
-void AdcModeConfig(void);
 
 u16 StartAdcSample(void);
 

@@ -2,7 +2,8 @@
 #include "AppParaCommon.h"
 #include "SysParaCommon.h"
 
-
+extern RTC_HandleTypeDef hrtc;
+extern ADC_HandleTypeDef hadc2;
 #define Nsamp RTC_FREQ/2 //10
 u16 adc_val ;
 volatile u16 adc_idx = 0;
@@ -10,68 +11,31 @@ u16 adc_buf[Nsamp] = {0};
 volatile u16 adc_result = BAT_LVL4;	//电池电压，单位mV
 volatile u8 AdcFlag = 0;
 volatile int BatLevel = 5;
-#if 0
-void AdcModeConfig(void)
-{
-    ADC_InitTypeDef adcInitStruct;
-    adcInitStruct.ADC_Mode = ADC_Mode_Independent;
-    adcInitStruct.ADC_ScanConvMode = DISABLE;
-    adcInitStruct.ADC_ContinuousConvMode = DISABLE;
-    adcInitStruct.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
-    adcInitStruct.ADC_DataAlign = ADC_DataAlign_Right;
-    adcInitStruct.ADC_NbrOfChannel = 1;
-    ADC_Init(ADC1,&adcInitStruct);
-    
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);        //使能ADC1时钟
-    
-    /* Enable ADC1 */
-    ADC_Cmd(ADC1, ENABLE);
-    
-    /*复位校准寄存器 */   
-    ADC_ResetCalibration(ADC1);
-    /*等待校准寄存器复位完成 */
-    while(ADC_GetResetCalibrationStatus(ADC1));
-    
-    /* ADC校准 */
-    ADC_StartCalibration(ADC1);
-    /* 等待校准完成 */
-    while(ADC_GetCalibrationStatus(ADC1));
-    
-//    ADC_TempSensorVrefintCmd(ENABLE);
-
-	ADC_Cmd(ADC1, ENABLE);
-	
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_28Cycles5);    
-    
-    /* 由于没有采用外部触发，所以使用软件触发ADC转换 */ 
-//    ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-  ADC1->CR2 |= (7<<17);
-	ADC1->CR2 |= (1<<20);
-	ADC1->CR2 |= (1<<22);
-}
-
 
 u16 StartAdcSample(void)
 {
-    u16 ADC_ConvertedValue;
-    
-    ADC_Cmd(ADC1, ENABLE);
+	uint16_t adcValue = 0;
 
-    while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC ));//等待转换结束  
+	// 设置要转换的通道
+	ADC_ChannelConfTypeDef sConfig = {0};
+	sConfig.Channel = ADC_CHANNEL_4;  // VBAT_ACQ_Pin - PA7
+	sConfig.Rank = ADC_REGULAR_RANK_1;
+	sConfig.SamplingTime = ADC_SAMPLETIME_47CYCLES_5;
+	sConfig.SingleDiff = ADC_SINGLE_ENDED;
+	HAL_ADC_ConfigChannel(&hadc2, &sConfig);
 
-    ADC_ConvertedValue = ADC_GetConversionValue(ADC1);    //返回最近一次ADC1规则组的转换结果
+	// 开始转换
+	HAL_ADC_Start(&hadc2);
 
-    ADC_Cmd(ADC1, ENABLE);	
-    
-    ADC_ClearFlag(ADC1, ADC_FLAG_EOC);          //清除转化结束标志位
-	
-	
-		ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_28Cycles5); 
-    
-//    ADC_SoftwareStartConvCmd(ADC1, ENABLE);     //使能指定的ADC1的软件转换启动功能 
-	ADC1->CR2 |= (1<<22);
-    
-    return ADC_ConvertedValue;
+	// 等待转换完成
+	if(HAL_ADC_PollForConversion(&hadc2, 100) == HAL_OK)
+	{
+		adcValue = HAL_ADC_GetValue(&hadc2);
+	}
+
+	HAL_ADC_Stop(&hadc2);
+
+	return adcValue;
 }
 
 
@@ -140,7 +104,6 @@ u16 adc_calc(u16 code)
 u8 ad_en= 0;
 u16 ad_data;
 
-#if 1
 void AdcSamp(void)
 {
 	ad_data = StartAdcSample();
@@ -154,15 +117,7 @@ void AdcSamp(void)
 		{
 			if(ad_data < BAT_LVSHDN/10)
 				{
-					BoostOff();
 					PowerOff();
-					//Disable RTC
-					RTC_SetCounter(0);
-					RTC_ITConfig(RTC_IT_OW,  DISABLE);
-					RTC_ITConfig(RTC_IT_ALR, DISABLE);
-					RTC_ITConfig(RTC_IT_SEC, DISABLE);
-					//MCU PowerOff
-					PWR_EnterSTANDBYMode();
 				}
 		}
 
@@ -175,45 +130,6 @@ void AdcSamp(void)
 			//BatLevel = GetBatLevel();
 		}
 }
-#endif
-
-#if 0
-void AdcSamp(void)
-{
-	ad_data = StartAdcSample();
-	adc_buf[adc_idx++] = ad_data;
-	if(adc_idx >= 10)
-	{
-		ad_en = 1;
-	}
-
-	if(ad_en == 1)
-		{
-			if(ad_data < BAT_LVSHDN/10)
-				{
-					BoostOff();
-					PowerOff();
-					//Disable RTC
-					RTC_SetCounter(0);
-					RTC_ITConfig(RTC_IT_OW,  DISABLE);
-					RTC_ITConfig(RTC_IT_ALR, DISABLE);
-					RTC_ITConfig(RTC_IT_SEC, DISABLE);
-					//MCU PowerOff
-					PWR_EnterSTANDBYMode();
-				}
-		}
-
-	if(adc_idx >= Nsamp)
-		{
-			adc_idx = 0;
-			//adc_val = adc_average(adc_buf, Nsamp);
-			adc_val = adc_bubble(adc_buf, Nsamp);
-			adc_result = adc_calc(adc_val);
-			AdcFlag = 1;
-			//BatLevel = GetBatLevel();
-		}
-}
-#endif
 
 int GetBatLevel(void)
 {
@@ -354,4 +270,3 @@ u16 GetVoltage(void)
 	ret = CalcVoltage(avg);
 	return ret;
 }
-#endif

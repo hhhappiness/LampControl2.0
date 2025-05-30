@@ -56,9 +56,7 @@ void MenuPage_Battery::Init()
 		//ObjList[iDuration]->SetPos(4*DEFAULT_HANZI_WIDTH + DEFAULT_ASCII_WIDTH+2,32);
 		//ObjList[iDuration]->Align = AlignMid;a
 		SetFocus(-1, false);
-		#if 0
 		Voltage = (GetVoltage() +50)/100;//3位小数转成1位
-		#endif
 		//todo计算可用时间Duration
 	}else{
 		//电压改成3位小数显示
@@ -87,12 +85,10 @@ void MenuPage_Battery::Init()
 		ObjList[iBtnSave]->SetPos(0*DEFAULT_ASCII_WIDTH,48);
 		ObjList[iCoff]->SetPos(10*DEFAULT_ASCII_WIDTH,48);	
 		ObjList[iCoff]->Align = AlignRight;
-		#if 0
 		AdcVal = GetAvgAdc();
 		Voltage = CalcVoltage(AdcVal);
 		bakACoff = SysPara.ACoff;
 		bakCCoff = SysPara.CCoff;
-		#endif
 		SetFocus(iV1, false);
 	}
 }
@@ -115,7 +111,6 @@ void MenuPage_Battery::OnClick(int i)
 
 void MenuPage_Battery::OnValChange()
 {
-#if 0
 	switch(FocusId){
 		case iV1:
 			AdVal1 = GetAvgAdc();	//采集ADC值
@@ -133,7 +128,6 @@ void MenuPage_Battery::OnValChange()
 	}
 	//刷新本页面
 	Show();
-#endif
 }
 
 void MenuPage_Battery::OnIdle()
@@ -143,17 +137,13 @@ void MenuPage_Battery::OnIdle()
 		ResetTimeOut(TIdle);
 		
 		if(!SecretMode){
-			#if 0
 			Voltage = (GetVoltage() +50)/100;//3位小数转成1位
-			#endif
 			//todo:计算可用时间Duration
 			GUI_Page::Show();
 		}else{
 			BlkCtrlCnt = 0;//清背计数器保持背光常开
-			#if 0
 			AdcVal = GetAvgAdc();
 			Voltage = CalcVoltage(AdcVal);
-			#endif
 			//切换显示A或C参数
 			AorC = (AorC+1)&0x07;
 			if(AorC==0){
@@ -172,9 +162,7 @@ void MenuPage_Battery::OnIdle()
 ///退出前恢复系数的备份值
 void MenuPage_Battery::OnClose(int x)
 {
-	#if 0
 	SetAdcCoff(bakACoff, bakCCoff);
-	#endif
 }
 
 }//namespace gui {

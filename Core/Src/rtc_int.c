@@ -154,7 +154,7 @@ void RTC_WKUP_IRQHandler(void)  //50ms为周期
 		//处理主界面频率调整模式
 		MainScan_Control();
 	}
-
+	AdcSamp();  //电池电压ADC采样
 }
 
 void ReInitSysTick(u8 freq)
