@@ -1436,6 +1436,27 @@
         </group>
         <group>
             <name>stm32lib</name>
+            <group>
+                <name>crypto</name>
+                <file>
+                    <name>$PROJ_DIR$\..\stm32lib\crypto\aes.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\stm32lib\crypto\aes_test .c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\stm32lib\crypto\des.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\stm32lib\crypto\des_test.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\stm32lib\crypto\tea.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\stm32lib\crypto\tea_test.c</name>
+                </file>
+            </group>
             <file>
                 <name>$PROJ_DIR$\..\stm32lib\AppParaCommon.c</name>
             </file>
@@ -1613,13 +1634,16 @@
                     <name>$PROJ_DIR$\..\Core\Src\Lcd.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\Core\Src\lcd_stc.c</name>
+                    <name>$PROJ_DIR$\..\Core\Src\lcd_stmf4.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Core\Src\main.cpp</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Core\Src\rtc_int.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Core\Src\share.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Core\Src\stm32g4xx_hal_msp.c</name>

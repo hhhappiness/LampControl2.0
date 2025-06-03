@@ -31,13 +31,13 @@ static void Spi_WriteByte(unsigned char dat)
 #else
 void Spi_WriteByte(unsigned char dat)
 {
-	//LCD_CSB(0);
+	LCD_CSB(0);
 	SPI2->DR = dat;	//写入数据
 	__NOP5()//至少加4个nop保证开始发送
+	//HAL_SPI_Transmit(&hspi2, &dat, 1, 10);
 	while(SPI2->SR & SPI_FLAG_BSY);	//判断发送完成。不能用TXE，只是缓冲区空
 //	Delay_us(1);
-	//LCD_CSB(1);
-	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET); //LCD_CSB=0
+	LCD_CSB(1);
 
 }
 #endif
@@ -60,9 +60,23 @@ static __inline void _SetPos(u8 page, u8 col)
 	WriteCommand( ((col)>>4) | 0x10); //Set Column Address High Byte
 	WriteCommand( (col)&0x0F ); //Low Byte Colum from S128 -> S1 auto add
 }
-void LcdFullFill(){
-  //WriteCommand(0xAF);
-  WriteCommand(0xAF); //all pixel ON
+void LcdFullFill(u8 data){
+  	uint8_t i,j;
+	if(data==0 || data==0x01){
+		for(i=0;i<9;i++)
+		{
+			WriteCommand(i|0xB0);
+			WriteCommand(0x10);
+			WriteCommand(0x00);
+			for(j=0;j<132;j++)
+			{
+				WriteData(data);
+			}
+		}
+	}else{
+		WriteCommand(0xa5);
+	}
+	
 }
 void LcmFill( u8 x, u8 y, u8 w, u8 h, u8 color )
 {
@@ -77,7 +91,6 @@ void LcmFill( u8 x, u8 y, u8 w, u8 h, u8 color )
 
 void LcmInit( void )
 {
-	LCD_CSB(0); //LCD_CSB=0
 	WriteCommand(0xAE); //Display OFF
 	WriteCommand(0xA2); //1/64 Duty 1/9 Bias
 	WriteCommand(0xA0); //ADC select S0->S131(玻璃设计用 S1-S128)
@@ -100,22 +113,26 @@ void LcmInit( void )
 
 void LcdInit(void)
 {
-	WriteCommand(0xe3); //Set Power Control
-	WriteCommand(0xa3); //Set LCD Bias
-	WriteCommand(0xa0); //Set ADC
-	WriteCommand(0xc8); //Set COM Output select
+	LCD_CSB(0);
+	LCD_RSTB(0);
+	//wdg();
+	Delay_ms(20);
+	//wdg();
+	LCD_RSTB(1);
+	Delay_ms(20);	
+	LCD_CSB(1);
+	WriteCommand(0xe2); //Set Power Control
 	WriteCommand(0x2f); //Set Power Control
-	WriteCommand(0x21); //Set Register ratio Rb/Ra
-	WriteCommand(0x81); //Set volume
-	WriteCommand(0x55); //vop
-	WriteCommand(0xf8); //x4
-	WriteCommand(0x08); //x4
-	WriteCommand(0xb0); //Set Page Address
-	WriteCommand(0x10); //Set Column Address 4 higher bits
-	WriteCommand(0x00); //Set Column Address 4 lower bits
-	for(int i=0;i<8;i++){
-		WriteData(0x00); //Clear Page
-	}
+	WriteCommand(0x23); //Regulator resistor select(RR2,RR1,VRR0=0,1,1)
+	WriteCommand(0xa2); //Set LCD Bias
+	WriteCommand(0x81); //set reference voltage
+	WriteCommand(0x25); //Set electronic volume (EV) level//Set Register ratio Rb/Ra
+	WriteCommand(0xc8); //set SHL COM1 to COM64    
+	WriteCommand(0xa1); ////ADC select SEG1 to SEG132
+	WriteCommand(0x40); //Initial Display Line 
+	WriteCommand(0xa6); //set reverse display OFF
+	WriteCommand(0xa4); //set all pixels OFF
+	LcdFullFill(0x00); //清屏
 	WriteCommand(0xaf); //Display ON
 }
 
@@ -353,19 +370,6 @@ void LcmPutBmpRect(u8 x,u8 y, const u8 *bmp,u8 w, const Rect8_t * rect)
 	}
 }
 
-
-void LcmReset(void)
-{
-	LCD_RSTB(1);
-	Delay_ms(10);
-	LCD_RSTB(0);
-	//wdg();
-	Delay_ms(20);
-	//wdg();
-	LCD_RSTB(1);
-	Delay_ms(10);	
-	//wdg();
-}
 
 //add by gongj
 void OutRectFill(u16 x1,u16 y1, u16 x2, u16 y2, u8 FillData)

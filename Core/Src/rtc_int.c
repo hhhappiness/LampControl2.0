@@ -7,6 +7,8 @@
 #include "timer.h"
 #include "adc.h"
 #include "ctrl.h"
+#include "stm32g4xx_it.h"
+
 //#include "RTT\Segger_RTT.h"
 //#include "utility.h"
 
@@ -84,7 +86,6 @@ u8 MainScanControlEn = 0;
 //volatile u8 AnyKeyPressedFlag = 0;
 
 //RTC的分频计数
-u8 RtcCnt = 0;
 
 //#ifdef RTT
 extern u8 _MainDispBuf[];
@@ -92,15 +93,7 @@ extern u8 _SecondDispBuf[];
 extern  u8   KeyRepeatNum; //重复键数
 extern RTC_HandleTypeDef hrtc;
 //#endif
-
-
-//extern void KeyInput(void);
-extern void EnterStandby(void);
 extern unsigned char code_HZ[];
-extern void SwitchStrobeAFIO(void);
-
-
-//__inline static void GPIOTest(void);
 #ifdef RTT
 __inline static void rtt_printf(void) ;
 #endif
@@ -113,23 +106,22 @@ int GetSpeedHz(void) ;
   */
 void RTC_WKUP_IRQHandler(void)  //50ms为周期
 {
-  static u8 encoder_wakeup_flag = 0;
-  HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);   //clear RTC wake up counter flag
-//电源按键检测
+	HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);   //clear RTC wake up counter flag
+	//电源按键检测
 	PwrKey_Detector();
 	//组合按键Enter + Mode + Power 进入Standby模式
 	if((PwrKey_Status == PwrKey_Pressed)&&(!GPI_KEY_ENTER)){
 			ShutDown();
 	}
-  KeyInput(); //按键输入检测
-  
-  AnyKeyPressed_Control();//检测到任意键按下需要的处理
-  
-  CloseDelay_Handler();//无操作状态下，延时关机处理
-  
-  Blk_Control();//背光控制处理
-  //encoder_test_pwmAdjust(); //编码器测试函数
-  //只有所有的系统初始化完毕后，才允许输出
+	KeyInput(); //按键输入检测
+	
+	AnyKeyPressed_Control();//检测到任意键按下需要的处理
+	
+	//CloseDelay_Handler();//无操作状态下，延时关机处理
+	
+	Blk_Control();//背光控制处理
+	//encoder_test_pwmAdjust(); //编码器测试函数
+	//只有所有的系统初始化完毕后，才允许输出
 	if(Status_MCU != Status_idle) {
 		//控制闪光输出的处理
 		if((EnterScanFlag == 0)&&(MainScanFlag == 0)) {

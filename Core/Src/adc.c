@@ -117,7 +117,7 @@ void AdcSamp(void)
 		{
 			if(ad_data < BAT_LVSHDN/10)
 				{
-					PowerOff();
+					//PowerOff();
 				}
 		}
 

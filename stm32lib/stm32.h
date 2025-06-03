@@ -78,6 +78,8 @@ __INLINE void InitSysTick(){
 #define IsTimeOut_us(TReg,us)     (_IsTimeOut(TReg,us*SYSTICK_us))
 #define Delay_ms(ms)     {u32 TReg=GetTimerCount();    while(!IsTimeOut_ms(TReg,ms));}
 #define Delay_us(us)     {u32 TReg=GetTimerCount();    while(!IsTimeOut_us(TReg,us));}
+#define delay_ms(ms) Delay_ms(ms);
+#define delay_us(us) Delay_us(us);
 #define Delay_100ms(i) Delay_ms(i*100) 
 #define ResetTimeOut(TReg) 	{TReg=GetTimerCount();}
 

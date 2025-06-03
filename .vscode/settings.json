@@ -53,7 +53,23 @@
         "pwm.h": "c",
         "gui_speed.hpp": "c",
         "stm32g4xx_hal_rtc_ex.h": "c",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "exception": "cpp",
+        "new": "cpp",
+        "utility": "cpp",
+        "xstddef": "cpp",
+        "cctype": "cpp",
+        "cfloat": "cpp",
+        "climits": "cpp",
+        "cmath": "cpp",
+        "cstdio": "cpp",
+        "cwchar": "cpp",
+        "cwctype": "cpp",
+        "initializer_list": "cpp",
+        "limits": "cpp",
+        "type_traits": "cpp",
+        "xtr1common": "cpp",
+        "xxexception": "cpp"
     },
     "Codegeex.RepoIndex": true
 }

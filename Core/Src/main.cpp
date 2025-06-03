@@ -27,11 +27,12 @@
 #include "rtc_int.h"
 #include "SysParaCommon.h"
 #include "SysPara.h"
-#include "Encoder.h"
+#include "encoder.h"
+#include "ctrl_common.h"
 //include for test
-#include <stdio.h>
-#include "key.h"
-#include "stm32g4xx_hal_tim.h"
+// #include <stdio.h>
+// #include "key.h"
+// #include "stm32g4xx_hal_tim.h"
 
 using namespace gui;
 // 创建一个 error_code 类型的变量
@@ -57,24 +58,20 @@ static void MX_TIM4_Init(void);
 void SysInit(void);
 void Init(void);
 
-
 int main(void)
 {
   Init();
-#if 0          // stc例程移植调试
-  lcd_init();
-	while(1)
-	{
-		display();
-	}
-#endif
+  LCD_GPIO_Init();
   CMainPage & MainPage= CMainPage::GetInstance();
+
   while(1)
   {
-    Delay_ms(50);  // 延时100ms
-    MainPage.Init();
-    MainPage.Show();
-    MainPage.Loop();
+    //Delay_ms(50);  // 延时100ms
+    // MainPage.Init();
+    // MainPage.Show();
+    // MainPage.Loop();
+    //LCD_display();
+    LCD_WR_REG(0xa5);
   }
 }
 
@@ -99,7 +96,7 @@ void SysInit()
   MX_ADC2_Init();             //ADC初始化
   //MX_WWDG_Init();             //看门狗初始化
   
-  MX_SPI2_Init();           //SPI初始化
+  //MX_SPI2_Init();           //SPI初始化
 
   MX_TIM3_Init();             //TIM3初始化
   MX_TIM4_Init();             //TIM4初始化
@@ -114,20 +111,18 @@ void Init(void){
   InitKey();        //按键初始化
   Encoder_Init(); //编码器初始化
   __enable_irq(); //使能所有中断
-#ifdef TEST
   if(CheckPowerKey(1000))//电源键按至少2s
   {
-    PowerSeq(); //上电缓启动
+    PowerOn(); // 开机
   }
   else
   {
 
-    ShutDown(); // 关机
+    //ShutDown(); // 关机
 
   }		
-  LcmReset();          //LCD复位
-  LcmInit();            //LCD初始化(按照数据手册)
-#endif
+  LCD_init();            //LCD初始化(按照数据手册)
+  PowerOn(); // 开机
   Status_MCU = Status_idle;
   LoadSysConfig();//先加载SysPara，因为部分AppPara的参数转换需要知道灯管类型
   LoadConfig();
@@ -310,11 +305,11 @@ static void MX_ADC2_Init(void)
   hadc2.Init.Resolution = ADC_RESOLUTION_12B;
   hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
   hadc2.Init.GainCompensation = 0;
-  hadc2.Init.ScanConvMode = ADC_SCAN_ENABLE;
+  hadc2.Init.ScanConvMode = ADC_SCAN_DISABLE;
   hadc2.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc2.Init.LowPowerAutoWait = DISABLE;
   hadc2.Init.ContinuousConvMode = DISABLE;
-  hadc2.Init.NbrOfConversion = 2;
+  hadc2.Init.NbrOfConversion = 1;
   hadc2.Init.DiscontinuousConvMode = DISABLE;
   hadc2.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc2.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -339,14 +334,6 @@ static void MX_ADC2_Init(void)
     Error_Handler();
   }
 
-  /** Configure Regular Channel
-  */
-  sConfig.Channel = ADC_CHANNEL_3;
-  sConfig.Rank = ADC_REGULAR_RANK_2;
-  if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
   /* USER CODE BEGIN ADC2_Init 2 */
 
   /* USER CODE END ADC2_Init 2 */
@@ -416,12 +403,12 @@ static void MX_SPI2_Init(void)
   /* SPI2 parameter configuration*/
   hspi2.Instance = SPI2;
   hspi2.Init.Mode = SPI_MODE_MASTER;
-  hspi2.Init.Direction = SPI_DIRECTION_1LINE;//双线但只用发送或单线
+  hspi2.Init.Direction = SPI_DIRECTION_1LINE;//双线但只用发送 或单线
   hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi2.Init.CLKPolarity = SPI_POLARITY_HIGH;
-  hspi2.Init.CLKPhase = SPI_PHASE_2EDGE;
+  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -433,7 +420,7 @@ static void MX_SPI2_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN SPI2_Init 2 */
-  WRITE_REG(hspi2.Instance->CR1,hspi2.Instance->CR1 |= SPI_CR1_BIDIOE); //设置输出开启
+  WRITE_REG(hspi2.Instance->CR1,hspi2.Instance->CR1 |= SPI_CR1_BIDIOE); //设置输出开启，与单线搭配使用，若为双线则不需要
   __HAL_SPI_ENABLE(&hspi2);
 
   /* USER CODE END SPI2_Init 2 */
@@ -445,7 +432,7 @@ static void MX_SPI2_Init(void)
   * @param None
   * @retval None
   */
- static void MX_WWDG_Init(void)
+static void MX_WWDG_Init(void)
  {
  
    /* USER CODE BEGIN WWDG_Init 0 */
@@ -491,7 +478,7 @@ static void MX_GPIO_Init(void)
  HAL_GPIO_WritePin(GPIOA, POWER_ALL_ON_Pin|SNSR_GPIO_Pin|LCD_RSTB_Pin|BKLT_ON_Pin, GPIO_PIN_RESET);
 
  /*Configure GPIO pin Output Level */
- HAL_GPIO_WritePin(GPIOB, DRIVER_ON_N_Pin|LCD_CSB_Pin|LDC_A0_Pin, GPIO_PIN_RESET);
+ HAL_GPIO_WritePin(GPIOB, DRIVER_ON_N_Pin|LCD_CSB_Pin|LCD_A0_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : SNSR_ADC_Pin PA5_DAC_Pin */
   GPIO_InitStruct.Pin = SNSR_ADC_Pin|PA5_DAC_Pin;
@@ -518,7 +505,7 @@ static void MX_GPIO_Init(void)
 
 
   /*Configure GPIO pins : DRIVER_ON_N_Pin LDC_A0_Pin */
-  GPIO_InitStruct.Pin = DRIVER_ON_N_Pin|LCD_CSB_Pin|LDC_A0_Pin;
+  GPIO_InitStruct.Pin = DRIVER_ON_N_Pin|LCD_CSB_Pin|LCD_A0_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

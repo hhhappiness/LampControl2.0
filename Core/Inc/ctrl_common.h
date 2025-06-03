@@ -8,6 +8,7 @@
 
 ///长关机的时间门限，以分钟为单位。缺省2小时，测试时可设成1分钟
 #define LONG_SHUT_DOWN_TIME 	(2*60)	 
+int CheckPowerKey(int ms);
 BOOL TestLongShutDown(int minutes);
 void PowerSeq(void);
 void WatchdogInit(void);
