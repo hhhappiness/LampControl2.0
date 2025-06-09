@@ -19,12 +19,12 @@
 #else				//App
 	//clock config
 	#define HSEClk      12000000
-	#define SysClk      168000000
-	#define AHBClk      168000000
-	#define APB1Clk      2100000
-	#define APB2Clk     168000000
-	#define  SYS_CLOCK_SOURCE		SYS_CLOCK_SOURCE_PLL
-	#define RTCCLK_SOURCE   RTCCLKSource_LSI //RTCCLKSource_HSE_Div128 由于要计standby的时间，只能用LSI
+	#define SysClk      70000000
+	#define AHBClk      70000000
+	#define APB1Clk      8750000
+	#define APB2Clk     35000000
+	#define SYS_CLOCK_SOURCE SYS_CLOCK_SOURCE_PLL
+	#define RTCCLK_SOURCE RTCCLKSource_LSI //RTCCLKSource_HSE_Div128 由于要计standby的时间，只能用LSI
 	#define RTC_FREQ   1000//用于按键扫描，通用定时中断
 #endif
 

@@ -140,15 +140,9 @@ int ScanSpeedPage::Loop()
 					StopScan();
 					OnStep(-(*SpeedCtrl.pVal)/2);
 					break;			
-				case KEY_MODE_RELEASE:				
-				case KEY_ENTER_RELEASE:
+				case KEY_ENTER_SHOT:
 					UnInit();
 					return Val;
-				case KEY_ENTER_LONG:
-				case KEY_MODE_LONG:
-				
-						UnInit();
-						return Val;
 				default:
 					break;
 				}

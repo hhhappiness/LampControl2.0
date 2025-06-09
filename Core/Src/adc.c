@@ -127,7 +127,6 @@ void AdcSamp(void)
 			adc_val = adc_average(adc_buf, Nsamp);
 			adc_result = adc_calc(adc_val);
 			AdcFlag = 1;
-			//BatLevel = GetBatLevel();
 		}
 }
 

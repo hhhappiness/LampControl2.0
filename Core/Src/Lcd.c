@@ -12,8 +12,8 @@
 extern SPI_HandleTypeDef hspi2;
 
 #define MIN(A,B) ((A)<(B)?(A):(B))
-
-
+#define WriteCommand(data) LCD_WR_REG(data)
+#define WriteData(data) LCD_WR_DATA8(data)
 
 
 #ifndef BOOTLOADER		//bootloader程序不输出汉字
@@ -43,16 +43,16 @@ void Spi_WriteByte(unsigned char dat)
 #endif
 
 
-static __inline void WriteCommand( Uchar CommandByte )
-{
-	_A0_0;
-	Spi_WriteByte(CommandByte);
-}
-static __inline void WriteData( Uchar DataByte )
-{
-	_A0_1;
-	Spi_WriteByte(DataByte);
-}
+// static __inline void WriteCommand( Uchar CommandByte )
+// {
+// 	_A0_0;
+// 	Spi_WriteByte(CommandByte);
+// }
+// static __inline void WriteData( Uchar DataByte )
+// {
+// 	_A0_1;
+// 	Spi_WriteByte(DataByte);
+// }
 
 static __inline void _SetPos(u8 page, u8 col)
 {
@@ -338,8 +338,8 @@ void LcmPutBmp(u8 x,u8 y, const u8 *bmp,u8 w, u8 h)
 	for(i=y;i<(y+h);i+=8)
 	{
 		WriteCommand(0xB0|(i/8)); //Set Page Address
-		WriteCommand(((x)>>4) |0x10); //Set Column Address = 0
-		WriteCommand((x)&0x0F); //Colum from S1 -> S128 auto add
+		WriteCommand(((x)>>4) |0x10); //Set Column Address 高位
+		WriteCommand((x)&0x0F); //colunm address 低位
 		for(j=0;j<w;j++){
 			WriteData( *bmp++ );
 		}

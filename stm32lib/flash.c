@@ -206,32 +206,3 @@ void SaveUserData(u32 addr,u32* data,u32 len)
     // }
 }
 
-/**
- * @brief 使用示例
- */
-void FlashStorageExample(void)
-{
-    #if 0
-    HAL_StatusTypeDef status;
-    UserData_t read_data; 
-    uint8_t test_array[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-    /* 保存数据 */
-    status = SaveUserData(0x12345678, 0x87654321, 3.14159f, test_array);
-    if (status != HAL_OK)
-    {
-        /* 错误处理 */
-        Error_Handler();
-    }
-    
-    /* 读取数据 */
-    status = ReadUserDataFromFlash(&read_data);
-    if (status != HAL_OK)
-    {
-        /* 错误处理 */
-        Error_Handler();
-    }
-    #endif
-    /* 此处可以使用读取的数据 */
-    /* 例如: printf("Parameter1: 0xlX\n", read_data.parameter1); */
-}
-

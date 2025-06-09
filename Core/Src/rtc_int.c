@@ -113,7 +113,7 @@ void RTC_WKUP_IRQHandler(void)  //50ms为周期
 	if((PwrKey_Status == PwrKey_Pressed)&&(!GPI_KEY_ENTER)){
 			ShutDown();
 	}
-	KeyInput(); //按键输入检测
+	//KeyInput(); //按键输入检测
 	
 	AnyKeyPressed_Control();//检测到任意键按下需要的处理
 	
@@ -147,6 +147,8 @@ void RTC_WKUP_IRQHandler(void)  //50ms为周期
 		MainScan_Control();
 	}
 	AdcSamp();  //电池电压ADC采样
+
+	
 }
 
 void ReInitSysTick(u8 freq)

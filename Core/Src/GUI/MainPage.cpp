@@ -20,6 +20,7 @@ extern u32 time_on;
 
 namespace gui {
 #define RUN_ICON_X (0)
+#define RUN_CH_X (18)
 #define BATTERY_ICON_X	(128-16-1-5)
 #define CHARGE_ICON_X	(128-5)
 	
@@ -59,18 +60,17 @@ int CMainPage::Loop()
 							SpeedCtrl.OnStep(GetEncoder());
 							SpeedCtrl.Display();
 							SpeedCtrl.Update();
-						case KEY_MODE_LONG:
-							OnKeyMode();
-						case KEY_MODE_RELEASE:
+							break;
+						case KEY_ENTER_LONG:
 							OnKeyMode();
 							break;
-						case KEY_DIV2_SHOT://除2
+						case KEY_DIV2_SHOT ://除2
 							MainScanFlag = 1;
 							SpeedCtrl.Div2();
 							SpeedCtrl.Display();
 							SpeedCtrl.Update();
 							break;
-						case KEY_MULT_SHOT://乘2
+						case KEY_MULT_SHOT ://乘2
 							MainScanFlag = 1;
 							SpeedCtrl.Mul2();
 							SpeedCtrl.Display();
@@ -105,7 +105,7 @@ int CMainPage::Loop()
 								SpeedCtrl.Update();
 							
 							break;		
-						case KEY_ENTER_LONG : 
+						case KEY_ENTER_SHOT : 
 							
 								//进入扫频界面
 								
@@ -120,27 +120,13 @@ int CMainPage::Loop()
 								ScanDlyCounting = 1;								
 							
 							break;
-						case KEY_ENTER_RELEASE : 
-							//进入扫频界面
-							
-							EnterScanFlag = 1;
-							ScanDlyFlag = 0;
-							
-							OnEnter();	
-							
-							EnterScanFlag = 0;
-							ScanDlyCnt = 0;
-							ScanDlyFlag = 1;
-							ScanDlyCounting = 1;
-
-							break;
 							
 					}
 				}else{//外触发跟普通界面一样
 					GUI_Num * p = (GUI_Num *)ObjList[FocusId]; 
 					//GUI_Num * p = NULL ;
 					switch(Key){
-						case KEY_MODE_RELEASE:
+						case KEY_UP_RELEASE:     //返回键，外触发暂时不管
 							OnKeyMode();
 							break;
 						case KEY_DIV2_SHOT:
@@ -261,9 +247,8 @@ void CMainPage::Show()
 	//内触发显示按键提示
 	if(IsTrigMode(Trig_Internal)){
 		if(IsLanguageCh()) {
-			DispStr8(10*8,48,"● 自动");
-			if(IsTrigMode(Trig_Internal))
-				DispStr8(0,48,"M 设置");
+			DispStr8(0,48,"● 自动");
+			//if(IsTrigMode(Trig_Internal)) DispStr8(0,48,"M 设置");
 			}
 		else {
 			DispStr8(10*8,48,"● Auto");
@@ -279,13 +264,13 @@ void CMainPage::Show()
 	ShowRunIcon((int)Status_MCU);		
 	ShowBatteryIcon(BatLevel);		
 	//ShowChargeIcon(ChargeFlag);	
-	ShowTrigModeIcon();
+	//ShowTrigModeIcon();             //显示触发模式，暂时关闭
 #ifdef DEBUG //显示调试选项，防止出货前刷错版本
 	DispStr8(BATTERY_ICON_X-8,0,"D");
 #endif	
 	//显示security bit是否加上
-	if(!FLASH_GetReadOutProtectionStatus()){
-		DispStr8(BATTERY_ICON_X-15,0,"!");
+	if(!FLASH_GetReadOutProtectionStatus()){ //无读保护则生效  
+		DispStr8(BATTERY_ICON_X-15,0,"!");   
 	}
 	Update();
 }
@@ -315,8 +300,12 @@ inline void CMainPage::PageInit_Internal()
 void CMainPage::ShowRunIcon(int mode){
 	switch(AppPara.Language){
 		case Lang_Chinese:
-			DispStr8(RUN_ICON_X, 0, (mode==Status_WorkStall) ? "暂停" : "运行");
-			Update(RUN_ICON_X, 0, 2*DEFAULT_HANZI_WIDTH, 16);
+			DispBmp(RUN_ICON_X,0, Icon_LED[2]);  //led icon
+			Update(RUN_ICON_X, 0, Icon_LED[0].Width, Icon_LED[0].Height*2);
+			DispStr8(RUN_CH_X,0,(mode==Status_WorkStall) ? "关" : "开");  //led 开/关
+			//Update(RUN_CH_X, 8, Icon_LED[0].Width,  Icon_LED[0].Height);
+			Update(RUN_CH_X, 0, 2*DEFAULT_HANZI_WIDTH, 16);
+
 			break;
 		case Lang_English:
 			DispStr8(RUN_ICON_X, 0, (mode==Status_WorkStall) ? "STOP" : "RUN ");
@@ -331,7 +320,7 @@ void CMainPage::ShowBatteryIcon(int level)
 {
 	if(level <0 || level > ARRAY_SIZE(Icon_Bat)) return;
 	DispBmp(BATTERY_ICON_X,4, Icon_Bat[level]);
-	Update(BATTERY_ICON_X, 0, Icon_Bat[0].Width, Icon_Bat[0].Height*2);
+	//Update(BATTERY_ICON_X, 0, Icon_Bat[0].Width, Icon_Bat[0].Height*2);
 }
 
 //显示充电状态的图标
@@ -393,7 +382,7 @@ void CMainPage::OnIdle()
 	//更新触发模式的显示
 	if(Last_TrigMode != AppPara.TrigMode)
 	{
-		ShowTrigModeIcon();
+		//ShowTrigModeIcon();
 		Last_TrigMode = AppPara.TrigMode;
 	}
 	//定时刷新的显示

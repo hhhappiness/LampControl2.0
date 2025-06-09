@@ -3,6 +3,7 @@
 #include "lcdfont.h" 
 #include "stm32.h"
 #include "main.h"
+//#include "delay.h"
 u16 BACK_COLOR, POINT_COLOR;   //背景色，画笔色
 u8 const ComTable[]={7,6,5,4,3,2,1,0,};
 u8 Key=1;
@@ -85,7 +86,7 @@ void LCD_display(){
 void LCD_Writ_Bus(char dat)   //串行数据写入
 {	
 	u8 i,j;	
-  OLED_CS_Clr();	//片选使能
+ 	OLED_CS_Clr();	//片选使能
   //delay_us(1);       //确保片选有效
 	for(i=0;i<8;i++)
 	{			  
@@ -97,7 +98,7 @@ void LCD_Writ_Bus(char dat)   //串行数据写入
 		delay_us(1);   
 		OLED_SCLK_Set();  //时钟线拉高，此时读取SDIN线数据
 		delay_us(1);
-		dat<<=1; 
+		dat<<=1;
 	}
 	//OLED_SDIN_Clr();  //每传输一个完整的字节，SDIN置低
   OLED_CS_Set();	//片选失能
@@ -144,42 +145,28 @@ void LCD_FullFill( uint8_t FillData )
 		}
 }
 
-void LCD_GPIO_Config(void)
-{    
-	GPIO_InitTypeDef GPIO_InitStructure;
-
-	//使能PORTB,D,E,G以及AFIO复用功能时钟
-	// RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD,ENABLE);
-
- 	// GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6|GPIO_Pin_8|GPIO_Pin_10|GPIO_Pin_12|GPIO_Pin_14;	
- 	// GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 //推挽输出
- 	// GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
- 	// GPIO_Init(GPIOD, &GPIO_InitStructure);
-	// GPIO_SetBits(GPIOD,GPIO_Pin_6|GPIO_Pin_8|GPIO_Pin_10|GPIO_Pin_12|GPIO_Pin_14);
-}
-
 void LCD_init(void)
 {
-		OLED_CS_Clr();  //打开片选使能
-		OLED_RST_Clr();
-		delay_ms(20);
-		OLED_RST_Set();
-		delay_ms(20);
-		OLED_CS_Set();
-	
-		LCD_WR_REG(0xE2);               //initialize interal function  
-		LCD_WR_REG(0x2F);               //power control(VB,VR,VF=1,1,1)     
-		LCD_WR_REG(0x23);               //Regulator resistor select(RR2,RR1,VRR0=0,1,1) 
-		LCD_WR_REG(0xA2);               //set LCD bias=1/9(BS=0)        
-		LCD_WR_REG(0x81);               //set reference voltage        
-		LCD_WR_REG(0x25);               //Set electronic volume (EV) level        
-		LCD_WR_REG(0xC8);               //set SHL COM1 to COM64      
-		LCD_WR_REG(0xA1);               //ADC select SEG1 to SEG132
-		LCD_WR_REG(0x40);               //Initial Display Line        
-		LCD_WR_REG(0xA6);               //set reverse display OFF        
-		LCD_WR_REG(0xA4);               //set all pixels OFF
-		LCD_FullFill(0x00);             //full clear        
-		LCD_WR_REG(0xAF);               //turns the display ON
+	OLED_CS_Clr();  //打开片选使能
+	OLED_RST_Clr();
+	delay_ms(20);
+	OLED_RST_Set();
+	delay_ms(20);
+	OLED_CS_Set();
+
+	LCD_WR_REG(0xE2);               //initialize interal function  
+	LCD_WR_REG(0x2F);               //power control(VB,VR,VF=1,1,1)     
+	LCD_WR_REG(0x23);               //Regulator resistor select(RR2,RR1,VRR0=0,1,1) 
+	LCD_WR_REG(0xA2);               //set LCD bias=1/9(BS=0)        
+	LCD_WR_REG(0x81);               //set reference voltage        
+	LCD_WR_REG(0x25);               //Set electronic volume (EV) level        
+	LCD_WR_REG(0xC0);               //COM:C8上下颠倒；C0 正常显示    
+	LCD_WR_REG(0xa1);               //SEG:A1 左右颠倒；A0 正常显示
+	LCD_WR_REG(0x40);               //Initial Display Line        
+	LCD_WR_REG(0xA6);               //set reverse display OFF        
+	LCD_WR_REG(0xA4);               //set all pixels OFF
+	LCD_FullFill(0x00);             //full clear        
+	LCD_WR_REG(0xAF);               //turns the display ON
 }
 
 

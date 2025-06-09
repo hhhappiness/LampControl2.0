@@ -13,14 +13,15 @@ int SubPage::Loop()
 	TKey = GetTimerCount();
 	TIdle = GetTimerCount();
 	while(1){
-		if(IsTimeOut_ms(TKey,100)){
+		if(IsTimeOut_ms(TKey,50)){
 			Key = GetKey();
 			if(Key != KEY_NULL){
 				switch(Key){
-					case KEY_MODE_RELEASE: 	OnClose(0);	return 0;
 //					case KEY_DIV2_SHOT : 	return 1;
 //					case KEY_MULT_SHOT : 	return -1;
-					case KEY_UP_SHOT : 		FocusPrevious(); break;
+					case KEY_UP_SHOT: 		
+						if(!FocusPrevious()) return 0;
+						break;
 					case KEY_DOWN_SHOT : 	FocusNext(); break;
 					case KEY_ENTER_RELEASE : 
 						OnEnter();

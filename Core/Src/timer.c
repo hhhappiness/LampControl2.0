@@ -8,7 +8,7 @@
 #include "stm32g4xx.h"
 #include "stm32g4xx_hal_tim.h"
 
-extern TIM_HandleTypeDef htim2, htim3, htim4;
+extern TIM_HandleTypeDef htim2, htim3, htim4,htim6;
 #define MAJOR_VERSION 	1
 #define MID_VERSION 	0
 #define MINOR_VERSION 	0
@@ -144,24 +144,9 @@ void StartInternalTrig(void);
 
 
 
-
-void TIM_ResetAll(void)
-{
-	TIM_Reset(TIM1);
-	TIM_Reset(TIM2);
-	TIM_Reset(TIM3);
-	TIM_Reset(TIM4);
-}
-
-
 #define  TIM1_100ns2clk(ns) ((ns)*(TIMxCLK/1000000)/10)
 #define  TIM1_us2clk(us) 	((us)*(TIMxCLK/1000000))
 #define  Hz2Us(hz)	(1000*1000*100 + hz/2)/hz
-
-
-
-
-
 //频率过高时强制分频
 __inline int VerifyInterval(void)
 {
@@ -191,15 +176,22 @@ void StartInternalTrig()
     __HAL_TIM_SET_AUTORELOAD(&htim2, TrigClks-1);  //period= TrigClks-1
     TIM_CCxChannelCmd(htim3.Instance, TIM_CHANNEL_2, TIM_CCx_ENABLE); //开启通道2的输出
     __HAL_TIM_ENABLE(&htim2); //TIM3trigger mode, TIM2作为触发器
+	/* 由于TIM2定时器会自动修改PB3的GPIO模式，这里手动恢复PB3为输入模式 */
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Pin = GPIO_PIN_3;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
 /**
   * @brief This function handles TIM2 global interrupt.
   */
-void TIM4_IRQHandler(void)
+void TIM6_DAC_IRQHandler(void)
 {
-  HAL_TIM_IRQHandler(&htim4);//标志位之类的
-  if(IsTrigMode(Trig_Internal)) StartInternalTrig();   //内触发模式,定期将更新的内触发频率设置为TIM2的period
+  HAL_TIM_IRQHandler(&htim6);//标志位之类的
+  if(IsTrigMode(Trig_Internal)) StartInternalTrig();   //内触发模式,定期更新的内触发频率
   Encoder_Update();
+  KeyInput(); //按键输入检测
 }
 
 inline void SetFlash_PulseWidth(u16 width_clk)
@@ -242,7 +234,7 @@ void Updata_OutPusle(void)
 	static int max_pulse;
 	u32 Linespeed2Rpm,tmp;	
 //	u8 div_flg = 0 ;
-	u32 tmp_nextclks,real_nextclks ;
+	u32 tmp_nextclks,real_nextclks;
 
 	if(IsTrigMode(Trig_Internal) ) {
 

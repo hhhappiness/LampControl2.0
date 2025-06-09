@@ -29,6 +29,7 @@
 #include "SysPara.h"
 #include "encoder.h"
 #include "ctrl_common.h"
+//#include "delay.h"
 //include for test
 // #include <stdio.h>
 // #include "key.h"
@@ -42,7 +43,7 @@ ADC_HandleTypeDef hadc2;
 RTC_HandleTypeDef hrtc;
 SPI_HandleTypeDef hspi2;
 WWDG_HandleTypeDef hwwdg;
-TIM_HandleTypeDef htim2,htim3,htim4;
+TIM_HandleTypeDef htim2,htim3,htim4,htim6;
 
 
 void SystemClock_Config(void);
@@ -54,24 +55,20 @@ static void MX_SPI2_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
+static void MX_TIM6_Init(void);
+
 
 void SysInit(void);
 void Init(void);
-
 int main(void)
 {
   Init();
-  LCD_GPIO_Init();
   CMainPage & MainPage= CMainPage::GetInstance();
-
   while(1)
   {
-    //Delay_ms(50);  // 延时100ms
-    // MainPage.Init();
-    // MainPage.Show();
-    // MainPage.Loop();
-    //LCD_display();
-    LCD_WR_REG(0xa5);
+    MainPage.Init();
+    MainPage.Show();
+    MainPage.Loop();
   }
 }
 
@@ -95,14 +92,17 @@ void SysInit()
   MX_GPIO_Init();             //GPIO初始化
   MX_ADC2_Init();             //ADC初始化
   //MX_WWDG_Init();             //看门狗初始化
+  __disable_irq(); //关闭中断
+  MX_RTC_Init();           //RTC初始化
   
   //MX_SPI2_Init();           //SPI初始化
 
   MX_TIM3_Init();             //TIM3初始化
+  
   MX_TIM4_Init();             //TIM4初始化
   MX_TIM2_Init();
-  MX_RTC_Init();           //RTC初始化
-  __disable_irq(); //禁止所有中断
+  MX_TIM6_Init();
+
 }
 
 void Init(void){
@@ -110,34 +110,35 @@ void Init(void){
   InitSysTick();         //初始化SysTick定时器
   InitKey();        //按键初始化
   Encoder_Init(); //编码器初始化
-  __enable_irq(); //使能所有中断
+  #if 1
   if(CheckPowerKey(1000))//电源键按至少2s
   {
     PowerOn(); // 开机
   }
   else
   {
-
+    PowerOn(); // 调试用
     //ShutDown(); // 关机
 
   }		
+  LCD_GPIO_Init();        //暂时取消SPI初始化，用GPIO模拟SPI
   LCD_init();            //LCD初始化(按照数据手册)
-  PowerOn(); // 开机
+
+  
   Status_MCU = Status_idle;
   LoadSysConfig();//先加载SysPara，因为部分AppPara的参数转换需要知道灯管类型
   LoadConfig();
   BackLightOn();       //背光打开
-
+  __enable_irq(); //开启中断
   //初始化完毕，允许输出
 	Status_MCU =  Status_WorkStall;
+  if(AppPara.PowerKey == PwrKey_Hit)   
   {
-		if(AppPara.PowerKey == PwrKey_Hit)
-		{
-			//StopToFlash();    //初始化暂停闪烁
-			WorkEn = 0;
-			PwrHitFlag = PwrHit_WORK;
-		}
-	}
+    StopToFlash();    //初始化暂停闪烁
+    WorkEn = 0;
+    PwrHitFlag = PwrHit_STALL;
+  }
+  #endif
 }
 
 /**
@@ -204,7 +205,7 @@ static void MX_TIM4_Init(void)
 
   /* USER CODE END TIM4_Init 1 */
   htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 41999;
+  htim4.Init.Prescaler = 0;    //分频成1000hz，所以一个counter是1ms
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim4.Init.Period = 49;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -229,8 +230,45 @@ static void MX_TIM4_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN TIM4_Init 2 */
-
   /* USER CODE END TIM4_Init 2 */
+
+}
+
+/**
+  * @brief TIM6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM6_Init(void)
+{
+
+  /* USER CODE BEGIN TIM6_Init 0 */
+
+  /* USER CODE END TIM6_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM6_Init 1 */
+
+  /* USER CODE END TIM6_Init 1 */
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 174;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 4999;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM6_Init 2 */
+  HAL_TIM_Base_Start_IT(&htim6); //启动定时器6中断
+  /* USER CODE END TIM6_Init 2 */
 
 }
 
@@ -245,7 +283,7 @@ void SystemClock_Config(void)
 
   /** Configure the main internal regulator output voltage
   */
-  HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1_BOOST);
+  HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -255,8 +293,8 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
-  RCC_OscInitStruct.PLL.PLLN = 28;
+  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV3;
+  RCC_OscInitStruct.PLL.PLLN = 35;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
   RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
@@ -272,9 +310,9 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV8;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
   }
@@ -301,7 +339,7 @@ static void MX_ADC2_Init(void)
   /** Common config
   */
   hadc2.Instance = ADC2;
-  hadc2.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+  hadc2.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
   hadc2.Init.Resolution = ADC_RESOLUTION_12B;
   hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
   hadc2.Init.GainCompensation = 0;
@@ -535,9 +573,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 41;
+  htim3.Init.Prescaler = 174;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 99;
+  htim3.Init.Period = 4999;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -571,7 +609,7 @@ static void MX_TIM3_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM2;
-  sConfigOC.Pulse = 49;
+  sConfigOC.Pulse = 4;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
@@ -603,7 +641,6 @@ void Error_Handler(void)
     {
       case ERROR_PWM:
 
-        printf("PWM error\n");
         break;
       default:
         break;

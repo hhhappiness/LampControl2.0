@@ -371,9 +371,6 @@ public:
 	}
 };
 
-
-
-
 }//namespace gui {
 #endif//_GUI_OBJECT_H_
 

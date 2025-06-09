@@ -11,7 +11,7 @@ extern const Bitmap Icon_Charge_Small;
 extern const Bitmap Icon_More[2];
 extern const Bitmap Icon_Up;
 extern const Bitmap Icon_Down;
-
+extern const Bitmap Icon_LED[3];
 	
 void ShowLogo();
 

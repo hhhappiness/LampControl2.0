@@ -45,10 +45,11 @@ void GUI_Page::SetFocus(int id, bool draw){
 	}
 }
 	
-void GUI_Page::FocusPrevious()
+int GUI_Page::FocusPrevious()
 {
-	if(FocusId <0 || ObjList.Num==0) return;
+	if(FocusId <0 || ObjList.Num==0) return 0; //没有焦点或没有控件，返回0
 	int NextFocusId = FocusId;
+	if(NextFocusId ==0) return 0;//返回0则在第一个焦点，此时再按上键，可以退出菜单
 	//必须保证有一个控件能获得焦点，否则会陷入死循环。
 	while(1) {
 		if(NextFocusId ==0){
@@ -59,6 +60,7 @@ void GUI_Page::FocusPrevious()
 		if(ObjList[NextFocusId]->Enable) break;//当前控件是否能获得焦点
 	};
 	SetFocus(NextFocusId);
+	return 1;
 }
 
 void GUI_Page::FocusNext()

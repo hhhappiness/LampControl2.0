@@ -33,7 +33,7 @@ __INLINE void InitSysTick(){
     //主频较高时用ABH clock/8
     SysTick->CTRL = (0 << SysTick_CTRL_CLKSOURCE_Pos) //0: AHB clock/8, 1: AHB clock
                 | (0<<SysTick_CTRL_TICKINT_Pos)  
-                | (1<<SysTick_CTRL_ENABLE_Pos);   /* Enable SysTick IRQ and SysTick Timer */
+                | (1<<SysTick_CTRL_ENABLE_Pos);   /* Disable SysTick IRQ and SysTick Timer */
     #elif AHBClk == 36000000 || AHBClk == 32000000
     SysTick->CTRL = (0 << SysTick_CTRL_CLKSOURCE_Pos) //0: AHB clock/8, 1: AHB clock
                 | (0<<SysTick_CTRL_TICKINT_Pos)  

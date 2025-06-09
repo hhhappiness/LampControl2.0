@@ -60,7 +60,7 @@ public:
 	///让指定控件获得焦点
 	void SetFocus(int id, bool draw=true);
 	
-	void FocusPrevious();
+	int FocusPrevious();
 	void FocusNext();
 	virtual void OnEnter();	///按Enter键的缺省操作
 	virtual void OnValChange(){} ///变量型控件OnEnter最后执行的操作

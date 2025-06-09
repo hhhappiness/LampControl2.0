@@ -63,7 +63,6 @@ void LCD_WR_REG(char da);
 void LCD_display();
 void LCD_GPIO_Init(void);
 void LCD_FullFill( uint8_t FillData );
-void LCD_GPIO_Config(void);
 void LCD_init(void);
 
 void display(u8 dat1,u8 dat2);

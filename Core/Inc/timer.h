@@ -45,8 +45,9 @@ extern void DeactiveTrigPoint(void) ;
 //将频率转换为时钟周期数
 #define TIM1_Hz2clk(hz) ((TIMxCLK*10+hz/20)/(hz/10))	 //0.01Hz
 
-#define TIM2_Hz2clk(hz) ((100*TIMxCLK/(TIM2->PSC+1)+hz/2)/(hz))	//输入的hz是原先100倍：输入的10000实则为100hz
-#define TIM2_rpm2clk(rpm) TIM2_Hz2clk(rpm/6)	//0.1rmp
+//频率转化为要存入counter寄存器的值
+#define TIM2_Hz2clk(hz) ((100*TIMXCLK/(TIM2->PSC+1)+hz/2)/(hz))	//输入的hz是原先100倍：输入的10000实则为100hz
+#define TIM2_rpm2clk(rpm) TIM2_Hz2clk(rpm/600)	//0.1rmp
 
 
 #define TIM2_clk2Hz(clk)	((TIMXCLK*100+clk/2)/(clk))
@@ -73,8 +74,8 @@ extern volatile u32	max_strobe_power;
 void TIM_Reset(TIM_TypeDef * TIM);
 inline void SetFlash_PulseWidth(u16 width_clk);
 void StartInternalTrig(void);
-void TIM4_IRQHandler(void);
 void Updata_OutPusle(void);
+void TIM6_DAC_IRQHandler(void);
 
 
 #ifdef __cplusplus

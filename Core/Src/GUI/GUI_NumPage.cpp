@@ -158,7 +158,7 @@ int GUI_NumPage::Loop()
 					break;
 				case KEY_UP_LONG : 
 				
-						switch(AutoMode){
+					switch(AutoMode){
 							case GUI_Num::Mode_None://单击转自动+
 								StartAutoPlus(true);
 								break;
@@ -251,10 +251,7 @@ int GUI_NumPage::Loop()
 				case KEY_DIV2_RELEASE : 	
 					OnStep(-(*pNumObj->pVal)/2);
 					break;				
-				case KEY_MODE_LONG:
-				case KEY_MODE_RELEASE:
-				case KEY_ENTER_RELEASE:
-				case KEY_ENTER_LONG:
+				case KEY_ENTER_SHOT:
 					UnInit();
 					return Val;					
 				}

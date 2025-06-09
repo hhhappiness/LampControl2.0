@@ -68,7 +68,6 @@ int GUI_DisplayBuf::DispStr8(u8 x, u8 y, const char * str, u8 color)
 			FontHeight 	= pFontASCII->Height;
 			FontInterval = pFontASCII->WidthMax - pFontASCII->Width;
 			ustr++;
-			
 		}else{
 			pDot 	= pFontHZ->Find(*ustr<<8|*(ustr+1));
 			FontWidth 	= pFontHZ->Width;

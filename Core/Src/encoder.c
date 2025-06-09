@@ -38,52 +38,7 @@ void Encoder_Init(void)
   }
 }
 
-#if 0
-void encoder_test_pwmAdjust()
-{
-/* 更新编码器状态 */
-  Encoder_Update();
-  
-  /* 打印编码器状态（调试用） */
-  #ifdef DEBUG
-  printf("Hz: %f, Total Steps: %d, diff: %u Delta Diff': %u \n",
-          currentHz,
-          encoderState.totalSteps,
-          encoderState.difference,
-          encoderState.delta_diff);
-  #endif
-  if(encoderState.difference)
-  {
-    if(encoderState.difference<=5 || encoderState.delta_diff <=5)
-      currentHz += (encoderState.difference/100.0 * (float)encoderState.direction);  //小数点后两位开始加
-    else if(encoderState.delta_diff <=15)
-      currentHz += ((encoderState.difference-5)/10.0 * (float)encoderState.direction);  //小数点后一位开始加
-    else if(encoderState.delta_diff <=50)
-      currentHz += ((encoderState.difference-15.0) * (float)encoderState.direction);  //个位开始加
-    else if(encoderState.delta_diff <=70)
-      currentHz += ((encoderState.difference-50.0)*2* (float)encoderState.direction);  //十位开始加
-    else currentHz += (encoderState.difference * (float)encoderState.direction);  //百位开始加
 
-    if(currentHz >200) 
-      currentHz = 200;
-    if(currentHz < 1) 
-      currentHz = 1;
-    currentPeriod_us = (u32)(1.0/(currentHz)*1000000); // 将频率换算成对应的周期（us）
-    PWM_Adjust(50,currentPeriod_us);
-  }
-
-  key = GetKey(); //获取按键值
-  if(POWER_PRESSED||ENTER_PRESSED){
-    if(flag == 0){
-      PWM_Stop(); //停止PWM
-      flag = 1;
-    }else{
-      PWM_Start(50,10000); //开启PWM，50%占空比，10000us周期（100hz）
-      flag = 0;
-    }
-  }
-}
-#endif
 /* 更新编码器状态 */
 void Encoder_Update(void)
 {
@@ -107,7 +62,7 @@ int GetEncoder()
 {
   /* 返回当前差值 */
   s8 difference = EncoderOutBuf;
-  s8 delta_diff = EncoderOutBuf - encoderState.encoder_diff.diff[3];  //差值变化率，判断旋钮转动快慢
+  s8 delta_diff = difference - encoderState.encoder_diff.diff[3];  //差值变化率，判断旋钮转动快慢
   s8 abs_diff = difference>0?difference:-difference;   //取绝对值
 
   encoderState.encoder_diff.diff_buffer <<= 8; // 左移8位

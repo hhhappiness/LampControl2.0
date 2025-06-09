@@ -148,30 +148,6 @@ void StartToFlash(void)
 			StartInternalTrig();
 		}
 		Status_MCU = Status_WorkFlash; // 设置状态为工作状态
-		// 函数OnChangeLineSpeed用于改变线速度
-		// 将新的线速度赋值给AppPara.LineSpeed
-			
-	// 调用LineSpeed2Clocks函数，将线速度转换为时钟周期
-	// 计算转速，公式为(AppPara.LineSpeed*100 + AppPara.PlateLen/2)/ AppPara.PlateLen
-		/*
-	// 调用Rpm2Hz函数，将转速转换为频率
-		else if(IsTrigMode(Trig_Wifi)) {
-	// 调用Updata_OutPusle函数，更新输出脉冲
-				if(wifi_recv_flag ) {
-	// 返回true
-					NextTrigClks = TIM2_Hz2clk(wifi_freq);
-					StartInternalTrig();
-				}
-			}
-		else if(IsTrigMode(Trig_Perimeter)) {
-			if(Trig_Perimeter_En == 1) {
-				StartInternalTrig();
-			}
-
-		}
-
-		*/
-		
 
 }
 	// 重置定时器1

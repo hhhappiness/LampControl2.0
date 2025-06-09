@@ -69,7 +69,9 @@
         "limits": "cpp",
         "type_traits": "cpp",
         "xtr1common": "cpp",
-        "xxexception": "cpp"
+        "xxexception": "cpp",
+        "__tuple": "cpp",
+        "winapifamily.h": "c"
     },
     "Codegeex.RepoIndex": true
 }

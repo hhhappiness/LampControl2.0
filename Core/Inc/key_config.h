@@ -12,8 +12,8 @@
 **/
 
 #define  KeyPushTimes           2 //     //确定按下、释放的检测次数，至少是2次
-#define  KeyLongPushTimes      (600/KEY_DETECT_PERIOD) //长压键盘时间间隔次数
-#define  KeyRunTimes           (250/KEY_DETECT_PERIOD) //自动触发时间间隔次数
+#define  KeyLongPushTimes      (600/KEY_DETECT_PERIOD) //长压键盘时间间隔次数 12
+#define  KeyRunTimes           (250/KEY_DETECT_PERIOD) //自动触发时间间隔次数 5
 #define  DbKeyPressTime        (180/KEY_DETECT_PERIOD) //双击功能启用时，第一次按压的时间最大值，160-200ms换算
 #define  DbKeyReleaseTime      (180/KEY_DETECT_PERIOD) //双击功能启用时，第一次释放到第2次压下的时间最大值，跟上一个值差不多
 
@@ -41,15 +41,15 @@ extern RTC_HandleTypeDef hrtc;
 static inline u32 KeyI(u8 KeyRow) {
     switch (KeyRow) {
         case 0:
-            return GPB_I(3); // PA11  KEY_DIV/key_right
+            return GPB_I(7); // PB3  KEY_DIV/key_right
         case 1:
-            return GPB_I(5); // PC13  KEY_ENTER
+            return GPB_I(5); // PB5  KEY_ENTER
         case 2:
-            return GPB_I(6); // PC14  KEY_MULT
+            return GPB_I(4); // PB6  KEY_MULT/KEY_LEFT  
         case 3:
-            return GPB_I(4); // PA12  KEY_DOWN
+            return GPB_I(6); // PB4  KEY_DOWN
         case 4:
-            return GPB_I(7); // PC1   key_mul/KEY_UP
+            return GPB_I(3); // PB7  KEY_UP
     }
     return 0;
 };
@@ -75,7 +75,7 @@ static const u8 KeyModeCtrl[KeyScanNum][KeyRowNum]={
 
 //判断按键电平。如果所有按键是相同的电平好办，定义一个宏判断高低电平就行。
 //如果有些按键是高电平，有此是低电平，就要写个函数来判断了
-#define IsKeyPressed(i) ((InP)==0) //这里将电平保存在变量InP里，低电平按下，参数i未使用
+#define IsKeyPressed ((InP)==0) //这里将电平保存在变量InP里，低电平按下，参数i未使用
 
 
 #ifdef __cplusplus

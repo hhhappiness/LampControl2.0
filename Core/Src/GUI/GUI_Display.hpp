@@ -40,10 +40,8 @@ public:
 	void DispBmp8(u8 x, u8 y, const Bitmap& Bmp, u8 color=0);
 	void DispBmp8(u8 x, u8 y, const Bitmap& Bmp, Rect8_t rect, u8 color=0);	
 	void DispBmp (u8 x, u8 y, const Bitmap& Bmp, u8 color=0);
-//	void DispBmp (u8 x, u8 y, const Bitmap& Bmp, Rect8_t rect, u8 color=0);
-	
 	///更新显示到Lcd，缺省为全屏
-	inline void Update(u8 x=0,u8 y=0)
+	inline void Update(u8 x=4,u8 y=0)
 	{
 		LcmPutBmp(x,y, pPix, Width, Height);
 	}
