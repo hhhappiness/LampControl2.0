@@ -41,7 +41,7 @@ int MenuPage::Loop()
 						CheckSecretMode(Key);
 						break;
 					case KEY_DOWN_SHOT : 	FocusNext(); CheckSecretMode(Key); break;
-					case KEY_ENTER_RELEASE : 
+					case KEY_ENTER_SHOT : 
 						OnEnter();
 						CheckSecretMode(Key);
 						break;
@@ -64,10 +64,15 @@ void MenuPage::Show()
 
 void MenuPage::OnIdle()
 {
+	//如果超过200ms没有操作，则执行以下操作
 	if(IsTimeOut_ms(TIdle,200)){
+		//调用wdg()函数
 		wdg();
+		//调用OnIdleMenuPage()函数
 		OnIdleMenuPage(TIdle);
+		//更新TIdle的值
 		TIdle = GetTimerCount();	
+		//绘制底线
 		LineH(0,LcmYPixel-1,LcmXPixel);//底线
 		Update(0,LcmYPixel-8,LcmXPixel,8);//更新最下面的page
 	}

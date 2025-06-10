@@ -41,22 +41,22 @@ public:
 	void DispBmp8(u8 x, u8 y, const Bitmap& Bmp, Rect8_t rect, u8 color=0);	
 	void DispBmp (u8 x, u8 y, const Bitmap& Bmp, u8 color=0);
 	///更新显示到Lcd，缺省为全屏
-	inline void Update(u8 x=4,u8 y=0)
+	inline void Update(u8 x=0,u8 y=0)
 	{
-		LcmPutBmp(x,y, pPix, Width, Height);
+		LcmPutBmp(x+4,y, pPix, Width, Height);
 	}
 	inline void Update(Rect8_t &rect, u8 x,u8 y)
 	{
-		LcmPutBmpRect(x,y, pPix,Width, &rect);
+		LcmPutBmpRect(x+4,y, pPix,Width, &rect);
 	}
 	inline void Update(Rect8_t &rect)
 	{
-		LcmPutBmpRect(rect.x,rect.y, pPix,Width, &rect);
+		LcmPutBmpRect(rect.x+4,rect.y, pPix,Width, &rect);
 	}	
 	inline void Update(u8 x,u8 y,u8 w, u8 h)
 	{
 		Rect8_t rect={x,y,w,h};
-		LcmPutBmpRect(rect.x,rect.y, pPix,Width, &rect);
+		LcmPutBmpRect(rect.x+4,rect.y, pPix,Width, &rect);
 	}	
 	void Fill8(u8 x, u8 y, u8 w, u8 h, u8 color);
 	void Fill(u8 x, u8 y, u8 w, u8 h, u8 color);

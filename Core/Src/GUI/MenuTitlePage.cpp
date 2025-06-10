@@ -189,6 +189,7 @@ void MenuTitlePage::ShowMenuPageBox(int i)
 	Update();
 	LineV(LcmXPixel-1,BOX_TOP_HEIGH-1,LcmYPixel-BOX_TOP_HEIGH);
 	Update();
+        return;
 }
 
 }//namespace gui {
