@@ -167,8 +167,12 @@ const u32 GUI_Num::DefaultKeepList[3]={1,1,2};
 }
 bool GUI_Num::OnEdit()
 {
+	#if 1
 	int BakVal = *pVal;
+	
 	int Ret = OnEditPage();	
+	
+	//int Ret = 50;
 	PwrKeyDisableFlag = 0;
 	if(OnChange == NULL){//确认后才生效的
 		if(Ret != BakVal){//值发生变化
@@ -189,6 +193,7 @@ bool GUI_Num::OnEdit()
 	Display();
 	Update();
 	Delay_100ms(3);
+	#endif
 	return true;
 }
 
@@ -224,9 +229,12 @@ void GUI_Progress ::Display(){
 
 bool GUI_List::OnEdit()
 {
+	
 	GUI_ListPage * p = new GUI_ListPage(*this);
+	#if 1
 	p->Init();
 	p->Show();
+	
 	int Ret = p->Loop();
 	if(Ret != Id){
 		Id = Ret;
@@ -235,6 +243,7 @@ bool GUI_List::OnEdit()
 		Update();
 		return true;
 	}
+	#endif
 	return false;
 
 }

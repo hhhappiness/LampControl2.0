@@ -25,6 +25,7 @@ private:
 	void ShowBatteryIcon(int level);		///<显示电池状态的图标
 	void ShowChargeIcon(bool enable=true);	///<显示充电状态的图标
 	void ShowTrigModeIcon();				///<显示触发模式的图标	
+	
 public:
 	/*
 	enum{
@@ -50,11 +51,12 @@ public:
 		iImage_Num = 2
 
 	};
-
+	void Test();
 	//重载的虚函数
 	virtual int Loop();
 	virtual void Init();
 	virtual void Show();
+	
 	virtual void OnIdle();
 	virtual void OnValChange();
 	GUI_Speed & SpeedCtrl;

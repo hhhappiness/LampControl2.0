@@ -111,6 +111,7 @@ public:
 class GUI_NumText : public GUI_Object
 {
 public: 	
+	// 构造函数，初始化GUI_NumText对象
 	GUI_NumText(int *val, u8 digital_num, u8 decimal=0, const Font_t* font=&DEFAULT_ASCII_FONT)
 	: GUI_Object(digital_num*font->WidthDefault+1,font->Height,font) //缺省按16x7的字体
 	,  pVal(val), DigitalNum(digital_num), Decimal(decimal)

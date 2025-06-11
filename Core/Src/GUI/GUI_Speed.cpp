@@ -123,9 +123,9 @@ void GUI_Speed::_OnKeyLongUpDown(int key)
 int GUI_Speed::OnEditPage()
 {
 	ScanSpeedPage & NumPage = ScanSpeedPage::GetInstance();
+	
 	NumPage.Init();
 	NumPage.Show();
-	
 	return NumPage.Loop();	
 }
 

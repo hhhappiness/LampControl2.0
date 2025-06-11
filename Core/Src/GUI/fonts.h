@@ -8,6 +8,7 @@
 
 #define DEFAULT_HANZI_FONT	Song12_GB2312
 #define DEFAULT_HANZI_WIDTH	12
+#define DEFAULT_MAINPAGE_NUM_FONT Song32_ASCII_16p
 #define DEFAULT_ASCII_FONT	Song16_ASCII_10p
 #define DEFAULT_ASCII_WIDTH	7
 
@@ -21,6 +22,8 @@ extern const Font_t YaHeiDigital8x6;
 extern const Font_t Consolas8_ASCII;
 extern const Font_t Song16_ASCII_11p;
 extern const Font_t Song16_ASCII_10p;
+extern const Font_t Song32_ASCII_16p;
+extern const Font_t Song24_ASCII_12p;
 extern const Font_t Song24_ASCII;
 extern const Font_t Song16_GB2312;
 extern const Font_t Song14_GB2312;

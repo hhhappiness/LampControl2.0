@@ -24,8 +24,8 @@ namespace gui {
 #define BATTERY_ICON_X	(128-16-1-5)
 #define CHARGE_ICON_X	(128-5)
 	
-const u8 SpeedX[SpeedUnitNum]={32,20,16};	///Speed控件的x坐标
-#define SpeedY 	16							///Speed控件的y坐标
+const u8 SpeedX[SpeedUnitNum]={10,4,0};	///Speed控件的x坐标
+#define SpeedY 	24							///Speed控件的y坐标
 #define SPEED_STEP_NUM 	3	
 ///Speed控件的步进值列表
 const u32 SpeedStepList[SpeedUnitNum][SPEED_STEP_NUM]={
@@ -48,12 +48,18 @@ int CMainPage::Loop()
 {
 	TKey = GetTimerCount();
 	TIdle = GetTimerCount();
+
 	while(1){
+		
 		if(IsTimeOut_ms(TKey,50)){
+			
 			wdg();
 			Key = GetKey();
+			
 			if(Key != KEY_NULL){
+			
 				if(IsTrigMode(Trig_Internal)){//内触发只调频率
+					
 					switch(Key){
 						case KEY_ENCODER:
 							MainScanFlag = 1;
@@ -61,22 +67,25 @@ int CMainPage::Loop()
 							SpeedCtrl.Display();
 							SpeedCtrl.Update();
 							break;
+						#if 1
 						case KEY_ENTER_LONG:
 							OnKeyMode();
 							break;
+						
 						case KEY_DIV2_SHOT ://除2
 							MainScanFlag = 1;
 							SpeedCtrl.Div2();
 							SpeedCtrl.Display();
 							SpeedCtrl.Update();
 							break;
+						
 						case KEY_MULT_SHOT ://乘2
 							MainScanFlag = 1;
 							SpeedCtrl.Mul2();
 							SpeedCtrl.Display();
 							SpeedCtrl.Update();
 							break;
-						case KEY_UP_RELEASE : 	
+						case KEY_UP_SHOT : 	
 							MainScanFlag = 1;
 							SpeedCtrl.OnStep(SpeedCtrl.StepList[0]);//最小步进值增加
 							SpeedCtrl.Display();
@@ -120,9 +129,13 @@ int CMainPage::Loop()
 								ScanDlyCounting = 1;								
 							
 							break;
-							
+					#endif
 					}
-				}else{//外触发跟普通界面一样
+					
+				}
+				#if 1
+				else{//外触发跟普通界面一样
+					
 					GUI_Num * p = (GUI_Num *)ObjList[FocusId]; 
 					//GUI_Num * p = NULL ;
 					switch(Key){
@@ -204,13 +217,16 @@ int CMainPage::Loop()
 							//OnEnter();	
 							break;
 					}					
+				
 				}
+				#endif
 			}
+			
 		}
 
 		OnIdle();
-
 	}
+
 }
 
 ///按Mode键进入菜单
@@ -242,8 +258,8 @@ void CMainPage::Show()
 	int x = SpeedX[i];
 	SpeedCtrl.SetPos(x,SpeedY);	//设置位置
 	SpeedCtrl.SetStepList(SpeedStepList[i], KeepList, SPEED_STEP_NUM);//设置步进列表
-	DispStr8(x + SpeedCtrl.DigitalNum*11+4, SpeedY+8, SpeedUnitStr[i]);//显示单位
-	
+	DispStr8(x + SpeedCtrl.DigitalNum*16+4, SpeedY+8, SpeedUnitStr[i]);//显示单位
+	#if 0
 	//内触发显示按键提示
 	if(IsTrigMode(Trig_Internal)){
 		if(IsLanguageCh()) {
@@ -260,6 +276,7 @@ void CMainPage::Show()
 		//重新设置速度控件的位置
 		//没有办法显示4行，Speed占的比较大	
 	}
+	#endif
 	GUI_Page::Show();		//显示控件
 	ShowRunIcon((int)Status_MCU);		
 	ShowBatteryIcon(BatLevel);		
@@ -275,6 +292,10 @@ void CMainPage::Show()
 	Update();
 }
 
+void CMainPage::Test(){
+
+	MenuPage::ShowMenuPage(1);
+}
 inline void CMainPage::OnValChange()
 {
 	switch(FocusId){
@@ -374,11 +395,13 @@ void CMainPage::OnIdle()
 	
 	//立即更新的状态显示，不在超时里做，让人感觉响应快一些
 	//更新运行状态显示
+	
 	if(Last_Status_MCU != Status_MCU)
 	{
 		ShowRunIcon(Status_MCU);
 		Last_Status_MCU = Status_MCU;
 	}
+	#if 1
 	//更新触发模式的显示
 	if(Last_TrigMode != AppPara.TrigMode)
 	{
@@ -386,6 +409,7 @@ void CMainPage::OnIdle()
 		Last_TrigMode = AppPara.TrigMode;
 	}
 	//定时刷新的显示
+	
 	if(IsTimeOut_ms(TIdle,500))
 	{
 		TIdle = GetTimerCount();
@@ -439,6 +463,7 @@ void CMainPage::OnIdle()
 		GUI_Page::Show();
 		Update();		
 	}
+	#endif
 
 }
 

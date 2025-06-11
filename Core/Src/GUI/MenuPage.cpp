@@ -27,11 +27,14 @@ int MenuPage::Loop()
 	TKey = GetTimerCount();
 	TIdle = GetTimerCount();
 	KeySeq =0;
+	
 	while(1){
+		
 		if(IsTimeOut_ms(TKey,50)){
 			TKey = GetTimerCount();
 			Key = GetKey();
 			wdg();
+			
 			if(Key != KEY_NULL){
 				switch(Key){
 					case KEY_DIV2_SHOT : 	OnClose(1); return 1;
@@ -40,7 +43,9 @@ int MenuPage::Loop()
 						if(!FocusPrevious()) return 0;
 						CheckSecretMode(Key);
 						break;
+					
 					case KEY_DOWN_SHOT : 	FocusNext(); CheckSecretMode(Key); break;
+					
 					case KEY_ENTER_SHOT : 
 						OnEnter();
 						CheckSecretMode(Key);
@@ -48,7 +53,9 @@ int MenuPage::Loop()
 					
 				}
 			}
+			
 		}
+		
 		OnIdle();
 	}
 	
@@ -98,8 +105,11 @@ int MenuPage::ShowMenuPage(int i)
 	pMenuPage->Update();
 	wdg();
 	//调用菜单页面的主循环
+	
+	
 	Ret = pMenuPage->Loop();
 	wdg();
+	
 	//删除菜单页面对像
 	delete pMenuPage;
 	//切换当前页面
@@ -113,7 +123,9 @@ int MenuPage::ShowMenuPage()
 //打开上次打开的菜单，如果没有就打开第1个
 	CurrMenu = (LastMenu<0) ? 0 : LastMenu; 
 	LastMenu = CurrMenu;
+	
 	Ret=ShowMenuPage(CurrMenu);///打开菜单，直到菜单页面退出，返回值表明是接着打开下一个菜单还是退出
+	#if 1
 	while(Ret!=0){
 		if(Ret<0){//前一个菜单
 			CurrMenu --;
@@ -127,6 +139,7 @@ int MenuPage::ShowMenuPage()
 		LastMenu = CurrMenu;
 		Ret = ShowMenuPage(CurrMenu);
 	}
+	#endif
 	//关闭菜单，恢复主页面的显示
 	CurrMenu = -1;
 	return 0;

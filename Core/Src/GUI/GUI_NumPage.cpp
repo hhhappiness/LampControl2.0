@@ -126,6 +126,7 @@ void GUI_NumPage::ClearInv()
 ///按键循环，左右键移动光标，确定选中退出
 int GUI_NumPage::Loop()
 {
+	#if 1
 	HoldRepeatKey = 0;
 	TQuit = 0;
 	ResetTimeOut(TKey);
@@ -277,6 +278,7 @@ int GUI_NumPage::Loop()
 		}
 		
 	}
+	#endif
 }
 
 void GUI_NumPage::StopScan()

@@ -162,6 +162,7 @@ int ScanSpeedPage::Loop()
 		if(AutoMode!=GUI_Num::Mode_None){
 			if(IsTimeOut_ms(TAutoMode,500)){
 				ResetTimeOut(TAutoMode);
+				
 				switch(AutoMode){
 					case GUI_Num::Mode_AutoPlus:
 						AutoPlus();
@@ -170,9 +171,9 @@ int ScanSpeedPage::Loop()
 						AutoMinus();
 						break;
 				}
+				
 			}		
 		}
-		
 	}
 }
 

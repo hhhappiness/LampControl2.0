@@ -83,37 +83,46 @@ void GUI_Page::FocusNext()
 ///按Enter键的缺省操作
 void GUI_Page::OnEnter()
 {
-
 	if(FocusId <0 || ObjList.Num == 0) return;
+	
 	if(typeid(*ObjList[FocusId]) == typeid(GUI_Num)){
+	#if 1
 		GUI_Num *p = (GUI_Num *)ObjList[FocusId];
+		#if 1
 		p->OnEdit();
+		
 		OnValChange();
+		#endif
 	}else if(typeid(*ObjList[FocusId]) == typeid(GUI_Speed)){
+		#if 1
 		GUI_Speed *p = (GUI_Speed *)ObjList[FocusId];
 		PwrKeyDisableFlag = 1;
 		p->OnEdit();	
+		#endif
+		#endif
 	}else if(typeid(*ObjList[FocusId]) == typeid(GUI_List)){
 		GUI_List * p = (GUI_List *) ObjList[FocusId];
 		if(p->OnEdit()){//调用List的选择界面，如果值有变化，调用OnValChange();
 			OnValChange();
 		}
-		
+	
 	}else if(typeid(*ObjList[FocusId]) == typeid(GUI_TextButton)){
 		OnClick(FocusId);
 		
 	}else if(typeid(*ObjList[FocusId]) == typeid(GUI_IconButton)){
 		OnClick(FocusId);
+		
 	}else if(typeid(*ObjList[FocusId]) == typeid(GUI_CheckBox)){
 		GUI_CheckBox * p = (GUI_CheckBox *) ObjList[FocusId];
 		p->OnEdit();//切换控件的值和图标
 		OnValChange();//根据值的变化做相应动作		
+		
 	}else if(typeid(*ObjList[FocusId]) == typeid(GUI_Bool)){
 		GUI_Bool * p = (GUI_Bool *) ObjList[FocusId];
 		p->OnEdit();//切换控件的值和图标
 		OnValChange();//根据值的变化做相应动作
 	}	
-
+	
 }
 
 void GUI_Page::GetKeyAndKnob(){

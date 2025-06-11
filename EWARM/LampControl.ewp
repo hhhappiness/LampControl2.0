@@ -361,6 +361,7 @@
                     <state>$PROJ_DIR$\..\stm32lib</state>
                     <state>$PROJ_DIR$\..\Core\Src\GUI</state>
                     <state>$PROJ_DIR$\..\stm32lib\crypto</state>
+                    <state>D:\GOOD\StroboScope\LampControl2.0\cm_backtrace</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -688,7 +689,7 @@
             <data>
                 <extensions></extensions>
                 <cmdline></cmdline>
-                <hasPrio>192</hasPrio>
+                <hasPrio>1</hasPrio>
                 <buildSequence>inputOutputBased</buildSequence>
             </data>
         </settings>
@@ -1100,6 +1101,15 @@
     </configuration>
     <group>
         <name>Application</name>
+        <group>
+            <name>cm_backtrace</name>
+            <file>
+                <name>$PROJ_DIR$\..\cm_backtrace\cm_backtrace.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\cm_backtrace\fault_handler\iar\cmb_fault.S</name>
+            </file>
+        </group>
         <group>
             <name>EWARM</name>
             <file>
