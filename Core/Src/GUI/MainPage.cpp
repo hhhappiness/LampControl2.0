@@ -55,6 +55,8 @@ int CMainPage::Loop()
 			if(Key != KEY_NULL){
 				if(IsTrigMode(Trig_Internal)){//内触发只调频率
 					switch(Key){
+						case KEY_POWER_LONG:
+							OnMeasureMode();
 						case KEY_ENCODER:
 							MainScanFlag = 1;
 							SpeedCtrl.OnStep(GetEncoder());
@@ -76,13 +78,13 @@ int CMainPage::Loop()
 							SpeedCtrl.Display();
 							SpeedCtrl.Update();
 							break;
-						case KEY_UP_RELEASE : 	
+						case KEY_UP_SHOT : 	
 							MainScanFlag = 1;
 							SpeedCtrl.OnStep(SpeedCtrl.StepList[0]);//最小步进值增加
 							SpeedCtrl.Display();
 							SpeedCtrl.Update();
 							break;
-						case KEY_DOWN_RELEASE : 
+						case KEY_DOWN_SHOT : 
 							MainScanFlag = 1;
 							SpeedCtrl.OnStep(-SpeedCtrl.StepList[0]);//最小步进值减小
 							//SpeedCtrl.Loop(Key); 
@@ -217,6 +219,13 @@ int CMainPage::Loop()
 void CMainPage::OnKeyMode()
 {
 	MenuPage::ShowMenuPage();
+	Init(); //重新初始化页面
+	Show();	//显示
+}
+
+void CMainPage::OnMeasureMode()
+{
+	MenuPage::ShowMeasurePage();
 	Init(); //重新初始化页面
 	Show();	//显示
 }

@@ -102,7 +102,7 @@ int GUI_ListPage::Loop()
 			switch(Key){
 			case KEY_UP_SHOT : 		NextItem(-1); break;
 			case KEY_DOWN_SHOT : 	NextItem(1); break;			
-			case KEY_ENTER_RELEASE : 
+			case KEY_ENTER_SHOT : 
 				pCurrPage = bakPage;//退出前恢复pCurrPage指针
 				pCurrPage->Update(Pop_x, Pop_y, Pop_w, Pop_h);//恢复遮盖部分的显示
 				return(StartId+FocusId);

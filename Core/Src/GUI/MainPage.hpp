@@ -15,6 +15,7 @@ private:
     CMainPage & operator = (const CMainPage &);	
 	
 	void OnKeyMode();
+	void OnMeasureMode();
 	
 	inline void PageInit_Internal();
 	inline void PageInit_SinglePulse();

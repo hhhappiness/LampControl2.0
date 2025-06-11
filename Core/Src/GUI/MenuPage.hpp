@@ -30,6 +30,7 @@ public:
 	static int CurrMenu;		///<当前选中菜单项
 	static int LastMenu;		///<最后一次打开的菜单		
 	static int ShowMenuPage(int i);
+	static int ShowMeasurePage();
 	static int ShowMenuPage();
 
 	//隐藏功能
@@ -72,6 +73,31 @@ public:
 		iWidthSlider = 0,	///<Slider控件
 		iMaxPwr = 0,
 		MaxObjNum
+	};
+
+	/*
+	enum {
+			iMaxPwr,
+			MaxObjNum
+		}
+*/
+	virtual void Show();
+	virtual void Init();
+	virtual void OnIdle();
+	
+	virtual void OnValChange();
+};
+
+class MeasurePage_Algorithm : public MenuPage
+{
+public:
+	MeasurePage_Algorithm();
+
+	///控件索引
+	enum{
+		iFFT,	///<Slider控件
+		iFR_Filter,
+		AlgorithmNum
 	};
 
 	/*

@@ -25,7 +25,8 @@ public:
 		iSpeedUnit_Led,
 		iOption_Led,
 		iBaterry_Led,
-		MenuNum_Led
+		MenuNum_Led,
+		MeasureMenu
 	};	
 
 	int MenuNum;

@@ -106,6 +106,31 @@ int MenuPage::ShowMenuPage(int i)
 	
 	return Ret;
 }
+int MenuPage::ShowMeasurePage()
+{
+	
+	int Ret;
+	#if 0
+	MenuPage * pMeasurePage;	///<菜单页面的实例指针
+	//创建菜单页面的实例
+	pMeasurePage = (MenuPage * )(new MeasurePage_Algorithm);
+
+	//显示菜单页面内容
+	pCurrPage = (GUI_Page * )pMeasurePage;
+	pMeasurePage->Init();
+	wdg();
+	pMeasurePage->Show();
+	pMeasurePage->Update();
+	wdg();
+	//调用菜单页面的主循环
+	Ret = pMeasurePage->Loop();
+	wdg();
+	//删除菜单页面对像
+	delete pMeasurePage;
+	//切换当前页面
+	#endif
+	return Ret;
+}
 
 int MenuPage::ShowMenuPage()
 {

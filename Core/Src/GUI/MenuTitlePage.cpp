@@ -20,6 +20,9 @@ const char * MenuName_Cn_Led[MenuTitlePage::MenuNum_Led]={
 //	"°ïÖú"
 };
 
+const char * MeasureName_Cn_Layser= {
+	"²âÆµËã·¨",
+};
 
 ///²Ëµ¥ÎÄ×Ö-Ó¢ÎÄ
 const char * MenuName_En_Led[MenuTitlePage::MenuNum_Led]={

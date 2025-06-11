@@ -11,8 +11,6 @@ namespace gui {
 MenuPage_PulseWidth::MenuPage_PulseWidth()
 : MenuPage(MaxObjNum)
 {
-
-	
 	SecretKey = 0x55;
 }
 

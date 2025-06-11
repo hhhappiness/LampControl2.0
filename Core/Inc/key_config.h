@@ -33,7 +33,7 @@ extern RTC_HandleTypeDef hrtc;
 
 //按键数量定义
 #define KeyScanNum       1
-#define KeyRowNum 		(5) 
+#define KeyRowNum 		(6) 
 
 
 //按键输入脚的位地址
@@ -50,6 +50,8 @@ static inline u32 KeyI(u8 KeyRow) {
             return GPB_I(6); // PB4  KEY_DOWN
         case 4:
             return GPB_I(3); // PB7  KEY_UP
+        case 5:
+            return GPB_I(0); // PB8  KEY_POWER
     }
     return 0;
 };
