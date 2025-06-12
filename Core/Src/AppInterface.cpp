@@ -252,6 +252,9 @@ bool OnChangeSpeedUnit(void)
 	return true;
 }
 
+bool OnChangeAlgorithm(void){
+	return true;
+}
 ///更改单脉冲的触发延时
 bool OnChange_Delay_SinglePulse(int new_val)
 {

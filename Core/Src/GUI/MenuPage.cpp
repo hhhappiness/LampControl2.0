@@ -57,10 +57,10 @@ int MenuPage::Loop()
 void MenuPage::Show()
 {
 	Clear();			//清屏
-	
 	MenuTitle.SelectMenu(CurrMenu);
 	wdg();
 }
+
 
 void MenuPage::OnIdle()
 {
@@ -86,9 +86,11 @@ int MenuPage::ShowMenuPage(int i)
 	//创建菜单页面的实例
 	switch(i){
 		case MenuTitlePage::iPulseWidth_Led: 	pMenuPage = (MenuPage * )(new MenuPage_PulseWidth); break;
+		case MenuTitlePage::iMeasureMenu: 		pMenuPage = (MenuPage * )(new MenuPage_Layser); break;
 		case MenuTitlePage::iSpeedUnit_Led: 	pMenuPage = (MenuPage * )(new MenuPage_SpeedUnit); break;
 		case MenuTitlePage::iOption_Led: 		pMenuPage = (MenuPage * )(new MenuPage_Option); break;
 		case MenuTitlePage::iBaterry_Led: 		pMenuPage = (MenuPage * )(new MenuPage_Battery); break;
+		
 	}
 	//显示菜单页面内容
 	pCurrPage = (GUI_Page * )pMenuPage;
@@ -104,31 +106,6 @@ int MenuPage::ShowMenuPage(int i)
 	delete pMenuPage;
 	//切换当前页面
 	
-	return Ret;
-}
-int MenuPage::ShowMeasurePage()
-{
-	
-	int Ret;
-	#if 0
-	MenuPage * pMeasurePage;	///<菜单页面的实例指针
-	//创建菜单页面的实例
-	pMeasurePage = (MenuPage * )(new MeasurePage_Algorithm);
-
-	//显示菜单页面内容
-	pCurrPage = (GUI_Page * )pMeasurePage;
-	pMeasurePage->Init();
-	wdg();
-	pMeasurePage->Show();
-	pMeasurePage->Update();
-	wdg();
-	//调用菜单页面的主循环
-	Ret = pMeasurePage->Loop();
-	wdg();
-	//删除菜单页面对像
-	delete pMeasurePage;
-	//切换当前页面
-	#endif
 	return Ret;
 }
 

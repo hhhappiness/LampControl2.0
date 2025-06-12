@@ -19,6 +19,12 @@ const char * const SpeedUnitStr[SpeedUnitNum]=
 	"m/min"
 };
 
+const int AlgTypeList[AlgNum]=
+{
+	Alg_FFT,
+	Alg_FR_Filter
+};
+
 ///语言版本参数值列表
 const int LanguageList[LangNum] =
 {
@@ -38,6 +44,7 @@ const APP_PARA AppParaDefault=
 
 	Trig_Internal, 	//int TrigMode;	//触发模式
 	0,				//int SpeedUnit; 	//速度模式，频率/转速
+	0,				//int Algorithm;   //FFT
 	6000,			//int LampFreq;	//内触发频率
 	36000,			//int Rpm;		//内触发转速
 
@@ -91,6 +98,7 @@ const APP_PARA AppParaMin=		//最小值
 
 	Trig_Internal, 	//int TrigMode;	//触发模式
 	0,				//int SpeedUnit; 	//速度模式，频率/转速
+	0,
 	100,				//int LampFreq;	//内触发频率
 
 	600,				//int Rpm;		//内触发转速
@@ -144,7 +152,7 @@ const APP_PARA AppParaMax=		//最大值
 
 	Trig_Internal, 	//int TrigMode;	//触发模式
 	2,				//int SpeedUnit; 	//速度模式，频率/转速
-
+	1,				//int Algorithm;   //FR_Filter
 
 	MAX_FREQ_LED*100,			//int LampFreq;	//内触发频率
 	MAX_FREQ_LED*600,			//int Rpm;		//内触发转速

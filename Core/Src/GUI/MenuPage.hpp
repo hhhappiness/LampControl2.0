@@ -88,24 +88,16 @@ public:
 	virtual void OnValChange();
 };
 
-class MeasurePage_Algorithm : public MenuPage
+class MenuPage_Layser : public MenuPage
 {
 public:
-	MeasurePage_Algorithm();
+	MenuPage_Layser();
 
 	///¿Ø¼þË÷Òý
 	enum{
-		iFFT,	///<Slider¿Ø¼þ
-		iFR_Filter,
-		AlgorithmNum
+		iAlgorithm, 
+		MaxObjNum
 	};
-
-	/*
-	enum {
-			iMaxPwr,
-			MaxObjNum
-		}
-*/
 	virtual void Show();
 	virtual void Init();
 	virtual void OnIdle();

@@ -22,11 +22,12 @@ private:
 public:  
 	enum {
 		iPulseWidth_Led,
+		iMeasureMenu,
 		iSpeedUnit_Led,
 		iOption_Led,
 		iBaterry_Led,
-		MenuNum_Led,
-		MeasureMenu
+		
+		MenuNum_Led
 	};	
 
 	int MenuNum;

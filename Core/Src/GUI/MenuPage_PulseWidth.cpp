@@ -62,34 +62,6 @@ void MenuPage_PulseWidth::OnIdle() {
 	
 }
 
-
-/*
-void MenuPage_PulseWidth::Show()
-{
-	//先画与主页面相关的
-	MenuPage::Show();
-	pCurrPage = this;
-	
-	SetFontASCII();
-	if(IsLanguageCh()) {
-		//显示静态文本
-		//DispStr8(2,16,"自动");
-		DispStr8(2,16,"脉宽:");
-		//DispStr8(2,48,"增加脉冲宽度会增加亮度，也会增加拖影"
-	}
-	else {
-		//DispStr8(2,16,"Automatic:");
-		DispStr8(2,16,"PulseWidth:");
-	}
-	wdg();
-	//显示控件
-	GUI_Page::Show();
-	//刷新到Lcd
-	Update();
-	wdg();
-}
-*/
-
 void MenuPage_PulseWidth::Show()
 {
 	//先画与主页面相关的

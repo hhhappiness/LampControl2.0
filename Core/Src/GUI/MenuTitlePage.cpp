@@ -14,14 +14,11 @@ namespace gui {
 ///菜单文字-中文
 const char * MenuName_Cn_Led[MenuTitlePage::MenuNum_Led]={
 	"亮度",
+	"测频",
 	"单位",
 	"选项",
 	"电池",
 //	"帮助"
-};
-
-const char * MeasureName_Cn_Layser= {
-	"测频算法",
 };
 
 ///菜单文字-英文
@@ -57,28 +54,13 @@ void MenuTitlePage::SelectMenu(int i)
 				StrList = MenuName_En_Led;
 		}
 		GUI_Text * p;
-		/*
-		if(IsTypeLed()) {
-			for(int i = 0; i< MenuNum; i++){
-				p = (GUI_Text *)ObjList[i];
-				p->Str = StrList[i];
-				p->Width = GetStrPixWidth(StrList[i]);
-			}	
-		}
-		else {
-			for(int i = 0; i< MenuNum - 1; i++){
-				p = (GUI_Text *)ObjList[i];
-				p->Str = StrList[i];
-				p->Width = GetStrPixWidth(StrList[i]);
-			}	
-		}
-		*/
-
+		
 		for(int i = 0; i< MenuNum; i++){
-				p = (GUI_Text *)ObjList[i];
-				p->Str = StrList[i];
-				p->Width = GetStrPixWidth(StrList[i]);
-			}
+			p = (GUI_Text *)ObjList[i];
+			p->Str = StrList[i];
+			p->Width = GetStrPixWidth(StrList[i]);
+		}	
+		
 			
 		LastLang = AppPara.Language;
 	}
@@ -88,6 +70,8 @@ void MenuTitlePage::SelectMenu(int i)
 	
 	ShowMenuPageBox(i);
 }
+
+
 
 
 ///跟据当前选中菜单项设置显示哪些菜单和布局

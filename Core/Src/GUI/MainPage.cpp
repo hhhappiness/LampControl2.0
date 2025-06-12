@@ -225,7 +225,8 @@ void CMainPage::OnKeyMode()
 
 void CMainPage::OnMeasureMode()
 {
-	MenuPage::ShowMeasurePage();
+	
+	//MenuPage::ShowMeasurePage();  
 	Init(); //重新初始化页面
 	Show();	//显示
 }

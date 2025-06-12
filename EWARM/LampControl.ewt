@@ -1576,6 +1576,9 @@
                         <name>$PROJ_DIR$\..\Core\Src\GUI\MenuPage_Battery.cpp</name>
                     </file>
                     <file>
+                        <name>$PROJ_DIR$\..\Core\Src\GUI\MenuPage_Layser.cpp</name>
+                    </file>
+                    <file>
                         <name>$PROJ_DIR$\..\Core\Src\GUI\MenuPage_Option.cpp</name>
                     </file>
                     <file>

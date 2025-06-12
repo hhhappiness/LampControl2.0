@@ -11,7 +11,7 @@ void OnChangePulseWidth_LED(void);
 void OnChangeTrigMode(void);
 //void OnChangeTrigMode(int new_val);
 bool OnChangeSpeedUnit(void);
-
+bool OnChangeAlgorithm(void);
 bool OnChangeContrast(int new_val);
 
 bool OnChangeFreq(int new_val);

@@ -58,12 +58,19 @@ typedef enum {
 	SpeedUnitNum ///<支持的单位种类数
 }SpeedUnit_t;
 
+typedef enum{
+	Alg_FFT,
+	Alg_FR_Filter,
+	AlgNum
+}Algorithm_t;
+
 ///参数表结构体
 typedef struct{
 	u32 MagicNum;	///<幻数
 	u32 Version;	///<参数表版本
 	int TrigMode;	///<触发模式
 	int SpeedUnit; 	///<速度模式，频率/转速
+	int Algorithm;  //算法类型
 	int LampFreq;		//<内触发频率
 	int Rpm;		//内触发转速
 	int LineSpeed;	//线速度,0.01
@@ -108,6 +115,7 @@ typedef struct{
 }APP_PARA;
 
 extern const int SpeedUnitList[SpeedUnitNum];
+extern const int AlgTypeList[AlgNum];
 extern const char * const SpeedUnitStr[SpeedUnitNum];
 extern const int LanguageList[LangNum];
 //extern int LightTypeList[LightTypeNum];
