@@ -31,9 +31,13 @@
 #include "ctrl_common.h"
 //#include "delay.h"
 //include for test
-// #include <stdio.h>
+#include "cm_backtrace.h"
+//#include <stdio.h>
 // #include "key.h"
 // #include "stm32g4xx_hal_tim.h"
+#define APPNAME                        "CmBacktrace"
+#define HARDWARE_VERSION               "V1.0.0"
+#define SOFTWARE_VERSION               "V0.0.1"
 
 using namespace gui;
 // 创建一个 error_code 类型的变量
@@ -60,15 +64,31 @@ static void MX_TIM6_Init(void);
 
 void SysInit(void);
 void Init(void);
+void fault_test_by_div0(void)
+{
+    volatile int * SCB_CCR = (volatile int *) 0xE000ED14; // SCB->CCR
+    int x, y, z;
+
+    *SCB_CCR |= (1 << 4); /* bit4: DIV_0_TRP. */
+
+    x = 10;
+    y = 0;
+    z = x / y;
+    printf("z:%d\n", z);
+}
 int main(void)
 {
   Init();
+  printf("CmBacktrace Test...\r\n");
+  cm_backtrace_init(APPNAME, HARDWARE_VERSION, SOFTWARE_VERSION);
+  
   CMainPage & MainPage= CMainPage::GetInstance();
   while(1)
   {
     MainPage.Init();
     MainPage.Show();
-    MainPage.Loop();
+    MainPage.Loop(); //主页面循环
+    //MainPage.Test();
   }
 }
 
@@ -92,9 +112,9 @@ void SysInit()
   MX_GPIO_Init();             //GPIO初始化
   MX_ADC2_Init();             //ADC初始化
   //MX_WWDG_Init();             //看门狗初始化
-  __disable_irq(); //关闭中断
-  MX_RTC_Init();           //RTC初始化
   
+  MX_RTC_Init();           //RTC初始化
+  __disable_irq(); //关闭中断
   //MX_SPI2_Init();           //SPI初始化
 
   MX_TIM3_Init();             //TIM3初始化
@@ -110,6 +130,8 @@ void Init(void){
   InitSysTick();         //初始化SysTick定时器
   InitKey();        //按键初始化
   Encoder_Init(); //编码器初始化
+  __enable_irq(); //开启中断
+
   #if 1
   if(CheckPowerKey(1000))//电源键按至少2s
   {
@@ -129,7 +151,6 @@ void Init(void){
   LoadSysConfig();//先加载SysPara，因为部分AppPara的参数转换需要知道灯管类型
   LoadConfig();
   BackLightOn();       //背光打开
-  __enable_irq(); //开启中断
   //初始化完毕，允许输出
 	Status_MCU =  Status_WorkStall;
   if(AppPara.PowerKey == PwrKey_Hit)   
