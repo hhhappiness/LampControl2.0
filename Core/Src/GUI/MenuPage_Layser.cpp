@@ -38,7 +38,7 @@ void MenuPage_Layser::Show()
 	
 	SetFontASCII();
 	if(AppPara.Language == Lang_Chinese) {
-        DispStr8(2,16,"À„∑®£∫");
+        DispStr8(2,16,"À„∑®:");
 	}
 	else {
 		DispStr8(2,16,"Alg:  ");

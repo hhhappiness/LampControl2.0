@@ -31,7 +31,7 @@
 #include "ctrl_common.h"
 //#include "delay.h"
 //include for test
-#include "cm_backtrace.h"
+//#include "cm_backtrace.h"
 //#include <stdio.h>
 // #include "key.h"
 // #include "stm32g4xx_hal_tim.h"
@@ -79,16 +79,14 @@ void fault_test_by_div0(void)
 int main(void)
 {
   Init();
-  printf("CmBacktrace Test...\r\n");
-  cm_backtrace_init(APPNAME, HARDWARE_VERSION, SOFTWARE_VERSION);
-  
+  //printf("CmBacktrace Test...\r\n");
+  //cm_backtrace_init(APPNAME, HARDWARE_VERSION, SOFTWARE_VERSION);
   CMainPage & MainPage= CMainPage::GetInstance();
   while(1)
   {
     MainPage.Init();
     MainPage.Show();
     MainPage.Loop(); //主页面循环
-    //MainPage.Test();
   }
 }
 

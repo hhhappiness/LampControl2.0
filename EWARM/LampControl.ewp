@@ -1102,15 +1102,6 @@
     <group>
         <name>Application</name>
         <group>
-            <name>cm_backtrace</name>
-            <file>
-                <name>$PROJ_DIR$\..\cm_backtrace\cm_backtrace.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\cm_backtrace\fault_handler\iar\cmb_fault.S</name>
-            </file>
-        </group>
-        <group>
             <name>EWARM</name>
             <file>
                 <name>$PROJ_DIR$\startup_stm32g431xx.s</name>
