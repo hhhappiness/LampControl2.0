@@ -23,9 +23,6 @@ private:
 	inline void SetTo_Freq();
 	inline void SetTo_rpm();
 	inline void SetTo_mpmin();
-	
-	
-	
 public:
 	virtual int OnEditPage();
 	void OnSetSpeedUnit();

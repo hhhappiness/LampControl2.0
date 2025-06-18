@@ -81,7 +81,7 @@ void GUI_Page::FocusNext()
 }
 
 ///按Enter键的缺省操作
-void GUI_Page::OnEnter()
+int GUI_Page::OnEnter()
 {
 
 	if(FocusId <0 || ObjList.Num == 0) return;
@@ -89,6 +89,9 @@ void GUI_Page::OnEnter()
 		GUI_Num *p = (GUI_Num *)ObjList[FocusId];
 		p->OnEdit();
 		OnValChange();
+	}else if(typeid(*ObjList[FocusId]) == typeid(GUI_NumText)){
+		GUI_NumText *p = (GUI_NumText *)ObjList[FocusId];
+		return  p->OnChosen(); //确认选中文本后执行的操作
 	}else if(typeid(*ObjList[FocusId]) == typeid(GUI_Speed)){
 		GUI_Speed *p = (GUI_Speed *)ObjList[FocusId];
 		PwrKeyDisableFlag = 1;
@@ -113,7 +116,7 @@ void GUI_Page::OnEnter()
 		p->OnEdit();//切换控件的值和图标
 		OnValChange();//根据值的变化做相应动作
 	}	
-
+	
 }
 
 void GUI_Page::GetKeyAndKnob(){

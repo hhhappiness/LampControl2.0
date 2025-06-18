@@ -51,8 +51,8 @@ __INLINE void InitSysTick(){
 
 //不同总线时钟下的延时换算系数
 
-#define SYSTICK_us      SystemCoreClock/8000000       //systick与us的换算系数
-#define SYSTICK_ms      SYSTICK_us*1000    //systick与ms的换算系数
+#define SYSTICK_us      (70+4)/8       //systick与us的换算系数
+#define SYSTICK_ms      8750    //systick与ms的换算系数
 #define MAX_DELAY_MS    (0x1000000/SYSTICK2ms) //最大能计3728ms
 
 

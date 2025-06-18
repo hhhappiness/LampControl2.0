@@ -30,7 +30,6 @@ public:
 	static int CurrMenu;		///<当前选中菜单项
 	static int LastMenu;		///<最后一次打开的菜单		
 	static int ShowMenuPage(int i);
-	static int ShowMeasurePage();
 	static int ShowMenuPage();
 
 	//隐藏功能

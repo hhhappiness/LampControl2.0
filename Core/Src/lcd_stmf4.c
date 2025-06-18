@@ -1,11 +1,10 @@
 #include "lcd_stmf4.h"
 #include "stdlib.h"
-#include "lcdfont.h" 
 #include "stm32.h"
 #include "main.h"
 //#include "delay.h"
 u16 BACK_COLOR, POINT_COLOR;   //背景色，画笔色
-u8 const ComTable[]={7,6,5,4,3,2,1,0,};
+// u8 const ComTable[]={7,6,5,4,3,2,1,0,};
 u8 Key=1;
 u16 t;  
 u16 len;	
@@ -65,7 +64,7 @@ void LCD_GPIO_Init(void)
 
   /* USER CODE END MX_GPIO_Init_2 */
 }
-
+#if 0
 void LCD_display(){
   	LCD_ShowBmp(bmp3);
 	DelayKey(1,0);
@@ -83,9 +82,10 @@ void LCD_display(){
 	DelayKey(1,0);
 	delay_ms(100);
 }
+#endif
 void LCD_Writ_Bus(char dat)   //串行数据写入
 {	
-	u8 i,j;	
+	u8 i;	
  	OLED_CS_Clr();	//片选使能
   //delay_us(1);       //确保片选有效
 	for(i=0;i<8;i++)
@@ -169,7 +169,7 @@ void LCD_init(void)
 	LCD_WR_REG(0xAF);               //turns the display ON
 }
 
-
+#if 0
 void display(u8 dat1,u8 dat2)
 {
    	u8 row,col;
@@ -285,7 +285,7 @@ void LCD_ShowBmp( u8 const *puts )
 }
 
 
-
+#endif
 
 
 

@@ -58,6 +58,8 @@
 /* External variables --------------------------------------------------------*/
 extern RTC_HandleTypeDef hrtc;
 extern TIM_HandleTypeDef htim2;
+extern DMA_HandleTypeDef hdma_adc1;
+
 
 /* USER CODE BEGIN EV */
 
@@ -66,6 +68,7 @@ extern TIM_HandleTypeDef htim2;
 /******************************************************************************/
 /*           Cortex-M4 Processor Interruption and Exception Handlers          */
 /******************************************************************************/
+
 /**
   * @brief This function handles Non maskable interrupt.
   */
@@ -80,14 +83,14 @@ void NMI_Handler(void)
   }
   /* USER CODE END NonMaskableInt_IRQn 1 */
 }
-
+#if 0
 /**
   * @brief This function handles Hard fault interrupt.
   */
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
+  //__asm("BKPT #0");
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
@@ -95,7 +98,7 @@ void HardFault_Handler(void)
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
 }
-
+#endif
 /**
   * @brief This function handles Memory management fault.
   */

@@ -34,8 +34,8 @@ int MenuPage::Loop()
 			wdg();
 			if(Key != KEY_NULL){
 				switch(Key){
-					case KEY_DIV2_SHOT : 	OnClose(1); return 1;
-					case KEY_MULT_SHOT : 	OnClose(-1); return -1;
+					case KEY_DIV2_SHOT : 	OnClose(-1); return -1;
+					case KEY_MULT_SHOT : 	OnClose(1); return 1;
 					case KEY_UP_SHOT : 		
 						if(!FocusPrevious()) return 0;
 						CheckSecretMode(Key);

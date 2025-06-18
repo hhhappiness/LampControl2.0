@@ -122,6 +122,7 @@ public:
 	u8 DigitalNum;	///<占用字符位数，包含小数点和负号
 	u8 Decimal; 	///<小数个数	
 	
+	int OnChosen();
 	static char NumStrBuf[GUI_NUM_STR_LEN];	//用于将数字转成字符串的共用缓冲区
 	inline void ToDecStr() {
 		U32ToDECStr(*pVal, NumStrBuf, DigitalNum+1, Decimal, Align);
@@ -130,6 +131,7 @@ public:
 		U32ToHEXStr(*pVal, NumStrBuf, DigitalNum+1, Align);
 	}	
 	virtual void Display();
+	
 };
 
 
@@ -187,6 +189,8 @@ public:
 	
 	///步进某个值step
 	int OnStep(int step);
+	//set val
+	int OnSetVal(int val);
 	///控件对应值乘以2
 	inline int Mul2() { 
 		return(OnStep(*pVal));

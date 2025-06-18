@@ -71,7 +71,9 @@
         "xtr1common": "cpp",
         "xxexception": "cpp",
         "__tuple": "cpp",
-        "winapifamily.h": "c"
+        "winapifamily.h": "c",
+        "fontbase.h": "c",
+        "byteconstsymbol.h": "c"
     },
     "Codegeex.RepoIndex": true
 }

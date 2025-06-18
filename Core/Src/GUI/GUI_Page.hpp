@@ -62,7 +62,7 @@ public:
 	
 	int FocusPrevious();
 	void FocusNext();
-	virtual void OnEnter();	///按Enter键的缺省操作
+	virtual int OnEnter();	///按Enter键的缺省操作
 	virtual void OnValChange(){} ///变量型控件OnEnter最后执行的操作
 	virtual void OnClick(int i){};//按钮控件按下时的操作
 	void GetKeyAndKnob();

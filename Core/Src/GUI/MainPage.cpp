@@ -13,6 +13,7 @@
 #include "SysPara.h"
 #include "encoder.h"
 #include "flash.h"
+#include "ScanAdcPage.hpp"
 
 
 extern u32 time_on;
@@ -57,6 +58,7 @@ int CMainPage::Loop()
 					switch(Key){
 						case KEY_POWER_LONG:
 							OnMeasureMode();
+							break;
 						case KEY_ENCODER:
 							MainScanFlag = 1;
 							SpeedCtrl.OnStep(GetEncoder());
@@ -64,7 +66,8 @@ int CMainPage::Loop()
 							SpeedCtrl.Update();
 							break;
 						case KEY_ENTER_LONG:
-							OnKeyMode();
+							// OnKeyMode();
+							OnMeasureMode();
 							break;
 						case KEY_DIV2_SHOT ://除2
 							MainScanFlag = 1;
@@ -225,8 +228,16 @@ void CMainPage::OnKeyMode()
 
 void CMainPage::OnMeasureMode()
 {
+	#if 0
+	ScanAdcPage& MeasurePage = ScanAdcPage::GetInstance();
 	
-	//MenuPage::ShowMeasurePage();  
+	MeasurePage.Init();
+	
+	MeasurePage.Show();
+	int Ret = MeasurePage.Loop();	 
+	//返回值则为用户选择的算法计算值，直接将SpeedCtrl的值设置为此值
+	SpeedCtrl.OnSetVal(Ret); //设置SpeedCtrl的值
+	#endif
 	Init(); //重新初始化页面
 	Show();	//显示
 }

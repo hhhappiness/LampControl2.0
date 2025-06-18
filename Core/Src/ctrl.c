@@ -13,7 +13,7 @@
 #include "string.h"
 #include "Reset.h"
 #include "share.h"
-
+extern void StartInternalTrig();
 //int Status_MCU = Status_WorkStall;
 
 Status_MCU_t Status_MCU;

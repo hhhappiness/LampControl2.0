@@ -1,0 +1,10 @@
+Examples/
+
+# 忽略 Source 目录下的所有二级目录
+Source/*/
+
+# 但是不忽略 TransformFunctions 目录
+!Source/TransformFunctions/
+!Source/CommonTables/
+
+

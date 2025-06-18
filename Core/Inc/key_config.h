@@ -41,11 +41,11 @@ extern RTC_HandleTypeDef hrtc;
 static inline u32 KeyI(u8 KeyRow) {
     switch (KeyRow) {
         case 0:
-            return GPB_I(7); // PB3  KEY_DIV/key_right
+            return GPB_I(4); // PB3  KEY_DIV/key_right
         case 1:
             return GPB_I(5); // PB5  KEY_ENTER
         case 2:
-            return GPB_I(4); // PB6  KEY_MULT/KEY_LEFT  
+            return GPB_I(7); // PB6  KEY_MULT/KEY_LEFT  
         case 3:
             return GPB_I(6); // PB4  KEY_DOWN
         case 4:

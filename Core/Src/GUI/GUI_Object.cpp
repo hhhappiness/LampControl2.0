@@ -97,6 +97,10 @@ void GUI_NumText::Display(){
 	DisplayStr(NumStrBuf);
 }
 
+int GUI_NumText::OnChosen(){
+	return *pVal; 
+}
+
 
 ///根据当前值在列表里查找得到Id。
 void GUI_List::InitId(){
@@ -206,6 +210,20 @@ int GUI_Num::OnStep(int step){
 		return Ret;///确认退出编辑再生效
 	}
 }
+int GUI_Num::OnSetVal(int val){
+	int bak=*pVal;//备份旧值
+	int Ret = StepS32(*pVal,val-*pVal,Min,Max);
+	if(OnChange != NULL){ ///如果要立即生效
+		if(!OnChange(Ret)){
+			return bak;//返回旧值，OnUpdate必须保持pVal的值不变
+		}else{
+			return Ret;//返回新值，OnUpdate已经更新pVal的值
+		}
+	}else{
+		*pVal = Ret;//直接复制，这里pVal指向的不是原始绑定值，是在GUI_NumPage里建的临时变量
+		return Ret;///确认退出编辑再生效
+	}
+}
 
 void GUI_Progress ::Display(){
 	Clear();
@@ -214,9 +232,9 @@ void GUI_Progress ::Display(){
 	int w = Width -4;
 	int End = x + Width - 2;
 	int Range = Max - Min;
-	x0= x+2 + w - ((Val-Min)*w + Range/2)/Range;
-	pCurrPage->Fill8(x0,y,  End - x0,8, XXXXXX_X);
-	pCurrPage->Fill8(x0,y+8,End - x0,8, X_XXXXXX);
+	x0= x+2 + ((Val-Min)*w + Range/2)/Range;
+	pCurrPage->Fill8(2,y,  x0,8, XXXXXX_X);
+	pCurrPage->Fill8(2,y+8,x0,8, X_XXXXXX);
 	
 }
 
@@ -228,6 +246,7 @@ bool GUI_List::OnEdit()
 	p->Init();
 	p->Show();
 	int Ret = p->Loop();
+	delete p;	//删除临时列表页
 	if(Ret != Id){
 		Id = Ret;
 		*pVal = ValList[Id];
