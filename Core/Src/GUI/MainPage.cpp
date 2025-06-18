@@ -264,7 +264,7 @@ void CMainPage::Show()
 	SpeedCtrl.SetPos(x,SpeedY);	//设置位置
 	SpeedCtrl.SetStepList(SpeedStepList[i], KeepList, SPEED_STEP_NUM);//设置步进列表
 	DispStr8(x + SpeedCtrl.DigitalNum*11+4, SpeedY+8, SpeedUnitStr[i]);//显示单位
-	
+	Update();
 	//内触发显示按键提示
 	if(IsTrigMode(Trig_Internal)){
 		if(IsLanguageCh()) {

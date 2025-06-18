@@ -60,7 +60,6 @@ extern RTC_HandleTypeDef hrtc;
 extern TIM_HandleTypeDef htim2;
 extern DMA_HandleTypeDef hdma_adc1;
 
-
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -68,7 +67,19 @@ extern DMA_HandleTypeDef hdma_adc1;
 /******************************************************************************/
 /*           Cortex-M4 Processor Interruption and Exception Handlers          */
 /******************************************************************************/
+/**
+  * @brief This function handles DMA1 channel1 global interrupt.
+  */
+void DMA1_Channel1_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Channel1_IRQn 0 */
 
+  /* USER CODE END DMA1_Channel1_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_adc1);
+  /* USER CODE BEGIN DMA1_Channel1_IRQn 1 */
+
+  /* USER CODE END DMA1_Channel1_IRQn 1 */
+}
 /**
   * @brief This function handles Non maskable interrupt.
   */
@@ -90,7 +101,8 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-  //__asm("BKPT #0");
+
+  __ASM volatile("BKPT #01");
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {

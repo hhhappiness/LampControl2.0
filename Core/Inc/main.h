@@ -71,8 +71,7 @@ void Error_Handler(void);
 #define SNSR_GPIO_GPIO_Port GPIOA
 #define DRIVER_STROBE_Pin GPIO_PIN_4
 #define DRIVER_STROBE_GPIO_Port GPIOA
-#define PA5_DAC_Pin GPIO_PIN_5
-#define PA5_DAC_GPIO_Port GPIOA
+
 #define BAT_NTC_Pin GPIO_PIN_6
 #define BAT_NTC_GPIO_Port GPIOA
 #define VBAT_ACQ_Pin GPIO_PIN_7
