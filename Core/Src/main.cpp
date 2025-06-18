@@ -48,7 +48,7 @@ RTC_HandleTypeDef hrtc;
 SPI_HandleTypeDef hspi2;
 WWDG_HandleTypeDef hwwdg;
 DMA_HandleTypeDef hdma_adc1;
-TIM_HandleTypeDef htim2,htim3,htim4,htim6;
+TIM_HandleTypeDef htim2,htim3,htim4,htim6,htim7;
 
 
 void SystemClock_Config(void);
@@ -63,6 +63,7 @@ static void MX_TIM4_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
+static void MX_TIM7_Init(void);
 
 
 void SysInit(void);
@@ -126,6 +127,7 @@ void SysInit()
   MX_TIM2_Init();
   MX_TIM6_Init();
   MX_ADC1_Init();
+  MX_TIM7_Init();
 
 
 }
@@ -165,6 +167,43 @@ void Init(void){
     PwrHitFlag = PwrHit_STALL;
   }
   #endif
+}
+/**
+  * @brief TIM7 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM7_Init(void)
+{
+
+  /* USER CODE BEGIN TIM7_Init 0 */
+
+  /* USER CODE END TIM7_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM7_Init 1 */
+
+  /* USER CODE END TIM7_Init 1 */
+  htim7.Instance = TIM7;
+  htim7.Init.Prescaler = 174;
+  htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim7.Init.Period = 1999;
+  htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim7, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM7_Init 2 */
+
+  /* USER CODE END TIM7_Init 2 */
+
 }
 /**
   * @brief ADC1 Initialization Function
