@@ -1,5 +1,4 @@
 #include "stm32g4xx_it.h"
-static volatile int AlownReturn = 0;
 
 void HardFault_Handler()
 {

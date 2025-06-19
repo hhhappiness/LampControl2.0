@@ -98,7 +98,7 @@ const APP_PARA AppParaMin=		//最小值
 
 	Trig_Internal, 	//int TrigMode;	//触发模式
 	0,				//int SpeedUnit; 	//速度模式，频率/转速
-	0,
+	0,  				//int Algorithm;   //FFT
 	100,				//int LampFreq;	//内触发频率
 
 	600,				//int Rpm;		//内触发转速
@@ -211,6 +211,7 @@ void VerifyParas(void)
 	//VerifyParaToDefault(LightType);
 	AppPara.TrigMode = Trig_Internal;
 	VerifyParaToDefault(SpeedUnit);
+	VerifyParaToDefault(Algorithm);
 	VerifyParaToDefault(LampFreq);
 	VerifyParaToDefault(Rpm);
 	VerifyParaToDefault(Delay_SinglePulse);
