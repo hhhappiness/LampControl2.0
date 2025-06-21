@@ -80,7 +80,7 @@ void ScanAdcPage::Show()
 	//显示窗口标题
 	if(AppPara.Language == Lang_Chinese){
 		DispStr8((LcmXPixel-6*DEFAULT_HANZI_WIDTH-3*DEFAULT_ASCII_WIDTH)/2,0,"正在采集数据...");
-        DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH)/2,DIGITAL_Y,"算法:");
+        DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-4*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"算法:");
 	}else{
 		DispStr8((LcmXPixel-8*DEFAULT_HANZI_WIDTH)/2,0,"Collecting Data...");
         DispStr8(2,DIGITAL_Y,"Algorithm:");
@@ -89,7 +89,8 @@ void ScanAdcPage::Show()
 	//显示控件
 	GUI_Page::Show(0);
 	//显示算法
-	DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-4*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,AlgorithmStr_Cn[AppPara.Algorithm]);	
+	DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-4*DEFAULT_ASCII_WIDTH)/2 + \
+            2*DEFAULT_HANZI_WIDTH+DEFAULT_ASCII_WIDTH,DIGITAL_Y,AlgorithmStr_Cn[AppPara.Algorithm]);	
 	Update();
 }
 

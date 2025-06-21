@@ -49,7 +49,7 @@ void Encoder_Update(void)
   encoderState.counter = __HAL_TIM_GET_COUNTER(&htim4);
   if(encoderState.counter == lastCounter) {
     InEncoderBuf(0);//如果没有变化则存入0,并推动缓冲区变化
-    GetEncoder();  
+    if (encoder_buff_num>0) encoder_buff_num--;
     return; //如果计数值没有变化，直接返回
   }
   /* 计算变化量（包含方向） */
@@ -65,22 +65,33 @@ void Encoder_Update(void)
 int GetEncoder()
 {
   /* 返回当前差值 */
+  int ret = 0;
   s8 difference = EncoderOutBuf;
   s8 delta_diff = difference - encoderState.encoder_diff.diff[3];  //差值变化率，判断旋钮转动快慢
+  u8 abs_delta_diff = delta_diff>0?delta_diff:-delta_diff;   //取绝对值
   u8 abs_diff = difference>0?difference:-difference;   //取绝对值
+  static u8 rotateTime = 0; //旋转时间
 
   encoderState.encoder_diff.diff_buffer <<= 8; // 左移8位
-  encoder_buff_num--; // 减少缓冲区数据个数
+  if(encoder_buff_num>0) encoder_buff_num--; // 减少缓冲区数据个数
+  
+  s8 direction = difference > 0 ? 1 : -1; // 判断方向
+  if(abs_diff<=5){
+    ret = (int)difference;  //小数点后两位开始加
+  }
+  else if(abs_diff <=12){
+    ret =  (int)direction*(abs_diff-5)*10 ;  //小数点后一位开始加
+    rotateTime = 0;
+  }else if(abs_diff <=20){
+    rotateTime++; 
+    if(rotateTime>=4) {
+      ret =  (int)direction*(abs_diff-12)* 700;  //提高倍率
+    }else{
+      ret =  (int)direction*(abs_diff-12) *100;  //个位开始加
+    } 
+  }
 
-  if(abs_diff<=5 || delta_diff <=5)
-    return (int)difference;  //小数点后两位开始加
-  else if(delta_diff <=15)
-    return (int)(difference-5)*10 ;  //小数点后一位开始加
-  else if(delta_diff <=50)
-    return (int)(difference-15.0) *100;  //个位开始加
-  else if(delta_diff <=70)
-    return (int)(difference-50.0)*2* 100;  //十位开始加
-  else return (int)difference * 100;  //百位开始加
+  return ret;
 
 }
 
@@ -99,7 +110,7 @@ void InEncoderBuf(s8 x){        //最早数据在diff[3]，最新数据在diff[0
 		  encoderState.encoder_diff.diff[0]=x;
       break;
     default:
-      encoderState.encoder_diff.diff[2]=x;  //从第三位往前开始存，第四位作为历史值随整体左移而存在
+      encoderState.encoder_diff.diff[2]=x;  //从第三位往前开始存，第四位作为历史值随整体左移而被赋值
       encoder_buff_num=1;
       break;
     }

@@ -192,7 +192,7 @@ void TIM6_DAC_IRQHandler(void)
 	HAL_TIM_IRQHandler(&htim6);//标志位之类的
 	HAL_IncTick();  //替代systick中断进行每ms计数
 	flag_1ms++;   //1000/s，32位总共可以计数到2^32-1
-	
+		
 	if(flag_1ms%50 == 0) { //每50ms执行一次
 		Encoder_Update();
 		KeyInput(); //按键输入检测
