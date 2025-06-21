@@ -89,11 +89,6 @@ int main(void)
   //printf("CmBacktrace Test...\r\n");
   //cm_backtrace_init(APPNAME, HARDWARE_VERSION, SOFTWARE_VERSION);
   CMainPage & MainPage= CMainPage::GetInstance();
-  // ScanAdcPage& MeasurePage = ScanAdcPage::GetInstance();
-	// MeasurePage.Init();
-	// MeasurePage.Show();
-  // int Ret = MeasurePage.Loop();	 
-	// MainPage.SpeedCtrl.OnSetVal(Ret); //设置SpeedCtrl的值
   while(1)
   {
     MainPage.Init();
@@ -409,7 +404,7 @@ static void MX_TIM6_Init(void)
   htim6.Instance = TIM6;
   htim6.Init.Prescaler = 174;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = 4999;
+  htim6.Init.Period = 99; //周期为1ms
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
   {

@@ -374,7 +374,6 @@ int KeyInput(void)
                 ReleaseCnt++;
                 if(PressCnt>=2){
                     InKey_Press(); //若按压次数大于等于2，则认为按下但没长按，保存按键
-                    //printf("pressed \r\n");
                     PressCnt=0;
                 }
                 if (ReleaseCnt>=KeyPushTimes){//确认释放

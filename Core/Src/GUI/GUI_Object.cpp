@@ -228,7 +228,7 @@ int GUI_Num::OnSetVal(int val){
 void GUI_Progress ::Display(){
 	Clear();
 	pCurrPage->Rectangle(x,y,Width,Height);
-	int x0;
+	u8 x0;
 	int w = Width -4;
 	int End = x + Width - 2;
 	int Range = Max - Min;

@@ -692,7 +692,7 @@
             <data>
                 <extensions></extensions>
                 <cmdline></cmdline>
-                <hasPrio>1</hasPrio>
+                <hasPrio>8</hasPrio>
                 <buildSequence>inputOutputBased</buildSequence>
             </data>
         </settings>
@@ -753,7 +753,7 @@
                 </option>
                 <option>
                     <name>IlinkLogFile</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IlinkLogInitialization</name>
@@ -956,7 +956,7 @@
                 </option>
                 <option>
                     <name>IlinkStackAnalysisEnable</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IlinkStackControlFile</name>
@@ -982,7 +982,7 @@
                 </option>
                 <option>
                     <name>IlinkLogCallGraph</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IlinkIcfFile_AltDefault</name>
@@ -1228,6 +1228,9 @@
                         <name>$PROJ_DIR$\..\Core\Src\GUI\PowerSetupPage.cpp</name>
                     </file>
                     <file>
+                        <name>$PROJ_DIR$\..\Core\Src\GUI\ScanAdcPage.cpp</name>
+                    </file>
+                    <file>
                         <name>$PROJ_DIR$\..\Core\Src\GUI\ScanSpeedPage.cpp</name>
                     </file>
                     <file>
@@ -1235,9 +1238,6 @@
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\Core\Src\GUI\SystemSetupPage.cpp</name>
-                    </file>
-                    <file>
-                        <name>$PROJ_DIR$\..\Core\Src\GUI\TestPage.cpp</name>
                     </file>
                 </group>
                 <file>

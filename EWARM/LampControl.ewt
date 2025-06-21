@@ -1361,11 +1361,11 @@
                 </option>
                 <option>
                     <name>GenRtcEnableBoundsChecking</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>GenRtcCheckPtrsNonInstrMem</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>GenRtcTrackPointerBounds</name>
@@ -1373,7 +1373,7 @@
                 </option>
                 <option>
                     <name>GenRtcCheckAccesses</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>GenRtcGenerateEntries</name>
@@ -1385,7 +1385,7 @@
                 </option>
                 <option>
                     <name>GenRtcIntOverflow</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GenRtcIncUnsigned</name>
@@ -1393,7 +1393,7 @@
                 </option>
                 <option>
                     <name>GenRtcIntConversion</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GenRtcInclExplicit</name>
@@ -1401,7 +1401,7 @@
                 </option>
                 <option>
                     <name>GenRtcIntShiftOverflow</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GenRtcInclUnsignedShiftOverflow</name>
@@ -1409,11 +1409,11 @@
                 </option>
                 <option>
                     <name>GenRtcUnhandledCase</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GenRtcDivByZero</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GenRtcEnable</name>
@@ -1421,7 +1421,7 @@
                 </option>
                 <option>
                     <name>GenRtcCheckPtrsNonInstrFunc</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
             </data>
         </settings>
@@ -1552,6 +1552,9 @@
                         <name>$PROJ_DIR$\..\Core\Src\GUI\PowerSetupPage.cpp</name>
                     </file>
                     <file>
+                        <name>$PROJ_DIR$\..\Core\Src\GUI\ScanAdcPage.cpp</name>
+                    </file>
+                    <file>
                         <name>$PROJ_DIR$\..\Core\Src\GUI\ScanSpeedPage.cpp</name>
                     </file>
                     <file>
@@ -1559,9 +1562,6 @@
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\Core\Src\GUI\SystemSetupPage.cpp</name>
-                    </file>
-                    <file>
-                        <name>$PROJ_DIR$\..\Core\Src\GUI\TestPage.cpp</name>
                     </file>
                 </group>
                 <file>

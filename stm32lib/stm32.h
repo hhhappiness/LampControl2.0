@@ -32,17 +32,7 @@ __INLINE void InitSysTick(){
     #if AHBClk == 72000000 || AHBClk == 70000000 || AHBClk == 168000000
     //主频较高时用ABH clock/8
     SysTick->CTRL = (0 << SysTick_CTRL_CLKSOURCE_Pos) //0: AHB clock/8, 1: AHB clock
-                | (0<<SysTick_CTRL_TICKINT_Pos)  
-                | (1<<SysTick_CTRL_ENABLE_Pos);   /* Disable SysTick IRQ and SysTick Timer */
-    #elif AHBClk == 36000000 || AHBClk == 32000000
-    SysTick->CTRL = (0 << SysTick_CTRL_CLKSOURCE_Pos) //0: AHB clock/8, 1: AHB clock
-                | (0<<SysTick_CTRL_TICKINT_Pos)  
-                | (1<<SysTick_CTRL_ENABLE_Pos);   /* Enable SysTick IRQ and SysTick Timer */
-                
-    #elif AHBClk == 8000000 || AHBClk ==16000000
-    //主频较低时用ABH clock/8
-    SysTick->CTRL = (1 << SysTick_CTRL_CLKSOURCE_Pos) //0: AHB clock/8, 1: AHB clock
-                | (0<<SysTick_CTRL_TICKINT_Pos)  
+                | (0 << SysTick_CTRL_TICKINT_Pos)   /* disable SysTick interrupt 原先在systick中断实现的转移到别处*/
                 | (1<<SysTick_CTRL_ENABLE_Pos);   /* Enable SysTick IRQ and SysTick Timer */
     #else
         #error please define the ABH clock

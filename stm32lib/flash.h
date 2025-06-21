@@ -15,8 +15,8 @@ extern "C" {
 #include "stm32g4xx_hal_flash.h"
 
 /* Flash存储参数定义 */
-#define FLASH_USER_START_ADDR   0x0800F800   /* Flash起始地址 */
-#define FLASH_USER_END_ADDR     0x0800FFFF   /* Flash结束地址 */
+#define FLASH_USER_START_ADDR   0x0801F000   /* Flash起始地址 */
+#define FLASH_USER_END_ADDR     0x0801FFFF   /* Flash结束地址 */
 
 /* 函数声明 */
 

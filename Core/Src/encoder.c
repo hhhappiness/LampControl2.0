@@ -47,7 +47,11 @@ void Encoder_Update(void)
   s8 diff=0;
   /* 获取当前计数值 */
   encoderState.counter = __HAL_TIM_GET_COUNTER(&htim4);
-  if(encoderState.counter == lastCounter) return; //如果计数值没有变化，则直接返回
+  if(encoderState.counter == lastCounter) {
+    InEncoderBuf(0);//如果没有变化则存入0,并推动缓冲区变化
+    GetEncoder();  
+    return; //如果计数值没有变化，直接返回
+  }
   /* 计算变化量（包含方向） */
   diff = encoderState.counter - lastCounter;
   /* 更新总步数 */
@@ -63,11 +67,12 @@ int GetEncoder()
   /* 返回当前差值 */
   s8 difference = EncoderOutBuf;
   s8 delta_diff = difference - encoderState.encoder_diff.diff[3];  //差值变化率，判断旋钮转动快慢
-  s8 abs_diff = difference>0?difference:-difference;   //取绝对值
+  u8 abs_diff = difference>0?difference:-difference;   //取绝对值
 
   encoderState.encoder_diff.diff_buffer <<= 8; // 左移8位
   encoder_buff_num--; // 减少缓冲区数据个数
-  if(difference<=5 || delta_diff <=5)
+
+  if(abs_diff<=5 || delta_diff <=5)
     return (int)difference;  //小数点后两位开始加
   else if(delta_diff <=15)
     return (int)(difference-5)*10 ;  //小数点后一位开始加
@@ -79,7 +84,7 @@ int GetEncoder()
 
 }
 
-void InEncoderBuf(u8 x){
+void InEncoderBuf(s8 x){        //最早数据在diff[3]，最新数据在diff[0]
     switch (encoder_buff_num) {
     case 1:
       encoderState.encoder_diff.diff[1]=x;

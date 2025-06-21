@@ -10,38 +10,30 @@ namespace gui {
 class ScanAdcPage : public GUI_Page
 {
 
-private:  
+public:  
     ScanAdcPage();   //构造函数是私有的  
 
-    ScanAdcPage(const ScanAdcPage &);  
-    ScanAdcPage & operator = (const ScanAdcPage &);  
-
 	GUI_Page * bakPage;
+	GUI_Speed &SpeedCtrl;
+	GUI_Progress* Progress;
+	GUI_NumText* Freq[4];
 
 	enum{
 		iProgress,
+		iFreq1,
 		iFreq2,
 		iFreq3,
 		iFreq4,
 		MaxObjNum
 	};
 
-	GUI_Speed &SpeedCtrl;
 	int Val;
 	int BakX,BakY;
 
-	int Step;	///步进值，控制进度条移动速度
 	
 	void OnStep(int step);
 	void StopScan();
 	void StartScan();
-
-public:	
-    static ScanAdcPage & GetInstance()  
-    {  
-        static ScanAdcPage instance;   //局部静态变量  
-        return instance;  
-    } 	
 	virtual void Init();
 	void UnInit();
 	void ShowResults(int* freqs);
