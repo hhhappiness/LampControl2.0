@@ -132,7 +132,6 @@ int ScanAdcPage::Loop()
     uint32_t remaining = BUFFER_SIZE,completion_percentage=0; // 剩余传输数量
     // StartScan(); // 启动ADC采集
     while(remaining>0){ // 等待DMA传输完成
-        delay_ms(1000);
         // 获取剩余传输数量
         // remaining = __HAL_DMA_GET_COUNTER(&hdma_adc1);
         
@@ -141,6 +140,8 @@ int ScanAdcPage::Loop()
         completion_percentage = 19900 * (BUFFER_SIZE - remaining) / BUFFER_SIZE + 100;
         remaining -= BUFFER_SIZE/5;
         Progress->SetValue(completion_percentage); //更新进度条
+        delay_ms(1000);
+
     }
     int* freqs = compute_fft_peak_frequencies(adc_buffer, 500, BUFFER_SIZE); // 计算FFT峰值频率
     #endif
