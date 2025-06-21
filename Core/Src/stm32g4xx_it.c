@@ -94,7 +94,7 @@ void NMI_Handler(void)
   }
   /* USER CODE END NonMaskableInt_IRQn 1 */
 }
-#if 0
+#if 1
 /**
   * @brief This function handles Hard fault interrupt.
   */

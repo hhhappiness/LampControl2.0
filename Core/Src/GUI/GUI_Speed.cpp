@@ -122,6 +122,7 @@ void GUI_Speed::_OnKeyLongUpDown(int key)
 ///重载了OnEditPage()，替换缺省数值编辑界面为扫频界面
 int GUI_Speed::OnEditPage()
 {
+
 	ScanSpeedPage & NumPage = ScanSpeedPage::GetInstance();
 	NumPage.Init();
 	NumPage.Show();

@@ -1,5 +1,5 @@
-#ifndef _GUI_NUM_PAGE_HPP_
-#define _GUI_NUM_PAGE_HPP_
+#ifndef _GUI_SCAN_SPEED_PAGE_HPP_
+#define _GUI_SCAN_SPEED_PAGE_HPP_
 #include "ByteConstSymbol.h"
 
 #include "GUI_page.hpp"
