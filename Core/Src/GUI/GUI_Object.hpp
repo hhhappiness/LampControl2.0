@@ -116,6 +116,7 @@ public:
 	,  pVal(val), DigitalNum(digital_num), Decimal(decimal)
 	{
 		Enable = false;
+		SelectMode = NotSelected;	///<缺省不选中
 	}
 
 	int *pVal;	///<控件绑定的数值的指针，限制为int型。
@@ -320,7 +321,7 @@ public:
 	GUI_Progress(Pos_t w, Pos_t h=GUI_PROGRES_HEIGHT)
 	: GUI_Object(w, h)
 	{
-		
+		Enable = false;
 	}
 	
 	s32 Val;   //控件关联的变量

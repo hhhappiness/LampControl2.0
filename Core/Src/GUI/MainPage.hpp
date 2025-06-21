@@ -15,7 +15,7 @@ private:
     CMainPage & operator = (const CMainPage &);	
 	
 	void OnKeyMode();
-	void OnMeasureMode();
+	
 	
 	inline void PageInit_Internal();
 	inline void PageInit_SinglePulse();
@@ -27,6 +27,7 @@ private:
 	void ShowChargeIcon(bool enable=true);	///<显示充电状态的图标
 	void ShowTrigModeIcon();				///<显示触发模式的图标	
 public:
+	void OnMeasureMode();
 	/*
 	enum{
 		iSpeed,

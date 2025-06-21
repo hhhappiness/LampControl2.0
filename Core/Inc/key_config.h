@@ -24,10 +24,10 @@ typedef union{
     u8 Key[4];
 }KEY_BUF;
 
-extern RTC_HandleTypeDef hrtc;
+extern TIM_HandleTypeDef htim6;
 //不同板子用得不同定时器
-#define DisableKeyTimInt() HAL_RTCEx_DeactivateWakeUpTimer(&hrtc) //禁按键定时器中断
-#define EnableKeyTimInt()  if (HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 63, RTC_WAKEUPCLOCK_RTCCLK_DIV16) != HAL_OK) Error_Handler();//开按键定时器中断
+#define DisableKeyTimInt() HAL_TIM_Base_Stop_IT(&htim6) //禁按键定时器中断
+#define EnableKeyTimInt() HAL_TIM_Base_Start_IT(&htim6);//开按键定时器中断
 
 
 

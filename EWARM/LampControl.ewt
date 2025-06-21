@@ -1365,7 +1365,7 @@
                 </option>
                 <option>
                     <name>GenRtcCheckPtrsNonInstrMem</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>GenRtcTrackPointerBounds</name>
@@ -1373,7 +1373,7 @@
                 </option>
                 <option>
                     <name>GenRtcCheckAccesses</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>GenRtcGenerateEntries</name>
@@ -1385,7 +1385,7 @@
                 </option>
                 <option>
                     <name>GenRtcIntOverflow</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GenRtcIncUnsigned</name>
@@ -1401,7 +1401,7 @@
                 </option>
                 <option>
                     <name>GenRtcIntShiftOverflow</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GenRtcInclUnsignedShiftOverflow</name>
@@ -1409,11 +1409,11 @@
                 </option>
                 <option>
                     <name>GenRtcUnhandledCase</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GenRtcDivByZero</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GenRtcEnable</name>
@@ -1421,7 +1421,7 @@
                 </option>
                 <option>
                     <name>GenRtcCheckPtrsNonInstrFunc</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
             </data>
         </settings>

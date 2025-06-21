@@ -23,9 +23,8 @@ typedef struct {
 /* 函数声明 */
 void Encoder_Init(void);
 void Encoder_Update(void);
-void encoder_test_pwmAdjust();
 s32 GetEncoder(void);
-void InEncoderBuf(u8 x);
+void InEncoderBuf(s8 x);
 void Encoder_Update_WithThreshold(void);
 void Encoder_Update_TimeWindow(void);
 void Encoder_Update_Median(void);

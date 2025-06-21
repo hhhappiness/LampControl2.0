@@ -1,6 +1,5 @@
 #include "ScanAdcPage.hpp"
 #include "Icons.hpp"
-#include "GUI_Speed.hpp"
 #include "ctrl.h"
 #include "AppParaCommon.h"
 #include "stm32g4xx_hal.h"
@@ -30,7 +29,7 @@ namespace gui {
 #define DOWN_ARROW_X	(LcmXPixel-15)
 #define OBJECT_ALG 0
 
-static GUI_Progress Progress(LcmXPixel,16);
+
 static const char *AlgorithmStr_Cn[AlgNum]={
 	"FFT",
 	"FR 滤波",
@@ -45,8 +44,8 @@ ScanAdcPage::ScanAdcPage()
 : GUI_Page(MaxObjNum, SecondDispBuf)
 , SpeedCtrl(GUI_Speed::GetInstance())
 {
-	ObjList.Append(&Progress);
-	
+    Progress = new GUI_Progress(LcmXPixel,16);
+	ObjList.Append(Progress);
 }
 
 
@@ -56,14 +55,14 @@ void ScanAdcPage::Init()
 	bakPage = pCurrPage;
 	pCurrPage = this;
 	//进度条设置
-	Progress.SetPos(0,24);
-	Progress.SetRange(SpeedCtrl.Min, SpeedCtrl.Max);
-	Progress.SetValue(*SpeedCtrl.pVal);
-    Step = LcmXPixel / 5*100; // 设置步进值为屏幕宽度的1/5,*100是为了配合setValue计算
+	Progress->SetPos(0,24);
+	Progress->SetRange(SpeedCtrl.Min, SpeedCtrl.Max);
+	Progress->SetValue(0); //初始值
 }
 
 void ScanAdcPage::UnInit()
 {
+    ObjList.Delete(0,MaxObjNum); // 删除所有New创建的控件
 	//退出前恢复pCurrPage指针
 	pCurrPage = bakPage;
 	pCurrPage->Update();//恢复遮盖部分的显示	
@@ -77,33 +76,43 @@ void ScanAdcPage::Show()
 	//Rectangle(0, 0, LcmXPixel, LcmYPixel);
 	//显示窗口标题
 	if(AppPara.Language == Lang_Chinese){
-		DispStr8((LcmXPixel-8*DEFAULT_HANZI_WIDTH)/2,0,"正在采集数据...");
-        DispStr8(2,DIGITAL_Y,"算法:");
+		DispStr8((LcmXPixel-6*DEFAULT_HANZI_WIDTH-3*DEFAULT_ASCII_WIDTH)/2,0,"正在采集数据...");
+        DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-4*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"算法:");
 	}else{
 		DispStr8((LcmXPixel-8*DEFAULT_HANZI_WIDTH)/2,0,"Collecting Data...");
         DispStr8(2,DIGITAL_Y,"Algorithm:");
 	}
 	
 	//显示控件
-	GUI_Page::Show();
+	GUI_Page::Show(0);
 	//显示算法
-	DispStr8(DIGITAL_X,DIGITAL_Y,AlgorithmStr_Cn[AppPara.Algorithm]);	
+	DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-4*DEFAULT_ASCII_WIDTH)/2 + \
+            2*DEFAULT_HANZI_WIDTH+DEFAULT_ASCII_WIDTH,DIGITAL_Y,AlgorithmStr_Cn[AppPara.Algorithm]);	
 	Update();
 }
 
 void ScanAdcPage::ShowResults(int* freqs){
+    Clear(); // 清除显示区域
+    if(AppPara.Language == Lang_Chinese){
+		DispStr8((LcmXPixel-4*DEFAULT_HANZI_WIDTH-DEFAULT_ASCII_WIDTH)/2,0,"算法结果:");
+        DispStr8((LcmXPixel-3*DEFAULT_HANZI_WIDTH)/2,DIGITAL_Y,"请确认");
+	}else{
+		DispStr8((LcmXPixel-8*DEFAULT_HANZI_WIDTH)/2,0,"Algorithm Results:");
+        DispStr8(2,DIGITAL_Y,"Please confirm:");
+	}
     //显示四个最大幅值代表的频率
-    ObjList.Delete(0);
-    ObjList.Append(new GUI_NumText(freqs, 2));
-    ObjList.Append(new GUI_NumText(freqs+1, 2));
-    ObjList.Append(new GUI_NumText(freqs+2, 2));
-    ObjList.Append(new GUI_NumText(freqs+3, 2));
-    
+    Freq[0] = new GUI_NumText(freqs, 3, 0, &Song_Width9_ASCII); // 创建四个频率文本控件
+    Freq[1] = new GUI_NumText(freqs+1, 3, 0, &Song_Width9_ASCII);    
+    Freq[2] = new GUI_NumText(freqs+2, 3, 0, &Song_Width9_ASCII);
+    Freq[3] = new GUI_NumText(freqs+3, 3, 0, &Song_Width9_ASCII);
     for(int i = 0; i < 4; i++){
-        ObjList[i]->SetPos(2 + i * (2 * DEFAULT_ASCII_WIDTH+4), 24);  //set每个控件的位置
+        Freq[i]->SetPos(2 + (i) * (3 * 9+4), 24);  //set每个控件的位置
+        Freq[i]->Enable = true; // 启用焦点功能
+        Freq[i]->Align = AlignRight; // 右对齐
+        ObjList.Append(Freq[i]);
     }
-    SetFocus(0,false);
-    GUI_Page::Show(); //显示所有控件
+    SetFocus(iFreq1,false);
+    GUI_Page::Show(1, 4); //显示除了进度条和算法控件之外的其他控件
     Update(); // 更新显示
 
 }
@@ -117,24 +126,22 @@ void ScanAdcPage::ShowResults(int* freqs){
 int ScanAdcPage::Loop()
 {
     #if 1
-    uint32_t remaining;
-    StartScan(); // 启动ADC采集
-    while(DMA_flag == 0){ // 等待DMA传输完成
-        // delay_ms(1000);
+    uint32_t remaining = BUFFER_SIZE,completion_percentage=0; // 剩余传输数量
+    // StartScan(); // 启动ADC采集
+    while(remaining>0){ // 等待DMA传输完成
         // 获取剩余传输数量
         // remaining = __HAL_DMA_GET_COUNTER(&hdma_adc1);
         
+         
         // 计算已完成百分比
-        // int completion_percentage = 19900 * (BUFFER_SIZE - remaining) / BUFFER_SIZE + 100;
-        Progress.SetValue(200*100); //更新进度条
+        completion_percentage = 19900 * (BUFFER_SIZE - remaining) / BUFFER_SIZE + 100;
+        remaining -= BUFFER_SIZE/5;
+        Progress->SetValue(completion_percentage); //更新进度条
+        delay_ms(1000);
+
     }
-    fft_peaks = compute_fft_peak_frequencies(adc_buffer, 500, BUFFER_SIZE); // 计算FFT峰值频率
-    int freqs[4] = {
-        (int)(fft_peaks.frequencies[0] + 0.5f),
-        (int)(fft_peaks.frequencies[1] + 0.5f),
-        (int)(fft_peaks.frequencies[2] + 0.5f),
-        (int)(fft_peaks.frequencies[3] + 0.5f)
-    };
+    int* freqs = compute_fft_peak_frequencies(adc_buffer, 500, BUFFER_SIZE); // 计算FFT峰值频率
+    #endif
     ShowResults(freqs); // 显示结果
     
     TKey = GetTimerCount();
@@ -150,12 +157,14 @@ int ScanAdcPage::Loop()
 					case KEY_MULT_SHOT : 	FocusNext();  break;
 					case KEY_ENTER_SHOT : 
 						int ChosenFreq = OnEnter();
+                        UnInit();
 						return ChosenFreq;
+					default:break;
 				}
 			}
 		}
 	}
-#endif
+
 }
 
 

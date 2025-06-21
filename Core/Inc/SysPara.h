@@ -9,10 +9,9 @@
 #include "type.h"
 #define SYS_PARA_MAGIC_NUM 		FOURCHAR2INT('L','A','M','2')	//Lamp Control 2
 #define SYS_PARA_VERSION		(1<<16 | 1)	//1.1
-#define SYS_PARA_ADDRESS		0x0800FC00
 //#define SYS_PARA_ADDRESS		0x0800FC00
+#define SYS_PARA_ADDRESS		0x0801F800
 
-#define SYS_PARA_SIZE			128
 
 
 

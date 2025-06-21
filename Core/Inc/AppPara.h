@@ -4,10 +4,9 @@
 #include "type.h"
 #define APP_PARA_MAGIC_NUM 		FOURCHAR2INT('L','A','M','2')	//Lamp Control 2
 #define APP_PARA_VERSION		(1<<16 | 4)	//1.2
-#define APP_PARA_ADDRESS		0x0800F800
-//#define APP_PARA_ADDRESS		0x0801F800
+#define APP_PARA_ADDRESS		0x0801F000
 
-#define APP_PARA_SIZE			128
+#define APP_PARA_SIZE			132
 
 ///触发模式定义。有些触发模式下部分设置相同，用位定义便于同时比较多个械式。
 #define Trig_Internal 		0x01

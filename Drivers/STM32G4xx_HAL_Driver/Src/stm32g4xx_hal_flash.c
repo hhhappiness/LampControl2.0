@@ -233,7 +233,11 @@ HAL_StatusTypeDef HAL_FLASH_Program(uint32_t TypeProgram, uint32_t Address, uint
     /* Flush the caches to be sure of the data consistency */
     FLASH_FlushCaches();
   }
-
+  else
+    {
+      return status;
+      /* Nothing to do */
+    }
   /* Process Unlocked */
   __HAL_UNLOCK(&pFlash);
 

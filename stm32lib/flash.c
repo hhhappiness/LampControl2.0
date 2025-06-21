@@ -92,11 +92,16 @@ HAL_StatusTypeDef EraseUserDataFlash(u32 addr)
     uint32_t page_error = 0;
     FLASH_EraseInitTypeDef erase_init;
     
-    /* 计算页号 (G4系列使用页号而非地址) */
-    uint32_t page_number = (FLASH_USER_START_ADDR - FLASH_BASE) / FLASH_PAGE_SIZE;
+    /* 验证地址范围 */
+    if (addr < FLASH_USER_START_ADDR || addr >= FLASH_USER_END_ADDR) {
+        return HAL_ERROR;
+    }
+    
+    /* 计算页号 (使用传入的地址) */
+    uint32_t page_number = (addr - FLASH_BASE) / FLASH_PAGE_SIZE;
     
     /* 配置擦除参数 */
-    erase_init.TypeErase   = addr;
+    erase_init.TypeErase   = FLASH_TYPEERASE_PAGES;
     erase_init.Banks       = FLASH_BANK_1; /* 根据实际地址选择Bank */
     erase_init.Page        = page_number;
     erase_init.NbPages     = 1; /* 擦除1页 */
@@ -113,29 +118,23 @@ HAL_StatusTypeDef EraseUserDataFlash(u32 addr)
     
     /* 执行擦除 */
     status = HAL_FLASHEx_Erase(&erase_init, &page_error);
-    if (status != HAL_OK)
-    {
-        HAL_FLASH_Lock();
-        return status;
-    }
     
-    /* 锁定Flash */
-    status = HAL_FLASH_Lock();
+    /* 锁定Flash，无论擦除是否成功 */
+    HAL_StatusTypeDef lock_status = HAL_FLASH_Lock();
     
-    return status;
+    /* 如果擦除失败则返回擦除错误状态，否则返回锁定状态 */
+    return (status != HAL_OK) ? status : lock_status;
 }
+
 
 /**
  * @brief 将用户数据写入Flash
  * @param data 用户数据结构体指针
  * @return HAL状态
  */
-HAL_StatusTypeDef WriteUserDataToFlash(u32 addr,u32 *data,u32 len)
+HAL_StatusTypeDef WriteUserDataToFlash(u32 addr, u32 *data, u32 len)
 {
-    HAL_StatusTypeDef status = HAL_OK;
-    uint32_t address = addr;
-    uint64_t *source_addr = (uint64_t *)data;
-    uint32_t data_length_64 = (len + 7) / 8; /* 向上取整到64位 */
+    HAL_StatusTypeDef status;
     
     /* 先擦除Flash页 */
     status = EraseUserDataFlash(addr);
@@ -154,23 +153,29 @@ HAL_StatusTypeDef WriteUserDataToFlash(u32 addr,u32 *data,u32 len)
     /* 清除所有Flash标志位 */
     __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
     
-    /* 按64位写入数据 */
+    /* 计算64位双字的数量 */
+    uint32_t data_length_64 = (len + 7) / 8;
+    uint64_t *source_addr = (uint64_t *)data;
+    uint32_t address = addr;
+    
+    /* 使用快速内存访问写入数据 */
     for (uint32_t i = 0; i < data_length_64; i++)
     {
         status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, address, source_addr[i]);
         if (status != HAL_OK)
         {
-            HAL_FLASH_Lock();
-            return status;
+            return status; /* 如果编程失败，立即返回错误 */
         }
         address += 8; /* 移动到下一个64位位置 */
     }
     
-    /* 锁定Flash */
-    status = HAL_FLASH_Lock();
+    /* 始终锁定Flash，无论是否成功 */
+    HAL_StatusTypeDef lock_status = HAL_FLASH_Lock();
     
-    return status;
+    /* 如果编程过程中出错，返回编程错误；否则返回锁定状态 */
+    return (status != HAL_OK) ? status : lock_status;
 }
+
 
 
 /**

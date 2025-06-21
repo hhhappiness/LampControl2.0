@@ -113,14 +113,13 @@ void RTC_WKUP_IRQHandler(void)  //50ms为周期
 	if((PwrKey_Status == PwrKey_Pressed)&&(!GPI_KEY_ENTER)){
 			ShutDown();
 	}
-	//KeyInput(); //按键输入检测
+	//KeyInput(); //按键输入检测,转移到TIM6中断中处理
 	
 	AnyKeyPressed_Control();//检测到任意键按下需要的处理
 	
 	//CloseDelay_Handler();//无操作状态下，延时关机处理
 	
 	Blk_Control();//背光控制处理
-	//encoder_test_pwmAdjust(); //编码器测试函数
 	//只有所有的系统初始化完毕后，才允许输出
 	if(Status_MCU != Status_idle) {
 		//控制闪光输出的处理

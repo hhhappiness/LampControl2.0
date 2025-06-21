@@ -449,7 +449,7 @@ void GUI_DisplayBuf::LineHWhite(u8 x, u8 y, u8 len)
 {
 	u8 *pDst = pPix + (y/8)*Width + x;	
 	u8 LowBits=y & 0x07;
-	u8 mask = ~(1<<LowBits);//Î»ÑÚÂë
+	u8 mask = ~(u8)(1<<LowBits);//Î»ÑÚÂë
 	for(int i=0;i<len;i++){
 		*pDst &= mask;
 		pDst++;
