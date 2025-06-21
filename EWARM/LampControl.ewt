@@ -1357,11 +1357,11 @@
                 <debug>1</debug>
                 <option>
                     <name>GenRtcDebugHeap</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>GenRtcEnableBoundsChecking</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>GenRtcCheckPtrsNonInstrMem</name>
@@ -1417,7 +1417,7 @@
                 </option>
                 <option>
                     <name>GenRtcEnable</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>GenRtcCheckPtrsNonInstrFunc</name>
@@ -1552,6 +1552,9 @@
                         <name>$PROJ_DIR$\..\Core\Src\GUI\PowerSetupPage.cpp</name>
                     </file>
                     <file>
+                        <name>$PROJ_DIR$\..\Core\Src\GUI\ScanAdcPage.cpp</name>
+                    </file>
+                    <file>
                         <name>$PROJ_DIR$\..\Core\Src\GUI\ScanSpeedPage.cpp</name>
                     </file>
                     <file>
@@ -1559,9 +1562,6 @@
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\Core\Src\GUI\SystemSetupPage.cpp</name>
-                    </file>
-                    <file>
-                        <name>$PROJ_DIR$\..\Core\Src\GUI\TestPage.cpp</name>
                     </file>
                 </group>
                 <file>
@@ -1581,6 +1581,9 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Core\Src\encoder.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\Core\Src\HardFault_Handler.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\Core\Src\KeyAndKnob_lamp2.c</name>

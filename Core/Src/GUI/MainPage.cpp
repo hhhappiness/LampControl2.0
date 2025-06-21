@@ -13,8 +13,8 @@
 #include "SysPara.h"
 #include "encoder.h"
 #include "flash.h"
-#include "TestPage.hpp"
-#include "ScanSpeedPage.hpp"
+#include "ScanAdcPage.hpp"
+
 
 extern u32 time_on;
 
@@ -44,20 +44,6 @@ CMainPage::CMainPage()
 	ObjList.Append(&SpeedCtrl);
 }	
 	
-
-void CMainPage::OnMeasureMode()
-{
-	
-	ScanAdcPage* MeasurePage = new ScanAdcPage;
-	MeasurePage->Init();
-	MeasurePage->Show();
-	int Ret = MeasurePage->Loop();	 
-	//返回值则为用户选择的算法计算值，直接将SpeedCtrl的值设置为此值
-	SpeedCtrl.OnSetVal(Ret); //设置SpeedCtrl的值
-	Init(); //重新初始化页面
-	Show();	//显示
-}
-
 ///MainPage主循环
 int CMainPage::Loop()
 {
@@ -240,6 +226,21 @@ void CMainPage::OnKeyMode()
 	Show();	//显示
 }
 
+void CMainPage::OnMeasureMode()
+{
+	#if 0
+	ScanAdcPage& MeasurePage = ScanAdcPage::GetInstance();
+	
+	MeasurePage.Init();
+	
+	MeasurePage.Show();
+	int Ret = MeasurePage.Loop();	 
+	//返回值则为用户选择的算法计算值，直接将SpeedCtrl的值设置为此值
+	SpeedCtrl.OnSetVal(Ret); //设置SpeedCtrl的值
+	#endif
+	Init(); //重新初始化页面
+	Show();	//显示
+}
 
 ///初始化页面中的所有对像，包括菜单、控件
 void CMainPage::Init()

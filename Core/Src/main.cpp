@@ -29,7 +29,6 @@
 #include "SysPara.h"
 #include "encoder.h"
 #include "ctrl_common.h"
-#include "ScanAdcPage.hpp"
 //#include "delay.h"
 //include for test
 //#include "cm_backtrace.h"
@@ -89,11 +88,6 @@ int main(void)
   //printf("CmBacktrace Test...\r\n");
   //cm_backtrace_init(APPNAME, HARDWARE_VERSION, SOFTWARE_VERSION);
   CMainPage & MainPage= CMainPage::GetInstance();
-  // ScanAdcPage& MeasurePage = ScanAdcPage::GetInstance();
-	// MeasurePage.Init();
-	// MeasurePage.Show();
-  // int Ret = MeasurePage.Loop();	 
-	// MainPage.SpeedCtrl.OnSetVal(Ret); //设置SpeedCtrl的值
   while(1)
   {
     MainPage.Init();
@@ -472,7 +466,6 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
-
 
 /**
   * @brief ADC2 Initialization Function
