@@ -24,10 +24,11 @@ typedef union{
     u8 Key[4];
 }KEY_BUF;
 
-extern TIM_HandleTypeDef htim6;
+extern u8 KeyInput_Enable;
+
 //不同板子用得不同定时器
-#define DisableKeyTimInt() HAL_TIM_Base_Stop_IT(&htim6) //禁按键定时器中断
-#define EnableKeyTimInt() HAL_TIM_Base_Start_IT(&htim6);//开按键定时器中断
+#define DisableKeyTimInt() {KeyInput_Enable=0; }//禁按键定时器中断
+#define EnableKeyTimInt() {KeyInput_Enable=1; };//开按键定时器中断
 
 
 

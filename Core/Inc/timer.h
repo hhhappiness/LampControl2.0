@@ -47,6 +47,7 @@ extern void DeactiveTrigPoint(void) ;
 
 //频率转化为要存入counter寄存器的值
 #define TIM2_Hz2clk(hz) ((100*TIMXCLK/(TIM2->PSC+1)+hz/2)/(hz))	//输入的hz是原先100倍：输入的10000实则为100hz
+#define  TIM3_us2clk(S) 	(TIMXCLK/(TIM3->PSC+1)*S/1000000) //us to clk
 #define TIM2_rpm2clk(rpm) TIM2_Hz2clk(rpm/600)	//0.1rmp
 
 

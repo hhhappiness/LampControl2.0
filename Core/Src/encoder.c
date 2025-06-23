@@ -6,6 +6,8 @@
 #include "bsp.h"
 
 #define EncoderOutBuf encoderState.encoder_diff.diff[3] //编码器缓冲区输出
+#define MaxEncoderDiff 0x36 //编码器差值最大值
+
 
 // 优化后的整数幂函数，防止b为负数且更安全
 static inline int pow_int(int base, int exp) {
@@ -37,11 +39,12 @@ void Encoder_Init(void)
     counterMax = 0xFFFF;
   }
 }
-
+u8 encoderUpdate_Enable = 1;
 
 /* 更新编码器状态 */
 void Encoder_Update(void)
 {
+  if(!encoderUpdate_Enable) return; // 如果编码器更新被禁用，直接返回
   static s32 lastCounter=0x7fff; //counter的初始值
   static u32 lastDiff=0;  //初始化lastcounter值
   s8 diff=0;
@@ -63,11 +66,13 @@ void Encoder_Update(void)
 
 int GetEncoder()
 {
+  encoderUpdate_Enable = 1; // 是否禁止编码器更新
   /* 返回当前差值 */
   int ret = 0;
   s8 difference,direction;
-  u8 abs_diff;   //取绝对值
-  static u8 rotateTime = 0; //旋转时间
+  u8 abs_diff,exp;
+  u32 factor;
+  u32 table[9] = {1,2,4,8,16,32,64,128,256}; // 2的幂表
   
   if(encoder_buff_num>0){
     difference = EncoderOutBuf;
@@ -76,24 +81,23 @@ int GetEncoder()
     encoderState.encoder_diff.diff_buffer <<= 8; // 左移8位
     encoder_buff_num--; // 减少缓冲区数据个数
 
-    if(abs_diff<=4){
-      ret = (int)difference;  //小数点后两位开始加
-    }else if(abs_diff <=8){
-      ret =  (int)direction*(abs_diff-5)*10 ;  //小数点后一位开始加
-      rotateTime = 0;
+    if(abs_diff<=5){
+      ret = (int)difference * pow_int(2,0);  //小数点后两位开始加
+    // }else{
+    //   exp = ((abs_diff - 5)* 8+ MaxEncoderDiff/2)/MaxEncoderDiff;
+    //   factor = table[exp];
+    //   ret = (int)(direction  *factor * 10);  //0.1~25.6
+    }else if(abs_diff <=10){
+      ret =  (int)direction*(abs_diff-5)*50 ;  //小数点后一位开始加
     }else{
-      rotateTime++; 
-      if(rotateTime>=2) {
-        ret =  (int)direction*(abs_diff-8)* 800;  //提高倍率
-      }else{
-        ret =  (int)direction*(abs_diff-8) *100;  //个位开始加
-      } 
+        ret =  (int)direction*(abs_diff-10) *1000;  
     }
-
-    return ret;
   }else{
     return 0; //如果没有数据，直接返回0
   }
+
+    return ret;
+
   
 
 }

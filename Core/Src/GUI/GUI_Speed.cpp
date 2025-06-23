@@ -24,7 +24,7 @@ u16 Steps[]={
 
 
 GUI_Speed::GUI_Speed()
-: GUI_Num(NULL,0,0,6,0, &Song24_ASCII) 
+: GUI_Num(NULL,0,0,6,0, &Song_Width16_ASCII) 
 , DispBuf(MainDispBuf)
 {
 	x = SPEED_X;

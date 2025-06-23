@@ -34,6 +34,7 @@ public:
 	
 	//打印字符串时是否可以自动换行。缺省不可以。		
 	int DispStr8(u8 x, u8 y, const char * str, u8 color=0);
+	int DispStr8Font(u8 x, u8 y, const char * str, u8 color, const Font_t * pFontASCII);
 	void DispStr8Align(u8 x, u8 y, u8 w, u8 h, Align_t align, const char * str, u8 color=0);
 	int GetStrPixWidth(const char * str);
 	

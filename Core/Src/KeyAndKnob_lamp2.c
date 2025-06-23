@@ -10,6 +10,7 @@
 #include "key.h"
 #include <stdio.h>
 
+extern int encoder_val;
 //按键状态机
 typedef enum{
     KS_Idle,
@@ -145,8 +146,9 @@ int GetKey(){
     //KeyRepeatNumRead保存上次读的值。根据KeyRepeatNum值的大小换算成不同的值
     if (KeyBufNum==0) {
         tmp=KEY_NULL;
-        if(encoder_buff_num > 0) {  //这里不禁定时器中断
+        if(encoder_buff_num > 0) { 
             tmp = KEY_ENCODER; 
+            encoder_val = GetEncoder(); //读取编码器值
         }
     }else {
         tmp=KeyOutBuf;

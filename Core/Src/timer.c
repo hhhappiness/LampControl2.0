@@ -144,8 +144,7 @@ void StartInternalTrig(void);
 
 
 
-#define  TIM1_100ns2clk(ns) ((ns)*(TIMxCLK/1000000)/10)
-#define  TIM1_us2clk(us) 	((us)*(TIMxCLK/1000000))
+#define  TIMX_us2clk(S) 	(TIMXCLK/(TIM2->PSC+1)*S/1000000) //us to clk
 #define  Hz2Us(hz)	(1000*1000*100 + hz/2)/hz
 //频率过高时强制分频
 __inline int VerifyInterval(void)
@@ -186,6 +185,7 @@ void StartInternalTrig()
 /**
   * @brief This function handles TIM2 global interrupt.
   */
+ u8 KeyInput_Enable = 1;
 void TIM6_DAC_IRQHandler(void)
 {
 	static u32 flag_1ms = 0;
@@ -193,14 +193,15 @@ void TIM6_DAC_IRQHandler(void)
 	HAL_IncTick();  //替代systick中断进行每ms计数
 	flag_1ms++;   //1000/s，32位总共可以计数到2^32-1
 
-	if (flag_1ms%40 == 0) { //每秒执行一次
+	
+	if(flag_1ms%40 == 0&&KeyInput_Enable) { //每50ms执行一次
+		KeyInput(); //按键输入检测
+	}
+	if (flag_1ms%60 == 1) { //执行一次
 	    Encoder_Update();
 	}
-	if(flag_1ms%50 == 0) { //每50ms执行一次
-		
-		KeyInput(); //按键输入检测
-	}else if(flag_1ms%200 == 0){
-		if(IsTrigMode(Trig_Internal)) StartInternalTrig();   //内触发模式,定期更新的内触发频率
+	if(flag_1ms%200 == 2){
+		if(Status_MCU == Status_WorkFlash&&IsTrigMode(Trig_Internal)) StartInternalTrig();   //内触发模式,定期更新的内触发频率
 	}
 	
 }
@@ -278,7 +279,7 @@ void Updata_OutPusle(void)
 
 		tmp = MIN(max_pulse,AppPara.PulseWidth_LED) + PULSE_WIDTH_OFFSET ;
 		//tmp = AppPara.PulseWidth_LED + PULSE_WIDTH_OFFSET ;
-		flash_pulse=TIM1_us2clk(tmp);
+		flash_pulse=TIM3_us2clk(tmp);
 		SetFlash_PulseWidth(flash_pulse);
 		
 		}

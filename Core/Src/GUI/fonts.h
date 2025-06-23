@@ -22,6 +22,8 @@ extern const Font_t Song16_ASCII_11p;
 extern const Font_t Song16_ASCII_10p;
 extern const Font_t Song24_ASCII;
 extern const Font_t Song_Width9_ASCII;
+extern const Font_t Song_Width16_ASCII;
+extern const Font_t Song_ASCII_Special;
 extern const Font_t Song12_GB2312;
 extern const Font_t *pFont8;
 extern const Font_t *pFont16;

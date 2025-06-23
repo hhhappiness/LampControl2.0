@@ -23,7 +23,7 @@ typedef struct {
 /* 函数声明 */
 void Encoder_Init(void);
 void Encoder_Update(void);
-s32 GetEncoder(void);
+int GetEncoder(void);
 void InEncoderBuf(s8 x);
 void Encoder_Update_WithThreshold(void);
 void Encoder_Update_TimeWindow(void);

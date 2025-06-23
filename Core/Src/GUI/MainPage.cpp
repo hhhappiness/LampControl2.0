@@ -16,7 +16,7 @@
 #include "ScanAdcPage.hpp"
 
 extern u32 time_on;
-
+int encoder_val; //读取的编码器值
 
 namespace gui {
 #define RUN_ICON_X (0)
@@ -25,7 +25,7 @@ namespace gui {
 #define CHARGE_ICON_X	(128-5)
 	
 const u8 SpeedX[SpeedUnitNum]={32,20,16};	///Speed控件的x坐标
-#define SpeedY 	16							///Speed控件的y坐标
+#define SpeedY 	28							///Speed控件的y坐标
 #define SPEED_STEP_NUM 	3	
 ///Speed控件的步进值列表
 const u32 SpeedStepList[SpeedUnitNum][SPEED_STEP_NUM]={
@@ -61,14 +61,13 @@ void CMainPage::OnMeasureMode()
 ///MainPage主循环
 int CMainPage::Loop()
 {
-	int encoder_val;
+	
 	TKey = GetTimerCount();
 	TIdle = GetTimerCount();
 	while(1){
 		if(IsTimeOut_ms(TKey,50)){
 			wdg();
 			Key = GetKey();
-			encoder_val = GetEncoder();
 			if(Key != KEY_NULL){
 				if(IsTrigMode(Trig_Internal)){//内触发只调频率
 					switch(Key){
@@ -82,9 +81,7 @@ int CMainPage::Loop()
 							SpeedCtrl.Update();
 							break;
 						case KEY_ENTER_LONG:
-							// OnKeyMode();
-							OnMeasureMode();
-
+							OnKeyMode();
 							break;
 						case KEY_DIV2_SHOT ://除2
 							MainScanFlag = 1;
@@ -262,21 +259,21 @@ void CMainPage::Show()
 {
 	//显示单位
 	int i=AppPara.SpeedUnit;
-	int x = SpeedX[i];
-	SpeedCtrl.SetPos(x,SpeedY);	//设置位置
+	int x = LcmXPixel-Song_Width16_ASCII.Width*6-11*2; //6个数字+2个单位
+	SpeedCtrl.SetPos(x/2,SpeedY);	//设置位置
 	SpeedCtrl.SetStepList(SpeedStepList[i], KeepList, SPEED_STEP_NUM);//设置步进列表
-	DispStr8(x + SpeedCtrl.DigitalNum*11+4, SpeedY+8, SpeedUnitStr[i]);//显示单位
+	DispStr8Font(x/2 + Song_Width16_ASCII.Width*6, SpeedY+8, SpeedUnitStr[i], 0, &Song_ASCII_Special);//显示单位
 	Update();
 	//内触发显示按键提示
 	if(IsTrigMode(Trig_Internal)){
 		if(IsLanguageCh()) {
-			DispStr8(0,48,"● 自动");
+			// DispStr8(0,48,"● 自动");
 			//if(IsTrigMode(Trig_Internal)) DispStr8(0,48,"M 设置");
 			}
 		else {
-			DispStr8(10*8,48,"● Auto");
-			if(IsTrigMode(Trig_Internal))
-				DispStr8(0,48,"M Setup");
+			// DispStr8(10*8,48,"● Auto");
+			// if(IsTrigMode(Trig_Internal))
+			// 	DispStr8(0,48,"M Setup");
 			}
 	}else{
 		//外触发有别的控件要显示
