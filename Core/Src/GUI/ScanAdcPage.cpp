@@ -4,20 +4,25 @@
 #include "AppParaCommon.h"
 #include "stm32g4xx_hal.h"
 // #include <arm_math.h>
-#include "math.h"
-
-#define BUFFER_SIZE 500 // 采样缓冲区大小
-
-uint16_t adc_buffer[600]; // 存储采样数据
-FrequencyPeaks fft_peaks;
-
-u8 first_time = 1, DMA_flag=0; // 用于标记是否第一次运行
-
 
 extern ADC_HandleTypeDef hadc1;
 extern TIM_HandleTypeDef htim7;
 extern DMA_HandleTypeDef hdma_adc1;
 
+typedef struct{
+    float frequencies[4]={};  // 四个主要频率
+    float magnitudes[4]={};   // 对应的幅值
+}FrequencyPeaks;
+
+FrequencyPeaks fft_peaks; // 用于存储FFT计算结果
+
+#define BUFFER_SIZE 2000 // 采样缓冲区大小
+
+uint16_t adc_buffer[BUFFER_SIZE]={0}; // 存储采样数据
+
+u8 first_time = 1, DMA_flag=0; // 用于标记是否第一次运行
+// void DMA1_Channel1_IRQHandler(void);
+int* compute_fft_peak_frequencies(uint16_t *adc_data, uint32_t sample_rate, uint32_t N);
 
 namespace gui {
 	
@@ -168,7 +173,7 @@ int ScanAdcPage::Loop()
 }
 
 
-
+#if 1
 
 void ScanAdcPage::StopScan()
 {
@@ -188,22 +193,24 @@ void ScanAdcPage::StartScan()  //开启adc定时采集并通过DMA传输到adc_buffer
     //__HAL_DMA_ENABLE_IT(&hdma_adc1, DMA_IT_TC);
     HAL_TIM_Base_Start(&htim7);
 }
-
+#endif
 
 }//namespace gui {
 
-/**
-  * @brief This function handles DMA1 channel1 global interrupt.
-  */
-void DMA1_Channel1_IRQHandler(void){
-  HAL_DMA_IRQHandler(&hdma_adc1);  // 处理DMA中断
-  DMA_flag = 1; 
-}
+// /**
+//   * @brief This function handles DMA1 channel1 global interrupt.
+//   */
+// void DMA1_Channel1_IRQHandler(void){
+//   HAL_DMA_IRQHandler(&hdma_adc1);  // 处理DMA中断
+//   DMA_flag = 1; 
+// }
 typedef float float32_t;
-FrequencyPeaks compute_fft_peak_frequencies(uint16_t *adc_data, uint32_t sample_rate, uint32_t N) {
+
+int* compute_fft_peak_frequencies(uint16_t *adc_data, uint32_t sample_rate, uint32_t N) {
+    int *freqs;
     #if 0
     arm_rfft_fast_instance_f32 S;
-#endif
+
     float32_t *real = new float32_t[N];
     float32_t *magnitude = new float32_t[N/2];
     
@@ -215,11 +222,11 @@ FrequencyPeaks compute_fft_peak_frequencies(uint16_t *adc_data, uint32_t sample_
         real[i] = ((float)(adc_data[i] - 2048) / 2048.0f) * window;
     }
 
-    #if 0
+
     // 执行FFT
     arm_rfft_fast_init_f32(&S, N);
     arm_rfft_fast_f32(&S, real, real, 0);
-#endif
+
     // 计算幅值谱
     for (uint32_t i = 0; i < N/2; i++) {
         // 实部和虚部在CMSIS-DSP的rfft结果中的排列方式
@@ -296,8 +303,17 @@ FrequencyPeaks compute_fft_peak_frequencies(uint16_t *adc_data, uint32_t sample_
         
         result.magnitudes[i] = max_mags[i];
     }
-    
+    fft_peaks = result; // 保存结果到全局变量
+    freqs = (int*)result.frequencies; // 返回频率数组指针
+
     delete[] real;
     delete[] magnitude;
-    return result;
+    #endif
+    
+     freqs[0] = (int)(100 + 0.5f);
+     freqs[1] = (int)(50 + 0.5f);
+     freqs[2] = (int)(25 + 0.5f);
+     freqs[3] = (int)(12.5f + 0.5f);
+    
+    return freqs;
 }

@@ -61,12 +61,14 @@ void CMainPage::OnMeasureMode()
 ///MainPage主循环
 int CMainPage::Loop()
 {
+	int encoder_val;
 	TKey = GetTimerCount();
 	TIdle = GetTimerCount();
 	while(1){
 		if(IsTimeOut_ms(TKey,50)){
 			wdg();
 			Key = GetKey();
+			encoder_val = GetEncoder();
 			if(Key != KEY_NULL){
 				if(IsTrigMode(Trig_Internal)){//内触发只调频率
 					switch(Key){
@@ -75,7 +77,7 @@ int CMainPage::Loop()
 							break;
 						case KEY_ENCODER:
 							MainScanFlag = 1;
-							SpeedCtrl.OnStep(GetEncoder());
+							SpeedCtrl.OnStep(encoder_val);
 							SpeedCtrl.Display();
 							SpeedCtrl.Update();
 							break;
@@ -241,21 +243,6 @@ void CMainPage::OnKeyMode()
 	Show();	//显示
 }
 
-void CMainPage::OnMeasureMode()
-{
-	#if 0
-	ScanAdcPage& MeasurePage = ScanAdcPage::GetInstance();
-	
-	MeasurePage.Init();
-	
-	MeasurePage.Show();
-	int Ret = MeasurePage.Loop();	 
-	//返回值则为用户选择的算法计算值，直接将SpeedCtrl的值设置为此值
-	SpeedCtrl.OnSetVal(Ret); //设置SpeedCtrl的值
-	#endif
-	Init(); //重新初始化页面
-	Show();	//显示
-}
 
 ///初始化页面中的所有对像，包括菜单、控件
 void CMainPage::Init()

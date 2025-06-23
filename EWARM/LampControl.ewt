@@ -1622,6 +1622,39 @@
         <name>Drivers</name>
         <group>
             <name>CMSIS</name>
+            <group>
+                <name>DSP_Lib</name>
+                <group>
+                    <name>Source</name>
+                    <group>
+                        <name>CommonTables</name>
+                        <file>
+                            <name>$PROJ_DIR$\..\Drivers\CMSIS\DSP_Lib\Source\CommonTables\arm_common_tables.c</name>
+                        </file>
+                    </group>
+                    <group>
+                        <name>Transformfunctions</name>
+                        <file>
+                            <name>$PROJ_DIR$\..\Drivers\CMSIS\DSP_Lib\Source\TransformFunctions\arm_bitreversal.c</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\Drivers\CMSIS\DSP_Lib\Source\TransformFunctions\arm_bitreversal2.s</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\Drivers\CMSIS\DSP_Lib\Source\TransformFunctions\arm_cfft_f32.c</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\Drivers\CMSIS\DSP_Lib\Source\TransformFunctions\arm_cfft_radix8_f32.c</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\Drivers\CMSIS\DSP_Lib\Source\TransformFunctions\arm_rfft_fast_f32.c</name>
+                        </file>
+                        <file>
+                            <name>$PROJ_DIR$\..\Drivers\CMSIS\DSP_Lib\Source\TransformFunctions\arm_rfft_fast_init_f32.c</name>
+                        </file>
+                    </group>
+                </group>
+            </group>
             <file>
                 <name>$PROJ_DIR$\..\Core\Src\system_stm32g4xx.c</name>
             </file>

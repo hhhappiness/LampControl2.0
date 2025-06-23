@@ -5,7 +5,7 @@
 #include "stdio.h"
 #include "bsp.h"
 
-#define EncoderOutBuf encoderState.encoder_diff.diff[2] //编码器缓冲区输出
+#define EncoderOutBuf encoderState.encoder_diff.diff[3] //编码器缓冲区输出
 
 // 优化后的整数幂函数，防止b为负数且更安全
 static inline int pow_int(int base, int exp) {
@@ -48,8 +48,7 @@ void Encoder_Update(void)
   /* 获取当前计数值 */
   encoderState.counter = __HAL_TIM_GET_COUNTER(&htim4);
   if(encoderState.counter == lastCounter) {
-    InEncoderBuf(0);//如果没有变化则存入0,并推动缓冲区变化
-    if (encoder_buff_num>0) encoder_buff_num--;
+    
     return; //如果计数值没有变化，直接返回
   }
   /* 计算变化量（包含方向） */
@@ -66,51 +65,60 @@ int GetEncoder()
 {
   /* 返回当前差值 */
   int ret = 0;
-  s8 difference = EncoderOutBuf;
-  s8 delta_diff = difference - encoderState.encoder_diff.diff[3];  //差值变化率，判断旋钮转动快慢
-  u8 abs_delta_diff = delta_diff>0?delta_diff:-delta_diff;   //取绝对值
-  u8 abs_diff = difference>0?difference:-difference;   //取绝对值
+  s8 difference,direction;
+  u8 abs_diff;   //取绝对值
   static u8 rotateTime = 0; //旋转时间
-
-  encoderState.encoder_diff.diff_buffer <<= 8; // 左移8位
-  if(encoder_buff_num>0) encoder_buff_num--; // 减少缓冲区数据个数
   
-  s8 direction = difference > 0 ? 1 : -1; // 判断方向
-  if(abs_diff<=5){
-    ret = (int)difference;  //小数点后两位开始加
-  }
-  else if(abs_diff <=12){
-    ret =  (int)direction*(abs_diff-5)*10 ;  //小数点后一位开始加
-    rotateTime = 0;
-  }else if(abs_diff <=20){
-    rotateTime++; 
-    if(rotateTime>=4) {
-      ret =  (int)direction*(abs_diff-12)* 700;  //提高倍率
-    }else{
-      ret =  (int)direction*(abs_diff-12) *100;  //个位开始加
-    } 
-  }
+  if(encoder_buff_num>0){
+    difference = EncoderOutBuf;
+    abs_diff = difference>0?difference:-difference;
+    direction = difference > 0 ? 1 : -1; // 判断方向
+    encoderState.encoder_diff.diff_buffer <<= 8; // 左移8位
+    encoder_buff_num--; // 减少缓冲区数据个数
 
-  return ret;
+    if(abs_diff<=4){
+      ret = (int)difference;  //小数点后两位开始加
+    }else if(abs_diff <=8){
+      ret =  (int)direction*(abs_diff-5)*10 ;  //小数点后一位开始加
+      rotateTime = 0;
+    }else{
+      rotateTime++; 
+      if(rotateTime>=2) {
+        ret =  (int)direction*(abs_diff-8)* 800;  //提高倍率
+      }else{
+        ret =  (int)direction*(abs_diff-8) *100;  //个位开始加
+      } 
+    }
+
+    return ret;
+  }else{
+    return 0; //如果没有数据，直接返回0
+  }
+  
 
 }
 
 void InEncoderBuf(s8 x){        //最早数据在diff[3]，最新数据在diff[0]
     switch (encoder_buff_num) {
     case 1:
-      encoderState.encoder_diff.diff[1]=x;
+      encoderState.encoder_diff.diff[2]=x;
       encoder_buff_num=2;
       break;
     case 2:
-      encoderState.encoder_diff.diff[0]=x;
+      encoderState.encoder_diff.diff[1]=x;
       encoder_buff_num=3;
       break;
-    case 3: //只存三个有效数据，第四位作为历史值用来计算变化速率
+    case 4:
+      encoderState.encoder_diff.diff[0]=x;
+      encoder_buff_num=4;
+    break;
+    case 3: 
       encoderState.encoder_diff.diff_buffer<<= 8; //按键移位进入缓冲区, 如果有键未读会移出  ori = " >> "
 		  encoderState.encoder_diff.diff[0]=x;
+    
       break;
     default:
-      encoderState.encoder_diff.diff[2]=x;  //从第三位往前开始存，第四位作为历史值随整体左移而被赋值
+      encoderState.encoder_diff.diff[3]=x; 
       encoder_buff_num=1;
       break;
     }
