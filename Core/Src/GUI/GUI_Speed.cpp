@@ -24,14 +24,17 @@ u16 Steps[]={
 
 
 GUI_Speed::GUI_Speed()
-: GUI_Num(NULL,0,0,6,0, &Song_Width16_ASCII) 
+: GUI_Num(NULL,0,0,6,0, &DEFAULT_SPEED_FONT) 
 , DispBuf(MainDispBuf)
 {
 	x = SPEED_X;
 	y = SPEED_Y;
 	OnSetSpeedUnit();
+	ifDrawWhiteLine = 0;
 	DispBuf.SetFontASCII(Font);
+	Width = DEFAULT_SPEED_WIDTH*5+DEFAULT_SPEED_WIDTH/2; //五个数字+一个dot
 }
+
 
 inline void GUI_Speed::SetTo_Freq()
 {
@@ -127,6 +130,24 @@ int GUI_Speed::OnEditPage()
 	NumPage.Show();
 	
 	return NumPage.Loop();	
+}
+
+void GUI_Speed::SetDefaultWidth(){
+		u8 UnitLenth[3] = {2,3,5};	///<单位长度，单位为字符数
+		u8 dotWidth = 0, digitalnum = 0;
+		Font_t unit_font;
+		if(pCurrPage->ifShortDotWidth){   //目前只有一种情况，即主页显示时，需要短点和大字体
+			digitalnum = DigitalNum - 1;
+			dotWidth = Font->Width/2;
+			unit_font = DEFAULT_UNIT_FONT;
+		}else{
+			digitalnum = DigitalNum;
+			dotWidth  = 0;
+			unit_font = *Font;
+		}
+		Width = digitalnum * Font->Width + dotWidth;   //数字+小数点
+		x = (LcmXPixel - Width - UnitLenth[AppPara.SpeedUnit] * unit_font.Width)/2;
+		Height = Font->Height;
 }
 
 void GUI_Speed::Loop(int key)

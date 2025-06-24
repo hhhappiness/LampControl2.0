@@ -67,63 +67,12 @@ int GUI_DisplayBuf::DispStr8(u8 x, u8 y, const char * str, u8 color)
 			FontWidth 	= pFontASCII->Width;
 			FontHeight 	= pFontASCII->Height;
 			FontInterval = pFontASCII->WidthMax - pFontASCII->Width;
-			ustr++;
-		}else{
-			pDot 	= pFontHZ->Find(*ustr<<8|*(ustr+1));
-			FontWidth 	= pFontHZ->Width;
-			FontHeight 	= pFontHZ->Height;
-			FontInterval = 0;
-			ustr+=2;
-		}
-		if((x+FontWidth)>Width){//自动换行
-			if(LineWrapEnable){
-				y+=FontHeight;
-				x=0;
-			}else{
-				return StrLen;
+			if(*ustr == '.'&&ifShortDotWidth){
+				FontWidth 	= pFontASCII->Width/2;
+				FontInterval = pFontASCII->WidthMax - FontWidth;
 			}
-		}
-		if(y>=Height) return StrLen;
-		StrLen+=FontWidth;
-		page = y/8;
-		page_end =(y+FontHeight)/8;
-		pDst = pPix + page*Width + x;
-		
-		for(; page <page_end && page < Height/8 ; page++){
-			p=pDst;
-			for(col=0;col<FontWidth;col++){
-				*p++ = color ^ (*pDot++);
-			}
-			pDst+=Width;
-			pDot+=FontInterval;
-		}
-		x+=FontWidth;
-//		CurrX += FontWidth;
-//		CurrY += FontHeight;
-	}
-	return StrLen;
-}
-
-int GUI_DisplayBuf::DispStr8Font(u8 x, u8 y, const char * str, u8 color,const Font_t * pFontASCII)
-{	
-	int StrLen=0;
-	u8 *pDot;
-	u8 *pDst,*p;
-	u8 FontWidth,FontHeight,FontInterval;
-	const u8 *ustr = (const u8 *) str; //转成unsigned char
-	int page,page_end,col;
-	if(x>=Width) return 0;
-	if(y>=Height) return 0;
-//	CurrX = x;
-//	CurrY = y;
-	while(*ustr != 0) //判断字符串时候显示完毕
-	{	
-		if(*ustr<128){
-			pDot 	= pFontASCII->Find(*ustr);
-			FontWidth 	= pFontASCII->Width;
-			FontHeight 	= pFontASCII->Height;
-			FontInterval = pFontASCII->WidthMax - pFontASCII->Width;
 			ustr++;
+			
 		}else{
 			pDot 	= pFontHZ->Find(*ustr<<8|*(ustr+1));
 			FontWidth 	= pFontHZ->Width;
@@ -164,6 +113,7 @@ int GUI_DisplayBuf::DispStr8Font(u8 x, u8 y, const char * str, u8 color,const Fo
 int GUI_DisplayBuf::GetStrPixWidth(const char * str)
 {	
 	int StrLen=0;
+	u8 FontWidth,dotNumber=0;
 	//转成unsigned char，否则跟128比大小时会warning
 	const u8 *ustr = (const u8 *) str; 
 
@@ -171,15 +121,20 @@ int GUI_DisplayBuf::GetStrPixWidth(const char * str)
 	{	
 		if(*ustr<128){
 			pFontASCII->Find(*ustr);
-			StrLen += pFontASCII->Width;
+			FontWidth 	= pFontASCII->Width;
+			if(*ustr == '.'&&ifShortDotWidth){
+				FontWidth 	= pFontASCII->Width/2;
+				dotNumber++;
+			}
+			StrLen += FontWidth;
 			ustr++;
-			
 		}else{
 			pFontHZ->Find(*ustr<<8|*(ustr+1));
 			StrLen += pFontHZ->Width;
 			ustr+=2;
 		}
 	}
+	dotNum = dotNumber;
 	return StrLen;
 }
 
@@ -189,6 +144,7 @@ void GUI_DisplayBuf::DispStr8Align(u8 x, u8 y, u8 w, u8 h, Align_t align, const 
 	//获得实际像素宽度
 	int PixWidth = GetStrPixWidth(str);
 	int dx;
+
 	//如果超宽了只能按左对齐
 	if(PixWidth>=w){
 		align = AlignLeft;

@@ -43,19 +43,10 @@ inline void GUI_Object::Clear()
 	
 }
 
-/*
-inline void GUI_Object::SetAligh(Align_t al)
-{
-	if((al != AlignLeft)||(al != AlignMid) ||(al != AlignRight))
-		return ;
-	Align = al;
-}
-*/
-
 ///在控件显示区按对齐方式显示字符串，假设高度和y是8的倍数，顶底至少两个像素空白
+//返回dot的个数，如果不决定缩短dot宽度，则返回零
 inline void GUI_Object::DisplayStr(const char *str)
 {
-	
 	if(Font!= pCurrPage->pFontASCII){
 		const Font_t *bak;
 		bak = pCurrPage->pFontASCII;
@@ -65,10 +56,13 @@ inline void GUI_Object::DisplayStr(const char *str)
 	}else{
 		pCurrPage->DispStr8Align(x,y,Width, Height, Align, str,(SelectMode == Selected) ? 0xFF : 0);
 	}
-	
 	//抹掉上下两行留出行间距
-	pCurrPage->LineHWhite(x,y,Width);
-	pCurrPage->LineHWhite(x,y+Height-1,Width);
+	if(ifDrawWhiteLine){
+		pCurrPage->LineHWhite(x,y,Width);
+		pCurrPage->LineHWhite(x,y+Height-1,Width);
+	}
+	
+
 }
 
 ///更新控件显示到Lcd
@@ -88,13 +82,24 @@ void GUI_Text::Display()
 
 ///数值控件显示
 void GUI_NumText::Display(){
+	
 	if(Decimal == 16){//16进制
 		ToHexStr();
 	}else{
 		ToDecStr();
 	}
 	if(ClearBeforeShow) Clear();
-	DisplayStr(NumStrBuf);
+	DisplayStr(NumStrBuf);	
+	#if 0
+	u8 newWidth;
+	static u8 isShortened = 0;
+	if(pCurrPage->ifShortDotWidth&&!isShortened)
+	{
+		newWidth = Width - pCurrPage->dotNum * Font->Width/2;  //新的控件宽度
+		SetWidthHeight(newWidth,Height);
+		isShortened = 1;   //确保只设置一次缩短后的宽度，避免重复计算
+	}
+	#endif
 }
 
 int GUI_NumText::OnChosen(){
@@ -232,7 +237,8 @@ void GUI_Progress ::Display(){
 	int w = Width -4;
 	int End = x + Width - 2;
 	int Range = Max - Min;
-	x0= x+2 + ((Val-Min)*w + Range/2)/Range;
+	x0= ((Val-Min)*w )/Range;
+	if(x0>124) x0=124;
 	pCurrPage->Fill8(2,y,  x0,8, XXXXXX_X);
 	pCurrPage->Fill8(2,y+8,x0,8, X_XXXXXX);
 	

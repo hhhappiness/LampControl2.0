@@ -25,7 +25,7 @@ namespace gui {
 #define CHARGE_ICON_X	(128-5)
 	
 const u8 SpeedX[SpeedUnitNum]={32,20,16};	///Speed控件的x坐标
-#define SpeedY 	28							///Speed控件的y坐标
+#define SpeedY 	24							///Speed控件的y坐标
 #define SPEED_STEP_NUM 	3	
 ///Speed控件的步进值列表
 const u32 SpeedStepList[SpeedUnitNum][SPEED_STEP_NUM]={
@@ -41,6 +41,7 @@ CMainPage::CMainPage()
 {
 	//缺省第一个控件，不可删除
 	ObjList.Append(&SpeedCtrl);
+	ifShortDotWidth = 1;
 }	
 	
 
@@ -258,16 +259,14 @@ void CMainPage::Init()
 void CMainPage::Show()
 {
 	//显示单位
+	u8 UnitLenth[3] = {2,3,5};	///<单位长度，单位为字符数
 	int i=AppPara.SpeedUnit;
-	int x = LcmXPixel-Song_Width16_ASCII.Width*6-11*2; //6个数字+2个单位
-	SpeedCtrl.SetPos(x/2,SpeedY);	//设置位置
+	SpeedCtrl.SetPos(SpeedCtrl.x,SpeedY);	//设置位置
 	SpeedCtrl.SetStepList(SpeedStepList[i], KeepList, SPEED_STEP_NUM);//设置步进列表
-	DispStr8Font(x/2 + Song_Width16_ASCII.Width*6, SpeedY+8, SpeedUnitStr[i], 0, &Song_ASCII_Special);//显示单位
-	Update();
 	//内触发显示按键提示
 	if(IsTrigMode(Trig_Internal)){
 		if(IsLanguageCh()) {
-			// DispStr8(0,48,"● 自动");
+			DispStr8(0,48,"● 自动");
 			//if(IsTrigMode(Trig_Internal)) DispStr8(0,48,"M 设置");
 			}
 		else {
@@ -281,6 +280,9 @@ void CMainPage::Show()
 		//没有办法显示4行，Speed占的比较大	
 	}
 	GUI_Page::Show();		//显示控件
+	SetFontASCII(&DEFAULT_UNIT_FONT);    //Unit字体单独设置
+	DispStr8(SpeedCtrl.x + DEFAULT_SPEED_WIDTH*(SpeedCtrl.DigitalNum-1)+DEFAULT_SPEED_WIDTH/2+1, SpeedY+8, SpeedUnitStr[i]);//显示单位
+	SetFontASCII(&DEFAULT_ASCII_FONT);  //重新设置为默认字体
 	ShowRunIcon((int)Status_MCU);		
 	ShowBatteryIcon(BatLevel);		
 	//ShowChargeIcon(ChargeFlag);	

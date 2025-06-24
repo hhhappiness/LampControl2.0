@@ -22,19 +22,19 @@ public:
 	///当前Hz字体，缺省为16x16
 	const Font_t *pFontHZ;
 
+	u8 ifShortDotWidth = 0, dotNum = 0; //是否缩短“.”的宽度
 
 	///设置页面所用ASCII字体
-	inline void SetFontASCII(const Font_t *p = &DEFAULT_ASCII_FONT){
+	void SetFontASCII(const Font_t *p = &DEFAULT_ASCII_FONT){
 		if(p!=NULL) pFontASCII = p;
 	}
 	///设置页面所用汉字字体
-	inline void SetFontHZ(const Font_t *p = &DEFAULT_HANZI_FONT){
+	void SetFontHZ(const Font_t *p = &DEFAULT_HANZI_FONT){
 		if(p!=NULL) pFontHZ = p;
 	}
 	
 	//打印字符串时是否可以自动换行。缺省不可以。		
 	int DispStr8(u8 x, u8 y, const char * str, u8 color=0);
-	int DispStr8Font(u8 x, u8 y, const char * str, u8 color, const Font_t * pFontASCII);
 	void DispStr8Align(u8 x, u8 y, u8 w, u8 h, Align_t align, const char * str, u8 color=0);
 	int GetStrPixWidth(const char * str);
 	

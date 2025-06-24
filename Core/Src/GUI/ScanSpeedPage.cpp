@@ -35,11 +35,13 @@ void ScanSpeedPage::Init()
 	//备份原坐标
 	BakX = SpeedCtrl.x;
 	BakY = SpeedCtrl.y;
-	//设置新坐标
-	SpeedCtrl.SetPos(DIGITAL_X,DIGITAL_Y);
 	//更改字体
 	SpeedCtrl.Font = &Song16_ASCII_10p;
 	SpeedCtrl.Height = 16;
+	//设置新坐标
+	SpeedCtrl.SetDefaultWidth();
+	SpeedCtrl.SetPos(SpeedCtrl.x,DIGITAL_Y);
+
 	//进度条设置
 	Progress.SetPos(0,24);
 	Progress.SetRange(SpeedCtrl.Min, SpeedCtrl.Max);
@@ -55,7 +57,7 @@ void ScanSpeedPage::UnInit()
 	//恢复速度控件的坐标
 	SpeedCtrl.SetPos(BakX, BakY);
 	//恢复字体
-	SpeedCtrl.Font = &Song24_ASCII;
+	SpeedCtrl.Font = &DEFAULT_SPEED_FONT;
 	SpeedCtrl.Height = 24;
 	pCurrPage->Update();//恢复遮盖部分的显示		
 	ClearKey();//清掉后面的长按键
@@ -76,7 +78,7 @@ void ScanSpeedPage::Show()
 	//显示控件
 	GUI_Page::Show();
 	//显示单位
-	DispStr8(SpeedCtrl.x+SpeedCtrl.Width+2,SpeedCtrl.y,SpeedUnitStr[AppPara.SpeedUnit]);	
+	DispStr8(SpeedCtrl.x + SpeedCtrl.Font->Width*SpeedCtrl.DigitalNum,SpeedCtrl.y,SpeedUnitStr[AppPara.SpeedUnit]);	
 	Update();
 }
 

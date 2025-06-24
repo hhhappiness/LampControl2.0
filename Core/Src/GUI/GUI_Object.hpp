@@ -70,6 +70,7 @@ public:
 	SelectMode_t SelectMode;///<是否选中
 	bool ClearBeforeShow;	///<输出前先清显示区
 	bool Enable;			///<是否可以获得焦点
+	bool ifDrawWhiteLine=1;	///<是否绘制空白线
 	const Font_t *Font;			///<Ascii字体
 	bool (*OnChange)(int new_val);///<每次变化时执行的操作
 	bool (*OnOk)(int new_val);///<确认后执行的操作	
@@ -79,6 +80,9 @@ public:
 	///设置控件坐标
 	void SetPos(Pos_t x, Pos_t y) {		
 		this->x = x; this->y = y;
+	}
+	void SetWidthHeight(Pos_t w, Pos_t h) {		
+		this->Width = w; this->Height = h;
 	}
 	///设置控件选中状态
 	inline void SetSelect(SelectMode_t t=Selected){
@@ -201,11 +205,7 @@ public:
 	{
 		return(OnStep(-(*pVal/2)));
 	}
-	
-	void SetDefaultWidth(){
-		Width = DigitalNum*Font->WidthDefault+1;
-		Height = Font->Height;
-	}
+
 };
 
 class GUI_List : public GUI_Object

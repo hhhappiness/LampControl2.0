@@ -1495,6 +1495,9 @@
                         <name>$PROJ_DIR$\..\Core\Src\GUI\font_ascii_Song16_11p.c</name>
                     </file>
                     <file>
+                        <name>$PROJ_DIR$\..\Core\Src\GUI\font_ascii_Song_w10_h16.c</name>
+                    </file>
+                    <file>
                         <name>$PROJ_DIR$\..\Core\Src\GUI\font_hz_song12.c</name>
                     </file>
                     <file>

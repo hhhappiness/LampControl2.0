@@ -35,6 +35,8 @@ public:
         static GUI_Speed instance;   //局部静态变量  
         return instance;  
     } 	
+	void SetDefaultWidth();
+
 };
 
 }
