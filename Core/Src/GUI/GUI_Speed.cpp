@@ -134,7 +134,7 @@ int GUI_Speed::OnEditPage()
 
 void GUI_Speed::SetDefaultWidth(){
 		u8 UnitLenth[3] = {2,3,5};	///<单位长度，单位为字符数
-		u8 dotWidth = 0, digitalnum = 0;
+		u8 dotWidth = 0, digitalnum = 0, CenterAlignDiv = 1;
 		Font_t unit_font;
 		if(pCurrPage->ifShortDotWidth){   //目前只有一种情况，即主页显示时，需要短点和大字体
 			digitalnum = DigitalNum - 1;
@@ -144,9 +144,10 @@ void GUI_Speed::SetDefaultWidth(){
 			digitalnum = DigitalNum;
 			dotWidth  = 0;
 			unit_font = *Font;
+			CenterAlignDiv = 2;
 		}
 		Width = digitalnum * Font->Width + dotWidth;   //数字+小数点
-		x = (LcmXPixel - Width - UnitLenth[AppPara.SpeedUnit] * unit_font.Width)/2;
+		x = (LcmXPixel - Width - UnitLenth[AppPara.SpeedUnit] * unit_font.Width-4)/CenterAlignDiv;
 		Height = Font->Height;
 }
 
