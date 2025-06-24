@@ -133,7 +133,8 @@ int CMainPage::Loop()
 								ScanDlyFlag = 0;
 								
 								OnEnter();	
-								
+								Init(); //重新初始化页面
+								Show();	//显示
 								EnterScanFlag = 0;
 								ScanDlyCnt = 0;
 								ScanDlyFlag = 1;
