@@ -11,6 +11,7 @@
 #define SYS_PARA_VERSION		(1<<16 | 1)	//1.1
 //#define SYS_PARA_ADDRESS		0x0800FC00
 #define SYS_PARA_ADDRESS		0x0801F800
+#define LAYSER
 
 
 

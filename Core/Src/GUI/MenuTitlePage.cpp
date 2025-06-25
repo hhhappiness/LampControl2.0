@@ -1,7 +1,6 @@
 #include "MenuTitlePage.hpp"
 #include "Icons.hpp"
 #include "SysPara.h"
-#include "SysParaCommon.h"
 
 namespace gui {
 	
@@ -14,7 +13,9 @@ namespace gui {
 ///菜单文字-中文
 const char * MenuName_Cn_Led[MenuTitlePage::MenuNum_Led]={
 	"亮度",
+#ifdef LAYSER
 	"测频",
+#endif
 	"单位",
 	"选项",
 	"电池",
@@ -24,6 +25,9 @@ const char * MenuName_Cn_Led[MenuTitlePage::MenuNum_Led]={
 ///菜单文字-英文
 const char * MenuName_En_Led[MenuTitlePage::MenuNum_Led]={
 	"Lum",
+#ifdef LAYSER
+        "Layser",
+#endif
 	"Unit",
 	"Option",
 	"Battery",

@@ -4,6 +4,7 @@
 #include "GUI_Page.hpp"
 #include "key.h"
 #include "AppParaCommon.h"
+#include "SysPara.h"
 
 namespace gui {
 /**
@@ -22,7 +23,9 @@ private:
 public:  
 	enum {
 		iPulseWidth_Led,
+		#ifdef LAYSER
 		iMeasureMenu,
+		#endif
 		iSpeedUnit_Led,
 		iOption_Led,
 		iBaterry_Led,

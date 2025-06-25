@@ -62,7 +62,6 @@ void CMainPage::OnMeasureMode()
 ///MainPage主循环
 int CMainPage::Loop()
 {
-	
 	TKey = GetTimerCount();
 	TIdle = GetTimerCount();
 	while(1){
@@ -72,9 +71,11 @@ int CMainPage::Loop()
 			if(Key != KEY_NULL){
 				if(IsTrigMode(Trig_Internal)){//内触发只调频率
 					switch(Key){
-						case KEY_POWER_LONG:
+						#ifdef LAYSER
+						case KEY_MULT_LONG:
 							OnMeasureMode();
 							break;
+						#endif
 						case KEY_ENCODER:
 							MainScanFlag = 1;
 							SpeedCtrl.OnStep(encoder_val);
@@ -271,7 +272,7 @@ void CMainPage::Show()
 			//if(IsTrigMode(Trig_Internal)) DispStr8(0,48,"M 设置");
 			}
 		else {
-			// DispStr8(10*8,48,"● Auto");
+			DispStr8(0,48,"● Auto");
 			// if(IsTrigMode(Trig_Internal))
 			// 	DispStr8(0,48,"M Setup");
 			}
@@ -321,18 +322,18 @@ inline void CMainPage::PageInit_Internal()
 
 //显示运行状态的图标
 void CMainPage::ShowRunIcon(int mode){
+	DispBmp(RUN_ICON_X,0, Icon_LED[2]);  //led icon
+	Update(RUN_ICON_X, 0, Icon_LED[0].Width, Icon_LED[0].Height*2);
 	switch(AppPara.Language){
 		case Lang_Chinese:
-			DispBmp(RUN_ICON_X,0, Icon_LED[2]);  //led icon
-			Update(RUN_ICON_X, 0, Icon_LED[0].Width, Icon_LED[0].Height*2);
+			
 			DispStr8(RUN_CH_X,0,(mode==Status_WorkStall) ? "关" : "开");  //led 开/关
-			//Update(RUN_CH_X, 8, Icon_LED[0].Width,  Icon_LED[0].Height);
 			Update(RUN_CH_X, 0, 2*DEFAULT_HANZI_WIDTH, 16);
 
 			break;
 		case Lang_English:
-			DispStr8(RUN_ICON_X, 0, (mode==Status_WorkStall) ? "STOP" : "RUN ");
-			Update(RUN_ICON_X, 0, 3*DEFAULT_ASCII_WIDTH, 16);
+			DispStr8(RUN_CH_X, 0, (mode==Status_WorkStall) ? "STOP" : "RUN ");
+			Update(RUN_CH_X, 0, 3*DEFAULT_ASCII_WIDTH, 16);
 			break;
 	}
 }

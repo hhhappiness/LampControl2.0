@@ -72,37 +72,31 @@ int GetEncoder()
   s8 difference,direction;
   u8 abs_diff,exp;
   u32 factor;
-  u32 table[9] = {1,2,4,8,16,32,64,128,256}; // 2的幂表
+  const u32 table[9] = {1,2,4,8,16,32,64,128,256}; // 2的幂表
   
-  if(encoder_buff_num>0){
-    difference = EncoderOutBuf;
-    abs_diff = difference>0?difference:-difference;
-    direction = difference > 0 ? 1 : -1; // 判断方向
-    encoderState.encoder_diff.diff_buffer <<= 8; // 左移8位
-    encoder_buff_num--; // 减少缓冲区数据个数
+  difference = EncoderOutBuf;
+  abs_diff = difference>0?difference:-difference;
+  direction = difference > 0 ? 1 : -1; // 判断方向
+  encoderState.encoder_diff.diff_buffer <<= 8; // 左移8位
+  encoder_buff_num--; // 减少缓冲区数据个数
 
-    if(abs_diff<=5){
-      ret = (int)difference * pow_int(2,0);  //小数点后两位开始加
-    // }else{
-    //   exp = ((abs_diff - 5)* 8+ MaxEncoderDiff/2)/MaxEncoderDiff;
-    //   factor = table[exp];
-    //   ret = (int)(direction  *factor * 10);  //0.1~25.6
-    }else if(abs_diff <=10){
-      ret =  (int)direction*(abs_diff-5)*50 ;  //小数点后一位开始加
-    }else{
-        ret =  (int)direction*(abs_diff-10) *1000;  
-    }
+  if(abs_diff<=5){
+    ret = (int)difference * pow_int(2,0);  //小数点后两位开始加
+  // }else{
+  //   exp = ((abs_diff - 5)* 8+ MaxEncoderDiff/2)/MaxEncoderDiff;
+  //   factor = table[exp];
+  //   ret = (int)(direction  *factor * 10);  //0.1~25.6
+  }else if(abs_diff <=10){
+    ret =  (int)direction*(abs_diff-5)*50 ;  //小数点后一位开始加
   }else{
-    return 0; //如果没有数据，直接返回0
+      ret =  (int)direction*(abs_diff-10) *1000;  
   }
 
-    return ret;
-
-  
-
+  return ret;
 }
 
 void InEncoderBuf(s8 x){        //最早数据在diff[3]，最新数据在diff[0]
+    AnyKeyPressedFlag = 1;
     switch (encoder_buff_num) {
     case 1:
       encoderState.encoder_diff.diff[2]=x;
@@ -112,11 +106,11 @@ void InEncoderBuf(s8 x){        //最早数据在diff[3]，最新数据在diff[0
       encoderState.encoder_diff.diff[1]=x;
       encoder_buff_num=3;
       break;
-    case 4:
+    case 3:
       encoderState.encoder_diff.diff[0]=x;
       encoder_buff_num=4;
     break;
-    case 3: 
+    case 4: 
       encoderState.encoder_diff.diff_buffer<<= 8; //按键移位进入缓冲区, 如果有键未读会移出  ori = " >> "
 		  encoderState.encoder_diff.diff[0]=x;
     

@@ -1357,7 +1357,7 @@
                 <debug>1</debug>
                 <option>
                     <name>GenRtcDebugHeap</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GenRtcEnableBoundsChecking</name>
@@ -1393,7 +1393,7 @@
                 </option>
                 <option>
                     <name>GenRtcIntConversion</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GenRtcInclExplicit</name>
@@ -1409,7 +1409,7 @@
                 </option>
                 <option>
                     <name>GenRtcUnhandledCase</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>GenRtcDivByZero</name>

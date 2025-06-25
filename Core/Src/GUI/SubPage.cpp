@@ -23,7 +23,7 @@ int SubPage::Loop()
 						if(!FocusPrevious()) return 0;
 						break;
 					case KEY_DOWN_SHOT : 	FocusNext(); break;
-					case KEY_ENTER_RELEASE : 
+					case KEY_ENTER_SHOT : 
 						OnEnter();
 						break;
 					

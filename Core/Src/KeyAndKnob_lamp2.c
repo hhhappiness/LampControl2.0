@@ -147,8 +147,8 @@ int GetKey(){
     if (KeyBufNum==0) {
         tmp=KEY_NULL;
         if(encoder_buff_num > 0) { 
-            tmp = KEY_ENCODER; 
             encoder_val = GetEncoder(); //¶ÁÈ¡±àÂëÆ÷Öµ
+            tmp = KEY_ENCODER; 
         }
     }else {
         tmp=KeyOutBuf;

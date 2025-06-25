@@ -77,22 +77,28 @@ void ScanAdcPage::UnInit()
 ///显示一个外框，各按钮图标，再显示控件
 void ScanAdcPage::Show()
 {
+    u8 algStrLenth_CH[2] = {3, 5};
+    u8 algStrLenth_EN[2] = {3, 7};
 	Clear();
 	//Rectangle(0, 0, LcmXPixel, LcmYPixel);
 	//显示窗口标题
 	if(AppPara.Language == Lang_Chinese){
 		DispStr8((LcmXPixel-6*DEFAULT_HANZI_WIDTH-3*DEFAULT_ASCII_WIDTH)/2,0,"正在采集数据...");
-        DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-4*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"算法:");
+        DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-algStrLenth_CH[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"算法:");
+        	//显示算法
+	    DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-algStrLenth_CH[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2 + \
+            2*DEFAULT_HANZI_WIDTH+DEFAULT_ASCII_WIDTH,DIGITAL_Y,AlgorithmStr_Cn[AppPara.Algorithm]);	
 	}else{
-		DispStr8((LcmXPixel-8*DEFAULT_HANZI_WIDTH)/2,0,"Collecting Data...");
-        DispStr8(2,DIGITAL_Y,"Algorithm:");
+		DispStr8((LcmXPixel-17*DEFAULT_ASCII_WIDTH)/2,0,"Collecting Data...");
+        DispStr8((LcmXPixel-10*DEFAULT_ASCII_WIDTH- algStrLenth_EN[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"Algorithm:");
+        	//显示算法
+	    DispStr8((LcmXPixel-10*DEFAULT_ASCII_WIDTH- algStrLenth_EN[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2 + \
+            10*DEFAULT_ASCII_WIDTH,DIGITAL_Y,AlgorithmStr_Cn[AppPara.Algorithm]);	
 	}
 	
 	//显示控件
 	GUI_Page::Show(0);
-	//显示算法
-	DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-4*DEFAULT_ASCII_WIDTH)/2 + \
-            2*DEFAULT_HANZI_WIDTH+DEFAULT_ASCII_WIDTH,DIGITAL_Y,AlgorithmStr_Cn[AppPara.Algorithm]);	
+
 	Update();
 }
 
@@ -102,8 +108,8 @@ void ScanAdcPage::ShowResults(int* freqs){
 		DispStr8((LcmXPixel-4*DEFAULT_HANZI_WIDTH-DEFAULT_ASCII_WIDTH)/2,0,"算法结果:");
         DispStr8((LcmXPixel-3*DEFAULT_HANZI_WIDTH)/2,DIGITAL_Y,"请确认");
 	}else{
-		DispStr8((LcmXPixel-8*DEFAULT_HANZI_WIDTH)/2,0,"Algorithm Results:");
-        DispStr8(2,DIGITAL_Y,"Please confirm:");
+		DispStr8((LcmXPixel-17*DEFAULT_ASCII_WIDTH)/2,0,"Algorithm Results:");
+        DispStr8((LcmXPixel-13*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"Please confirm");
 	}
     //显示四个最大幅值代表的频率
     Freq[0] = new GUI_NumText(freqs, 3, 0, &Song_Width9_ASCII); // 创建四个频率文本控件

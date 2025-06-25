@@ -334,7 +334,6 @@ __inline void CloseDelay_Handler(void)
 	else
 		CloseCnt = 0;
 }
-
 __inline void Blk_Control(void)
 {
 	AppPara.BackLightDelay = 10;
@@ -355,8 +354,6 @@ __inline void Blk_Control(void)
 		}
 
 }
-
-
 __inline void Scan_Control(void)
 {
 	if((EnterScanFlag == 1) &&(ScanControlEn == 0)){
@@ -412,7 +409,6 @@ __inline void Scan_Control(void)
 			
 	}
 }
-
 __inline void MainScan_Control(void)
 {
 	//如果检测到主页面按下4个键(+,-,*,/)
@@ -482,7 +478,6 @@ __inline void MainScan_Control(void)
 			}
 	}
 }
-
 //任意键按下时候需要执行的操作
 __inline void AnyKeyPressed_Control(void)
 {

@@ -8,6 +8,8 @@
 #include "SysPara.h"
 #include "Icons.hpp"
 
+extern int encoder_val;
+
 namespace gui {
 
 int MenuPage::CurrMenu;		///<当前选中菜单项
@@ -22,8 +24,11 @@ MenuPage::MenuPage(int max_num)
 	
 }
 
+
 int MenuPage::Loop()
 {
+	u8 encoder_step;
+	s8 encoder_dir;
 	TKey = GetTimerCount();
 	TIdle = GetTimerCount();
 	KeySeq =0;
@@ -34,6 +39,11 @@ int MenuPage::Loop()
 			wdg();
 			if(Key != KEY_NULL){
 				switch(Key){
+					case KEY_ENCODER:
+						encoder_dir = (encoder_val>0)?1:-1;
+						encoder_step = 1;  //控制步进量
+						return (int)encoder_dir*encoder_step;
+						break;
 					case KEY_DIV2_SHOT : 	OnClose(-1); return -1;
 					case KEY_MULT_SHOT : 	OnClose(1); return 1;
 					case KEY_UP_SHOT : 		
@@ -86,7 +96,9 @@ int MenuPage::ShowMenuPage(int i)
 	//创建菜单页面的实例
 	switch(i){
 		case MenuTitlePage::iPulseWidth_Led: 	pMenuPage = (MenuPage * )(new MenuPage_PulseWidth); break;
+		#ifdef LAYSER
 		case MenuTitlePage::iMeasureMenu: 		pMenuPage = (MenuPage * )(new MenuPage_Layser); break;
+		#endif
 		case MenuTitlePage::iSpeedUnit_Led: 	pMenuPage = (MenuPage * )(new MenuPage_SpeedUnit); break;
 		case MenuTitlePage::iOption_Led: 		pMenuPage = (MenuPage * )(new MenuPage_Option); break;
 		case MenuTitlePage::iBaterry_Led: 		pMenuPage = (MenuPage * )(new MenuPage_Battery); break;
