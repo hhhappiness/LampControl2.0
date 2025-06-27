@@ -23,7 +23,7 @@ public:
 	const Font_t *pFontHZ;
 
 	u8 ifShortDotWidth = 0, dotNum = 0; //是否缩短“.”的宽度
-
+	u8 ifContinousPage = 1; //显示是否以8行为单位连续显示
 	///设置页面所用ASCII字体
 	void SetFontASCII(const Font_t *p = &DEFAULT_ASCII_FONT){
 		if(p!=NULL) pFontASCII = p;

@@ -28,6 +28,8 @@ void InEncoderBuf(s8 x);
 void Encoder_Update_WithThreshold(void);
 void Encoder_Update_TimeWindow(void);
 void Encoder_Update_Median(void);
+void TIM4_IRQHandler(void);
+
 
 //extern EncoderState_t encoderState; // 声明编码器状态变量
 extern u8 encoder_buff_num; // 缓冲区数据个数

@@ -25,7 +25,7 @@ namespace gui {
 #define CHARGE_ICON_X	(128-5)
 	
 const u8 SpeedX[SpeedUnitNum]={32,20,16};	///Speed控件的x坐标
-#define SpeedY 	24							///Speed控件的y坐标
+#define SpeedY 	22							///Speed控件的y坐标
 #define SPEED_STEP_NUM 	3	
 ///Speed控件的步进值列表
 const u32 SpeedStepList[SpeedUnitNum][SPEED_STEP_NUM]={
@@ -85,25 +85,25 @@ int CMainPage::Loop()
 						case KEY_ENTER_LONG:
 							OnKeyMode();
 							break;
-						case KEY_DIV2_SHOT ://除2
+						case KEY_DOWN_SHOT ://除2
 							MainScanFlag = 1;
 							SpeedCtrl.Div2();
 							SpeedCtrl.Display();
 							SpeedCtrl.Update();
 							break;
-						case KEY_MULT_SHOT ://乘2
+						case KEY_UP_SHOT ://乘2
 							MainScanFlag = 1;
 							SpeedCtrl.Mul2();
 							SpeedCtrl.Display();
 							SpeedCtrl.Update();
 							break;
-						case KEY_UP_SHOT : 	
+						case KEY_MULT_SHOT : 	
 							MainScanFlag = 1;
 							SpeedCtrl.OnStep(SpeedCtrl.StepList[0]);//最小步进值增加
 							SpeedCtrl.Display();
 							SpeedCtrl.Update();
 							break;
-						case KEY_DOWN_SHOT : 
+						case KEY_DIV2_SHOT : 
 							MainScanFlag = 1;
 							SpeedCtrl.OnStep(-SpeedCtrl.StepList[0]);//最小步进值减小
 							//SpeedCtrl.Loop(Key); 
@@ -132,7 +132,6 @@ int CMainPage::Loop()
 								
 								EnterScanFlag = 1;
 								ScanDlyFlag = 0;
-								
 								OnEnter();	
 								Init(); //重新初始化页面
 								Show();	//显示
@@ -281,6 +280,7 @@ void CMainPage::Show()
 		//重新设置速度控件的位置
 		//没有办法显示4行，Speed占的比较大	
 	}
+	ifContinousPage = 0; //不连续页面
 	GUI_Page::Show();		//显示控件
 	SetFontASCII(&DEFAULT_UNIT_FONT);    //Unit字体单独设置
 	DispStr8(SpeedCtrl.x + DEFAULT_SPEED_WIDTH*(SpeedCtrl.DigitalNum-1)+DEFAULT_SPEED_WIDTH/2+1, SpeedY+8, SpeedUnitStr[i]);//显示单位

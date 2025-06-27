@@ -7,6 +7,7 @@
 
 #define EncoderOutBuf encoderState.encoder_diff.diff[3] //编码器缓冲区输出
 #define MaxEncoderDiff 0x36 //编码器差值最大值
+extern TIM_HandleTypeDef htim4;
 
 
 // 优化后的整数幂函数，防止b为负数且更安全
@@ -20,10 +21,8 @@ EncoderState_t encoderState = {0};
 u8 encoder_buff_num = 0; // 缓冲区数据个数
 uint32_t counterMax;
 
-float currentHz = 100,exponent_result = 0;
-u32 currentPeriod_us;
-u16 key = 0;
-u8 flag=1;
+int rotateCoe; //转速系数
+
 /* 编码器初始化函数 */
 void Encoder_Init(void)
 {
@@ -38,8 +37,31 @@ void Encoder_Init(void)
     __HAL_TIM_SET_COUNTER(&htim4, 0x7FFF);
     counterMax = 0xFFFF;
   }
+  __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_UPDATE); // 使能定时器更新中断
 }
 u8 encoderUpdate_Enable = 1;
+
+
+void TIM4_IRQHandler(void)
+{
+  static u32 historyTickCnt = 0;
+  u32 tickCnt = 0, interval = 0;
+  /* USER CODE BEGIN TIM4_IRQn 0 */
+  
+  /* USER CODE END TIM4_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim4);
+  /* USER CODE BEGIN TIM4_IRQn 1 */
+  tickCnt = GetTimerCount();
+  if(tickCnt-historyTickCnt > 0) interval = tickCnt - historyTickCnt;
+  else{
+    interval = SysTick_LOAD_RELOAD_Msk-historyTickCnt + tickCnt;
+  }
+
+  if(interval > 10) rotateCoe = 1;
+  else  rotateCoe = 2;
+  historyTickCnt = tickCnt;
+  /* USER CODE END TIM4_IRQn 1 */
+}
 
 /* 更新编码器状态 */
 void Encoder_Update(void)
@@ -80,16 +102,21 @@ int GetEncoder()
   encoderState.encoder_diff.diff_buffer <<= 8; // 左移8位
   encoder_buff_num--; // 减少缓冲区数据个数
 
-  if(abs_diff<=5){
+  if(abs_diff<=3){
     ret = (int)difference * pow_int(2,0);  //小数点后两位开始加
   // }else{
   //   exp = ((abs_diff - 5)* 8+ MaxEncoderDiff/2)/MaxEncoderDiff;
   //   factor = table[exp];
   //   ret = (int)(direction  *factor * 10);  //0.1~25.6
-  }else if(abs_diff <=10){
-    ret =  (int)direction*(abs_diff-5)*50 ;  //小数点后一位开始加
-  }else{
-      ret =  (int)direction*(abs_diff-10) *1000;  
+  }else if(abs_diff <=6){
+    ret =  (int)direction*(abs_diff-3)*50 ;  //小数点后一位开始加
+  }else if(abs_diff <=9){
+    ret =  (int)direction*(abs_diff-6) *1000;
+  }else if(abs_diff <=12){
+    ret =  (int)direction*(abs_diff-9) *5000;
+  }
+  else{
+      ret =  (int)direction*(abs_diff-12) *10000;  
   }
 
   return ret;

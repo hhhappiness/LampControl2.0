@@ -39,11 +39,13 @@ int MenuPage::Loop()
 			wdg();
 			if(Key != KEY_NULL){
 				switch(Key){
+					#if 0
 					case KEY_ENCODER:
 						encoder_dir = (encoder_val>0)?1:-1;
 						encoder_step = 1;  //控制步进量
 						return (int)encoder_dir*encoder_step;
 						break;
+					#endif
 					case KEY_DIV2_SHOT : 	OnClose(-1); return -1;
 					case KEY_MULT_SHOT : 	OnClose(1); return 1;
 					case KEY_UP_SHOT : 		

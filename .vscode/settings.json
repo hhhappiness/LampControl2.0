@@ -73,7 +73,8 @@
         "__tuple": "cpp",
         "winapifamily.h": "c",
         "fontbase.h": "c",
-        "byteconstsymbol.h": "c"
+        "byteconstsymbol.h": "c",
+        "gui_page.hpp": "c"
     },
     "Codegeex.RepoIndex": true
 }

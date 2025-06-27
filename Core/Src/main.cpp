@@ -150,9 +150,7 @@ void Init(void){
   }
   else
   {
-    PowerOn(); // 调试用
-    //ShutDown(); // 关机
-
+   ShutDown(); // 关机
   }		
   LCD_GPIO_Init();        //暂时取消SPI初始化，用GPIO模拟SPI
   LCD_init();            //LCD初始化(按照数据手册)
@@ -174,6 +172,7 @@ void Init(void){
 }
 /**
   * @brief TIM7 Initialization Function
+  * @note TIM7用于控制ADC1采样的定时触发
   * @param None
   * @retval None
   */
@@ -380,8 +379,8 @@ static void MX_TIM4_Init(void)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN TIM4_Init 2 */
-  /* USER CODE END TIM4_Init 2 */
+  
+
 
 }
 
@@ -567,7 +566,7 @@ static void MX_RTC_Init(void)
   }
   /* USER CODE BEGIN RTC_Init 2 */
 /** Enable the WakeUp*/
-if (HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 99, RTC_WAKEUPCLOCK_RTCCLK_DIV16) != HAL_OK) //设置中断，50ms一次
+if (HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 101, RTC_WAKEUPCLOCK_RTCCLK_DIV16) != HAL_OK) //设置中断，50ms一次
 {
   Error_Handler();
 }

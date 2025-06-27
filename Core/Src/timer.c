@@ -188,20 +188,21 @@ void StartInternalTrig()
  u8 KeyInput_Enable = 1;
 void TIM6_DAC_IRQHandler(void)
 {
-	static u32 flag_1ms = 0;
+	static u32 flag_1ms = 0, lastTrigClks;
 	HAL_TIM_IRQHandler(&htim6);//标志位之类的
 	HAL_IncTick();  //替代systick中断进行每ms计数
 	flag_1ms++;   //1000/s，32位总共可以计数到2^32-1
 
 	
-	if(flag_1ms%40 == 0&&KeyInput_Enable) { //每50ms执行一次
+	if(flag_1ms%40 == 0&&KeyInput_Enable) { //每40ms执行一次
 		KeyInput(); //按键输入检测
 	}
 	if (flag_1ms%60 == 1) { //执行一次
 	    Encoder_Update();
 	}
-	if(flag_1ms%200 == 2){
+	if(NextTrigClks != lastTrigClks){  //频率变化了再开始重新设置ARR
 		if(Status_MCU == Status_WorkFlash&&IsTrigMode(Trig_Internal)) StartInternalTrig();   //内触发模式,定期更新的内触发频率
+		lastTrigClks = NextTrigClks;
 	}
 	
 }
