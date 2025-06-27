@@ -72,7 +72,7 @@ int CMainPage::Loop()
 				if(IsTrigMode(Trig_Internal)){//内触发只调频率
 					switch(Key){
 						#ifdef LAYSER
-						case KEY_MULT_LONG:
+						case KEY_POWER_LONG:
 							OnMeasureMode();
 							break;
 						#endif
@@ -110,35 +110,35 @@ int CMainPage::Loop()
 							SpeedCtrl.Display();
 							SpeedCtrl.Update();
 							break;
-						case KEY_UP_LONG : 		
+						case KEY_MULT_LONG: 		
 						
-								//SpeedCtrl.OnStep(SpeedCtrl.StepList[1]);//最小自动步进值增加
-								SpeedCtrl.Loop(Key); 
-								SpeedCtrl.Display();
-								SpeedCtrl.Update();
+							//SpeedCtrl.OnStep(SpeedCtrl.StepList[1]);//最小自动步进值增加
+							SpeedCtrl.Loop(Key); 
+							SpeedCtrl.Display();
+							SpeedCtrl.Update();
 						
 							break;
-						case KEY_DOWN_LONG : 	
+						case KEY_DIV2_LONG: 	
 							
-								//SpeedCtrl.OnStep(-SpeedCtrl.StepList[1]);//最小自动步进值减小
-								SpeedCtrl.Loop(Key); 
-								SpeedCtrl.Display();
-								SpeedCtrl.Update();
+							//SpeedCtrl.OnStep(-SpeedCtrl.StepList[1]);//最小自动步进值减小
+							SpeedCtrl.Loop(Key); 
+							SpeedCtrl.Display();
+							SpeedCtrl.Update();
 							
 							break;		
 						case KEY_ENTER_SHOT : 
 							
-								//进入扫频界面
-								
-								EnterScanFlag = 1;
-								ScanDlyFlag = 0;
-								OnEnter();	
-								Init(); //重新初始化页面
-								Show();	//显示
-								EnterScanFlag = 0;
-								ScanDlyCnt = 0;
-								ScanDlyFlag = 1;
-								ScanDlyCounting = 1;								
+							//进入扫频界面
+							
+							EnterScanFlag = 1;
+							ScanDlyFlag = 0;
+							OnEnter();	
+							Init(); //重新初始化页面
+							Show();	//显示
+							EnterScanFlag = 0;
+							ScanDlyCnt = 0;
+							ScanDlyFlag = 1;
+							ScanDlyCounting = 1;								
 							
 							break;
 							
@@ -293,7 +293,7 @@ void CMainPage::Show()
 	DispStr8(BATTERY_ICON_X-8,0,"D");
 #endif	
 	//显示security bit是否加上
-	if(!FLASH_GetReadOutProtectionStatus()){ //无读保护则生效  
+	if(!SecureApplication()){ //无读保护则生效  
 		DispStr8(BATTERY_ICON_X-15,0,"!");   
 	}
 	Update();

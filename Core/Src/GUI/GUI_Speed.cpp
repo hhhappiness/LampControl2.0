@@ -109,7 +109,7 @@ void GUI_Speed::OnSetSpeedUnit()
 
 void GUI_Speed::_OnKeyLongUpDown(int key)
 {
-    if (key == KEY_UP_LONG) {
+    if (key == KEY_MULT_LONG) {
         OnStep(Steps[StepId]*StepList[0]);
     }else{
         OnStep(-Steps[StepId]*StepList[0]);

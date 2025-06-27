@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-#define DEBUG
+// #define DEBUG
 /* Includes ------------------------------------------------------------------*/
 #include "stm32g4xx_hal.h"
 #include "bsp.h"

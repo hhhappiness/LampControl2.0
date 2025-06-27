@@ -18,6 +18,55 @@ typedef struct {
 } UserData_t;
 
 
+/**
+ * @brief 启用Flash读保护
+ * @param level: 读保护等级 (OB_RDP_LEVEL_0, OB_RDP_LEVEL_1, OB_RDP_LEVEL_2)
+ * @return HAL状态
+ * @note 设置Level 2保护后无法通过编程方式取消保护，请谨慎使用！
+ */
+HAL_StatusTypeDef FLASH_SetReadProtection(uint32_t level)
+{
+    HAL_StatusTypeDef status = HAL_OK;
+    FLASH_OBProgramInitTypeDef OBInit;
+    
+    /* 解锁Flash和选项字节 */
+    status = HAL_FLASH_Unlock();
+    if (status != HAL_OK) {
+        return status;
+    }
+    
+    status = HAL_FLASH_OB_Unlock();
+    if (status != HAL_OK) {
+        HAL_FLASH_Lock();
+        return status;
+    }
+    
+    /* 设置读保护级别 */
+    OBInit.OptionType = OPTIONBYTE_RDP;
+    OBInit.RDPLevel = level;
+    
+    /* 编程选项字节 */
+    status = HAL_FLASHEx_OBProgram(&OBInit);
+    if (status != HAL_OK) {
+        HAL_FLASH_OB_Lock();
+        HAL_FLASH_Lock();
+        return status;
+    }
+    
+    /* 启动加载选项字节 */
+    status = HAL_FLASH_OB_Launch();
+    
+    /* 锁定选项字节和Flash */
+    HAL_FLASH_OB_Lock();
+    HAL_FLASH_Lock();
+    
+    return status;
+}
+
+/**
+ * @brief 获取Flash读保护状态
+ * @return SET: 启用了读保护; RESET: 未启用读保护
+ */
 FlagStatus FLASH_GetReadOutProtectionStatus(void)
 {
     uint32_t rdp_level = READ_BIT(FLASH->OPTR, FLASH_OPTR_RDP);
@@ -28,6 +77,30 @@ FlagStatus FLASH_GetReadOutProtectionStatus(void)
         return SET;    // 有读保护
     }
 }
+
+u8 SecureApplication(void)
+{
+    #if 0
+    /* 检查是否已经启用了读保护 */
+    if (FLASH_GetReadOutProtectionStatus() == RESET) {
+        /* 没有读保护，启用Level 1保护 */
+        if (HAL_FLASH_OB_Unlock() == HAL_OK) {
+            //开始设置读保护
+            FLASH_SetReadProtection(OB_RDP_LEVEL_1);
+            //读保护已经设置，设备将重启
+        } else {
+            return 0;  //RESET
+            //无法解锁选项字节
+        }
+    } else {
+       //读保护已经启用
+    }
+    return 1;  //SET
+#endif
+    return 0;
+    /* 应用程序继续执行... */
+}
+
 /**
  * @brief 计算数据的CRC校验和
  * @param data 数据指针
