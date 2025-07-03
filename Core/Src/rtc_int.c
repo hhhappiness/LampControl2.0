@@ -15,7 +15,7 @@
 //定时器20Hz, 50mS,实测40mS,每秒25.  LSI时钟模式下。
 //后面改成了HSE/128分频，比较准些。实测50mS一次，比较准
 #define TimeGainSec	20
-#define TimeGainMin	1200 //20*60
+#define TimeGainMin	1200 //20*60 一分钟
 #define ScanDlyTime	3*TimeGainSec   //用于自动扫描后的延时3秒
 //用于手动调整频率后的延时3秒
 //在手动扫描延时3秒的过程中，无论是屏蔽单击模式的操作
@@ -117,7 +117,7 @@ void RTC_WKUP_IRQHandler(void)  //50ms为周期
 	
 	AnyKeyPressed_Control();//检测到任意键按下需要的处理
 	
-	//CloseDelay_Handler();//无操作状态下，延时关机处理
+	CloseDelay_Handler();//无操作状态下，延时关机处理
 	
 	Blk_Control();//背光控制处理
 	//只有所有的系统初始化完毕后，才允许输出
@@ -325,7 +325,7 @@ __inline void CloseDelay_Handler(void)
 	{
 		//需要在电源键和任意键按下的时候清零
 		CloseCnt++;
-		if(CloseCnt >= TimeGainMin*AppPara.PowerOffDly)
+		if(CloseCnt >= TimeGainMin*AppPara.PowerOffDly)  //缺省10Mins
 			{
 				//关闭系统
 				ShutDown();
