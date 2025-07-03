@@ -480,6 +480,9 @@ void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef* htim_encoder)
     GPIO_InitStruct.Alternate = GPIO_AF10_TIM4;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+    /* TIM4 interrupt Init */
+    HAL_NVIC_SetPriority(TIM4_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(TIM4_IRQn);
     /* USER CODE BEGIN TIM4_MspInit 1 */
 
     /* USER CODE END TIM4_MspInit 1 */
@@ -606,6 +609,8 @@ void HAL_TIM_Encoder_MspDeInit(TIM_HandleTypeDef* htim_encoder)
     PA12     ------> TIM4_CH2
     */
     HAL_GPIO_DeInit(GPIOA, KEY_CHA_Pin|KEY_CHB_Pin);
+    HAL_NVIC_DisableIRQ(TIM4_IRQn);
+
     /* USER CODE BEGIN TIM4_MspDeInit 1 */
 
     /* USER CODE END TIM4_MspDeInit 1 */

@@ -45,6 +45,15 @@ GUI_DisplayBuf::GUI_DisplayBuf(const GUI_DisplayBuf & dispbuf)
 	SetFontHZ();		
 }
 
+#define SWAP_NIBBLES(x) (((x & 0x0F) << 4) | ((x & 0xF0) >> 4))
+// 预计算的4位二进制反转表（2^4=16种可能）
+static const uint8_t BIT_REVERSE_TABLE[16] = {
+    0x0, 0x8, 0x4, 0xC, 0x2, 0xA, 0x6, 0xE,
+    0x1, 0x9, 0x5, 0xD, 0x3, 0xB, 0x7, 0xF
+};
+
+// 反转8位二进制数中的两个4位块
+#define reverse8bits(num) 	((BIT_REVERSE_TABLE[num & 0xF] << 4) | (BIT_REVERSE_TABLE[(num >> 4) & 0xF]))
 
 //显示字符串，纵向坐标是8的倍数
 //返回字符串占的像素宽度，不过如果自动换行了宽度就没什么意义了
@@ -54,14 +63,21 @@ int GUI_DisplayBuf::DispStr8(u8 x, u8 y, const char * str, u8 color)
 	u8 *pDot;
 	u8 *pDst,*p;
 	u8 FontWidth,FontHeight,FontInterval;
+	u8 leftshift, isSameColoum;
+	u32 *coloumBytes = nullptr;
+	u8 *col8Num = nullptr, *pDot_;
+	u8 historyWidth = 0;   //初始为0
+
 	const u8 *ustr = (const u8 *) str; //转成unsigned char
 	int page,page_end,col;
+	
 	if(x>=Width) return 0;
 	if(y>=Height) return 0;
 //	CurrX = x;
 //	CurrY = y;
 	while(*ustr != 0) //判断字符串时候显示完毕
 	{	
+		
 		if(*ustr<128){
 			pDot 	= pFontASCII->Find(*ustr);
 			FontWidth 	= pFontASCII->Width;
@@ -72,7 +88,6 @@ int GUI_DisplayBuf::DispStr8(u8 x, u8 y, const char * str, u8 color)
 				FontInterval = pFontASCII->WidthMax - FontWidth;
 			}
 			ustr++;
-			
 		}else{
 			pDot 	= pFontHZ->Find(*ustr<<8|*(ustr+1));
 			FontWidth 	= pFontHZ->Width;
@@ -92,19 +107,64 @@ int GUI_DisplayBuf::DispStr8(u8 x, u8 y, const char * str, u8 color)
 		StrLen+=FontWidth;
 		page = y/8;
 		page_end =(y+FontHeight)/8;
-		pDst = pPix + page*Width + x;
 		
+		if(!if8RowShow){  //如需要非连续页显示，即y为22时，显示从第二页的第6行开始
+			if(historyWidth != FontWidth){
+				if(coloumBytes != nullptr){
+					delete [] coloumBytes;         //释放前一个大小为FontWidth的内存，准备重新分配
+					delete [] col8Num;
+					col8Num = NULL;
+					coloumBytes = NULL;
+				}
+				coloumBytes = new u32[FontWidth];  //用于拼接一列的x个字节，x = FontHeight/8
+				col8Num = new u8[FontWidth];  //未拼接的字节个数
+				
+			}
+			memset(coloumBytes, 0, FontWidth*sizeof(u32)); //初始化
+			memset(col8Num, FontHeight/8, FontWidth*sizeof(u8)); //初始化
+			pDot_ = pDot;
+			leftshift = 8 - y%8;  //统一用上移方式
+			for(; page <page_end && page < Height/8 ; page++){
+				for(int coloum = 0; coloum < FontWidth; coloum++){
+					coloumBytes[coloum] |= reverse8bits(*pDot_)<<8*(col8Num[coloum]-1);
+					pDot_++;
+					col8Num[coloum]--;
+				}
+				pDot_ += FontInterval;
+			}
+			for(int c = 0;c<FontWidth;c++){
+				coloumBytes[c] <<= leftshift;     //每列移动一次即可
+			}
+			page = y/8;
+			page_end++;  			//page_end多一页
+			memset(col8Num, FontHeight/8, FontWidth*sizeof(u8)); //重新赋值
+		}
+		
+		pDst = pPix + page*Width + x;
 		for(; page <page_end && page < Height/8 ; page++){
 			p=pDst;
 			for(col=0;col<FontWidth;col++){
-				*p++ = color ^ (*pDot++);
+				if(!if8RowShow){
+					*p++ = color ^ reverse8bits(u8(coloumBytes[col]>>8*(col8Num[col])));
+					col8Num[col]--;
+				}else *p++ = color ^ (*pDot++);
 			}
 			pDst+=Width;
 			pDot+=FontInterval;
 		}
 		x+=FontWidth;
-//		CurrX += FontWidth;
-//		CurrY += FontHeight;
+		if(!if8RowShow && (historyWidth != FontWidth) ){
+			
+			historyWidth = FontWidth;
+		}
+
+
+	}
+	if( coloumBytes != nullptr){  //退出函数前再删一次
+		delete [] coloumBytes;
+		delete [] col8Num;
+		col8Num = NULL;
+		coloumBytes = NULL;
 	}
 	return StrLen;
 }

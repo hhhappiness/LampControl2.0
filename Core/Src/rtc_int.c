@@ -109,9 +109,9 @@ void RTC_WKUP_IRQHandler(void)  //50ms为周期
 	HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);   //clear RTC wake up counter flag
 	//电源按键检测
 	PwrKey_Detector();
-	//组合按键Enter + Mode + Power 进入Standby模式
+	//组合按键Enter + Power 关机 
 	if((PwrKey_Status == PwrKey_Pressed)&&(!GPI_KEY_ENTER)){
-			ShutDown();
+		ShutDown();
 	}
 	//KeyInput(); //按键输入检测,转移到TIM6中断中处理
 	
@@ -336,7 +336,7 @@ __inline void CloseDelay_Handler(void)
 }
 __inline void Blk_Control(void)
 {
-	AppPara.BackLightDelay = 10;
+	AppPara.BackLightDelay = 30;
 		//系统初始化完毕后，才使能背光的控制
 		if(Status_MCU != Status_idle)
 		{

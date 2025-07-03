@@ -9,6 +9,9 @@
 #include "spi_io.h"
 #include "core_config.h"
 #include "ctrl_common.h"
+#include "GUI_Page.hpp"
+using namespace gui;
+
 extern SPI_HandleTypeDef hspi2;
 
 #define MIN(A,B) ((A)<(B)?(A):(B))
@@ -351,13 +354,15 @@ void LcmPutBmp(u8 x,u8 y, const u8 *bmp,u8 w, u8 h)
 void LcmPutBmpRect(u8 x,u8 y, const u8 *bmp,u8 w, const Rect8_t * rect)
 {
 	//定义变量i,j
-	Uchar i,j;
+	Uchar i,j, page_end;
 	//定义指针pSrc，指向位图矩形区域的起始位置
 	const u8 * pSrc = bmp + rect->y/8 * w + rect->x;
 	//定义指针p
 	const u8 * p;
 	//循环，从y开始，到y+rect->h结束，每次增加8
-	for(i=y;i<(y+rect->h);i+=8)
+	page_end = (y+rect->h);
+	if(pCurrPage->if8RowShow == 0) page_end += 4; //使得总体页数+1
+	for(i=y;i<page_end;i+=8)
 	{
 		WriteCommand(0xB0|(i/8)); //Set Page Address
 		WriteCommand(((x)>>4) |0x10); //Set Column Address = 0

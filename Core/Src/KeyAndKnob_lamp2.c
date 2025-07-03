@@ -171,11 +171,11 @@ int GetKey(){
 
 
 #define InKey_Release()  {                \
-    AnyKeyPressedFlag = 1;              \
+    if(i!=5) AnyKeyPressedFlag = 1;              \
     InKeyBuf(i*KeyScanNum+KeyScanId+1+ShiftState+KEY_RELEASE); \
 }
 #define InKey_Long()  {                \
-    AnyKeyPressedFlag = 1;              \
+    if(i!=5) AnyKeyPressedFlag = 1;              \
 	InKeyBuf(i*KeyScanNum+KeyScanId+1+KEY_REPEATE); \
 } 
 #define InKey_LongRelease()  {                \
@@ -187,7 +187,7 @@ int GetKey(){
 } 
 
 #define InKey_DbClick()  {                \
-    AnyKeyPressedFlag = 1;              \
+    if(i!=5) AnyKeyPressedFlag = 1;              \
     InKeyBuf(i*KeyScanNum+KeyScanId+1 +KEY_DOUBLE); \
 }
 #define StoreInp 
@@ -433,11 +433,13 @@ int KeyInput(void)
                 }
             }
             break;
-        }
-
+        }    
+        // if(i==5&&AnyKeyPressedFlag==1)
+        //     AnyKeyPressedFlag=0; //电源键不放进这个标志位的判断
         PressCount[KeyScanId][i] = PressCnt;
         ReleaseCount[KeyScanId][i]=ReleaseCnt;
         KeyState[KeyScanId][i] = State;
+        
     }
 
 	ScanNextCol();
