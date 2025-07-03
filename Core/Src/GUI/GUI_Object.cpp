@@ -197,7 +197,7 @@ bool GUI_Num::OnEdit()
 	}
 	Display();
 	Update();
-	Delay_100ms(3);
+	Delay_ms(30);
 	return true;
 }
 

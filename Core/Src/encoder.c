@@ -37,11 +37,11 @@ void Encoder_Init(void)
     __HAL_TIM_SET_COUNTER(&htim4, 0x7FFF);
     counterMax = 0xFFFF;
   }
-  __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_UPDATE); // 使能定时器更新中断
+  // __HAL_TIM_ENABLE_IT(&htim4, TIM_IT_UPDATE); // 使能定时器更新中断
 }
 u8 encoderUpdate_Enable = 1;
 
-
+#if 0
 void TIM4_IRQHandler(void)
 {
   static u32 historyTickCnt = 0;
@@ -62,7 +62,7 @@ void TIM4_IRQHandler(void)
   historyTickCnt = tickCnt;
   /* USER CODE END TIM4_IRQn 1 */
 }
-
+#endif
 /* 更新编码器状态 */
 void Encoder_Update(void)
 {

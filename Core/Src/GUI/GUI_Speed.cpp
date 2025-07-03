@@ -161,23 +161,16 @@ void GUI_Speed::Loop(int key)
 			wdg();
 			MainPage.GetKeyAndKnob();
 			if(MainPage.Key != KEY_NULL){
-                switch (MainPage.Key) {
-                case KEY_UP_LONG_RELEASE:
-                case KEY_DOWN_LONG_RELEASE:
-                    //长按释放时直接返回
-                    return;
-                case KEY_UP_LONG:
-                case KEY_DOWN_LONG:
-                     _OnKeyLongUpDown(key);
-                     break;
-                default://不明按键退出
-                    return;
-                }
-            }
+                if(MainPage.Key == KEY_MULT_LONG || MainPage.Key == KEY_DIV2_LONG){
+					_OnKeyLongUpDown(key);
+				}else
+				    return;
+			}
+		}
 
 	}
 }
-		}
+
+} /* namespace gui */
 
 
-}

@@ -80,6 +80,7 @@ void DMA1_Channel1_IRQHandler(void)
 
   /* USER CODE END DMA1_Channel1_IRQn 1 */
 }
+#if 0
 /**
   * @brief This function handles Non maskable interrupt.
   */
@@ -91,10 +92,15 @@ void NMI_Handler(void)
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
    while (1)
   {
+    wdg();
+		if(FaultResetCondition()){
+			//Reset(); //用自己写的跳转函数不行，没法切换CPU的中断状态
+			SoftReset();
+		}
   }
   /* USER CODE END NonMaskableInt_IRQn 1 */
 }
-#if 0
+
 /**
   * @brief This function handles Hard fault interrupt.
   */

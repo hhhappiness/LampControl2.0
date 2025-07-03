@@ -2,6 +2,7 @@
 #include "stdlib.h"
 #include "stm32.h"
 #include "main.h"
+#include "ctrl.h"
 //#include "delay.h"
 u16 BACK_COLOR, POINT_COLOR;   //背景色，画笔色
 // u8 const ComTable[]={7,6,5,4,3,2,1,0,};
@@ -149,9 +150,12 @@ void LCD_init(void)
 {
 	OLED_CS_Clr();  //打开片选使能
 	OLED_RST_Clr();
+	wdg();
 	delay_ms(20);
+	wdg();
 	OLED_RST_Set();
 	delay_ms(20);
+	wdg();
 	OLED_CS_Set();
 
 	LCD_WR_REG(0xE2);               //initialize interal function  

@@ -119,7 +119,7 @@ void SysInit()
   MX_DMA_Init();
 
   MX_ADC2_Init();             //ADC初始化
-  //MX_WWDG_Init();             //看门狗初始化
+
   
   MX_RTC_Init();           //RTC初始化
   __disable_irq(); //关闭中断
@@ -132,7 +132,7 @@ void SysInit()
   MX_TIM6_Init();
   MX_ADC1_Init();
   MX_TIM7_Init();
-
+  MX_WWDG_Init();             //看门狗初始化
 
 }
 
@@ -140,6 +140,7 @@ void Init(void){
   SysInit();        //CubeMX配置的系统初始化  
   InitSysTick();         //初始化SysTick定时器
   InitKey();        //按键初始化
+
   Encoder_Init(); //编码器初始化
   __enable_irq(); //开启中断
 
@@ -169,6 +170,7 @@ void Init(void){
     PwrHitFlag = PwrHit_STALL;
   }
   #endif
+  
 }
 /**
   * @brief TIM7 Initialization Function
@@ -631,16 +633,16 @@ static void MX_WWDG_Init(void)
  
    /* USER CODE END WWDG_Init 1 */
    hwwdg.Instance = WWDG;
-   hwwdg.Init.Prescaler = WWDG_PRESCALER_128;
-   hwwdg.Init.Window = 110;
-   hwwdg.Init.Counter = 110;
+   hwwdg.Init.Prescaler = WWDG_PRESCALER_8;
+   hwwdg.Init.Window = 0x7F;
+   hwwdg.Init.Counter = 0x7F;
    hwwdg.Init.EWIMode = WWDG_EWI_DISABLE;
    if (HAL_WWDG_Init(&hwwdg) != HAL_OK)
    {
      Error_Handler();
    }
    /* USER CODE BEGIN WWDG_Init 2 */
- 
+  //  __HAL_WWDG_ENABLE(&hwwdg); //使能看门狗,初始化中有了
    /* USER CODE END WWDG_Init 2 */
  
  }

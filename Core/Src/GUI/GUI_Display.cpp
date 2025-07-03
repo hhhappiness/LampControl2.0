@@ -113,8 +113,8 @@ int GUI_DisplayBuf::DispStr8(u8 x, u8 y, const char * str, u8 color)
 				if(coloumBytes != nullptr){
 					delete [] coloumBytes;         //释放前一个大小为FontWidth的内存，准备重新分配
 					delete [] col8Num;
-					col8Num = NULL;
-					coloumBytes = NULL;
+					col8Num = nullptr;
+					coloumBytes = nullptr;
 				}
 				coloumBytes = new u32[FontWidth];  //用于拼接一列的x个字节，x = FontHeight/8
 				col8Num = new u8[FontWidth];  //未拼接的字节个数
@@ -163,8 +163,8 @@ int GUI_DisplayBuf::DispStr8(u8 x, u8 y, const char * str, u8 color)
 	if( coloumBytes != nullptr){  //退出函数前再删一次
 		delete [] coloumBytes;
 		delete [] col8Num;
-		col8Num = NULL;
-		coloumBytes = NULL;
+		col8Num = nullptr;
+		coloumBytes = nullptr;
 	}
 	return StrLen;
 }

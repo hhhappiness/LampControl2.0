@@ -118,11 +118,11 @@ void LcdInit(void)
 {
 	LCD_CSB(0);
 	LCD_RSTB(0);
-	//wdg();
-	Delay_ms(20);
-	//wdg();
+	wdg();
+	Delay_ms(5);
+	wdg();
 	LCD_RSTB(1);
-	Delay_ms(20);	
+	Delay_ms(5);	
 	LCD_CSB(1);
 	WriteCommand(0xe2); //Set Power Control
 	WriteCommand(0x2f); //Set Power Control

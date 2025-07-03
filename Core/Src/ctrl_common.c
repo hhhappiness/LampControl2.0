@@ -2,7 +2,6 @@
 #include "board_config.h"
 #include "type.h"
 #include "ctrl_common.h"
-
 ///App和Bootloader共用的控制代码
 
 ///bootloader将版本信息写到字符串BootloaderVersionStr，App可以读取
@@ -28,7 +27,7 @@ int CheckPowerKey(int ms)
 	{
 		if(IsTimeOut_ms(Treg,50))//没按就退出
 		{
-			//wdg();
+			wdg();
 			Treg=GetTimerCount();
 			if(!POWER_PRESSED)
 			{
@@ -38,13 +37,5 @@ int CheckPowerKey(int ms)
 			if(Cnt==0) return 1;
 		}
 	}
-}
-
-void dbgmcu_cr(void)
-{
-	u32 dbg_reg;
-	dbg_reg = DEBUGMCU_CR;
-	dbg_reg |= ((1<<9)|(1<<2));
-	DEBUGMCU_CR = dbg_reg;
 }
 
