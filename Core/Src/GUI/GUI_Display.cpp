@@ -64,8 +64,10 @@ int GUI_DisplayBuf::DispStr8(u8 x, u8 y, const char * str, u8 color)
 	u8 *pDst,*p;
 	u8 FontWidth,FontHeight,FontInterval;
 	u8 leftshift, isSameColoum;
-	u32 *coloumBytes;
-	u8 *col8Num, *pDot_;
+	u32 *coloumBytes = nullptr;
+	u8 *col8Num = nullptr, *pDot_;
+	u8 historyWidth = 0;   //初始为0
+
 	const u8 *ustr = (const u8 *) str; //转成unsigned char
 	int page,page_end,col;
 	
@@ -75,7 +77,7 @@ int GUI_DisplayBuf::DispStr8(u8 x, u8 y, const char * str, u8 color)
 //	CurrY = y;
 	while(*ustr != 0) //判断字符串时候显示完毕
 	{	
-		u8 historyWidth = 0;
+		
 		if(*ustr<128){
 			pDot 	= pFontASCII->Find(*ustr);
 			FontWidth 	= pFontASCII->Width;
@@ -106,15 +108,20 @@ int GUI_DisplayBuf::DispStr8(u8 x, u8 y, const char * str, u8 color)
 		page = y/8;
 		page_end =(y+FontHeight)/8;
 		
-		if(historyWidth != FontWidth){
-			coloumBytes = new u32[FontWidth];  //用于拼接一列的x个字节，x = FontHeight/8
-			col8Num = new u8[FontWidth];  //未拼接的字节个数
-			
-		}
-		memset(coloumBytes, 0, FontWidth*sizeof(u32)); //初始化
-		memset(col8Num, FontHeight/8, FontWidth*sizeof(u8)); //初始化
-
-		if(!ifContinousPage){  //如需要非连续页显示，即y为22时，显示从第二页的第6行开始
+		if(!if8RowShow){  //如需要非连续页显示，即y为22时，显示从第二页的第6行开始
+			if(historyWidth != FontWidth){
+				if(coloumBytes != nullptr){
+					delete [] coloumBytes;         //释放前一个大小为FontWidth的内存，准备重新分配
+					delete [] col8Num;
+					col8Num = NULL;
+					coloumBytes = NULL;
+				}
+				coloumBytes = new u32[FontWidth];  //用于拼接一列的x个字节，x = FontHeight/8
+				col8Num = new u8[FontWidth];  //未拼接的字节个数
+				
+			}
+			memset(coloumBytes, 0, FontWidth*sizeof(u32)); //初始化
+			memset(col8Num, FontHeight/8, FontWidth*sizeof(u8)); //初始化
 			pDot_ = pDot;
 			leftshift = 8 - y%8;  //统一用上移方式
 			for(; page <page_end && page < Height/8 ; page++){
@@ -130,13 +137,14 @@ int GUI_DisplayBuf::DispStr8(u8 x, u8 y, const char * str, u8 color)
 			}
 			page = y/8;
 			page_end++;  			//page_end多一页
+			memset(col8Num, FontHeight/8, FontWidth*sizeof(u8)); //重新赋值
 		}
-		memset(col8Num, FontHeight/8, FontWidth*sizeof(u8)); //重新赋值
+		
 		pDst = pPix + page*Width + x;
 		for(; page <page_end && page < Height/8 ; page++){
 			p=pDst;
 			for(col=0;col<FontWidth;col++){
-				if(!ifContinousPage){
+				if(!if8RowShow){
 					*p++ = color ^ reverse8bits(u8(coloumBytes[col]>>8*(col8Num[col])));
 					col8Num[col]--;
 				}else *p++ = color ^ (*pDot++);
@@ -145,15 +153,18 @@ int GUI_DisplayBuf::DispStr8(u8 x, u8 y, const char * str, u8 color)
 			pDot+=FontInterval;
 		}
 		x+=FontWidth;
-		if(historyWidth != FontWidth){
-			delete [] coloumBytes;
-			delete [] col8Num;
-			col8Num = NULL;
-			coloumBytes = NULL;
+		if(!if8RowShow && (historyWidth != FontWidth) ){
+			
 			historyWidth = FontWidth;
 		}
 
 
+	}
+	if( coloumBytes != nullptr){  //退出函数前再删一次
+		delete [] coloumBytes;
+		delete [] col8Num;
+		col8Num = NULL;
+		coloumBytes = NULL;
 	}
 	return StrLen;
 }

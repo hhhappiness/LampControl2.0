@@ -128,17 +128,17 @@ int CMainPage::Loop()
 							break;		
 						case KEY_ENTER_SHOT : 
 							
-							//进入扫频界面
-							
-							EnterScanFlag = 1;
-							ScanDlyFlag = 0;
-							OnEnter();	
-							Init(); //重新初始化页面
-							Show();	//显示
-							EnterScanFlag = 0;
-							ScanDlyCnt = 0;
-							ScanDlyFlag = 1;
-							ScanDlyCounting = 1;								
+								//进入扫频界面
+								
+								EnterScanFlag = 1;
+								ScanDlyFlag = 0;
+								OnEnter();	
+								Init(); //重新初始化页面
+								Show();	//显示
+								EnterScanFlag = 0;
+								ScanDlyCnt = 0;
+								ScanDlyFlag = 1;
+								ScanDlyCounting = 1;								
 							
 							break;
 							
@@ -280,7 +280,7 @@ void CMainPage::Show()
 		//重新设置速度控件的位置
 		//没有办法显示4行，Speed占的比较大	
 	}
-	ifContinousPage = 0; //不连续页面
+	if8RowShow = 0; //不连续页面
 	GUI_Page::Show();		//显示控件
 	SetFontASCII(&DEFAULT_UNIT_FONT);    //Unit字体单独设置
 	DispStr8(SpeedCtrl.x + DEFAULT_SPEED_WIDTH*(SpeedCtrl.DigitalNum-1)+DEFAULT_SPEED_WIDTH/2+1, SpeedY+8, SpeedUnitStr[i]);//显示单位

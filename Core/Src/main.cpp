@@ -150,7 +150,7 @@ void Init(void){
   }
   else
   {
-   ShutDown(); // 关机
+    ShutDown(); // 关机
   }		
   LCD_GPIO_Init();        //暂时取消SPI初始化，用GPIO模拟SPI
   LCD_init();            //LCD初始化(按照数据手册)

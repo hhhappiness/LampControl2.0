@@ -361,7 +361,7 @@ void LcmPutBmpRect(u8 x,u8 y, const u8 *bmp,u8 w, const Rect8_t * rect)
 	const u8 * p;
 	//循环，从y开始，到y+rect->h结束，每次增加8
 	page_end = (y+rect->h);
-	if(pCurrPage->ifContinousPage == 0) page_end += 4; //使得总体页数+1
+	if(pCurrPage->if8RowShow == 0) page_end += 4; //使得总体页数+1
 	for(i=y;i<page_end;i+=8)
 	{
 		WriteCommand(0xB0|(i/8)); //Set Page Address

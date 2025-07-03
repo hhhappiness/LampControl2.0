@@ -175,13 +175,6 @@ void StartInternalTrig()
     __HAL_TIM_SET_AUTORELOAD(&htim2, TrigClks-1);  //period= TrigClks-1
     TIM_CCxChannelCmd(htim3.Instance, TIM_CHANNEL_2, TIM_CCx_ENABLE); //开启通道2的输出
     __HAL_TIM_ENABLE(&htim2); //TIM3trigger mode, TIM2作为触发器
-			/* 由于TIM2定时器会自动修改PB3的GPIO模式，这里手动恢复PB3为输入模式 */
-		GPIO_InitTypeDef GPIO_InitStruct = {0};
-		GPIO_InitStruct.Pin = GPIO_PIN_3;
-		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-		GPIO_InitStruct.Pull = GPIO_NOPULL;
-		HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
 }
 /**
   * @brief This function handles TIM2 global interrupt.
@@ -201,12 +194,18 @@ void TIM6_DAC_IRQHandler(void)
 	else if (flag_1ms%60 == 1) { //执行一次
 	    Encoder_Update();
 	}
-
-	if(flag_1ms%50 == 2){  //频率变化了再开始重新设置ARR
+	if(NextTrigClks != lastTrigClks){  //频率变化了再开始重新设置ARR
 		if(Status_MCU == Status_WorkFlash&&IsTrigMode(Trig_Internal)) StartInternalTrig();   //内触发模式,定期更新的内触发频率
 		lastTrigClks = NextTrigClks;
 	}
-	
+	if( ( (GPIOB->MODER>> (3 * 2)) & 0x03 ) != MODE_INPUT ) { 
+		/* 由于TIM2定时器会自动修改PB3的GPIO模式，这里手动恢复PB3为输入模式 */
+		GPIO_InitTypeDef GPIO_InitStruct = {0};
+		GPIO_InitStruct.Pin = GPIO_PIN_3;
+		GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+		GPIO_InitStruct.Pull = GPIO_NOPULL;
+		HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+	}
 }
 
 inline void SetFlash_PulseWidth(u16 width_clk)
