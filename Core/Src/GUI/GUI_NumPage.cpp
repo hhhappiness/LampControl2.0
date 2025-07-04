@@ -76,7 +76,7 @@ void GUI_NumPage::UnInit()
 	pNumObj = NULL;
 	
 	pCurrPage = bakPage;//退出前恢复pCurrPage指针
-	pCurrPage->Update();//恢复遮盖部分的显示		
+	//pCurrPage->Update();//恢复遮盖部分的显示（发现不合适，因为这里的还是旧数据）		
 	ClearKey();//清掉后面的长按键
 }
 

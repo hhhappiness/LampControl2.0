@@ -190,9 +190,10 @@ void TIM6_DAC_IRQHandler(void)
 	
 	if(flag_1ms%40 == 0&&KeyInput_Enable) { //每40ms执行一次
 		KeyInput(); //按键输入检测
-	}
-	else if (flag_1ms%60 == 1) { //执行一次
+	}else if (flag_1ms%60 == 1) { //执行一次
 	    Encoder_Update();
+	}else if( flag_1ms%100 == 2) { //100ms执行一次
+		wdg();   
 	}
 	if(NextTrigClks != lastTrigClks){  //频率变化了再开始重新设置ARR
 		if(Status_MCU == Status_WorkFlash&&IsTrigMode(Trig_Internal)) StartInternalTrig();   //内触发模式,定期更新的内触发频率

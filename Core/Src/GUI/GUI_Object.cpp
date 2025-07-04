@@ -196,8 +196,8 @@ bool GUI_Num::OnEdit()
 		//nothing to do 
 	}
 	Display();
-	Update();
-	Delay_ms(30);
+	pCurrPage->Update();
+        Delay_ms(30);
 	return true;
 }
 
