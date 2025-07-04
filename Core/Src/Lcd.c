@@ -33,7 +33,9 @@ static void Spi_WriteByte(unsigned char dat)
 }
 #else
 
-static inline void Spi_WriteByte(SPI_HandleTypeDef *hspi,u8 dat)
+u8 spi_dat;
+
+static inline void Spi_WriteByte(SPI_HandleTypeDef *hspi,const u8 *dat)
 {
 	LCD_CSB(0);
 #if 0
@@ -78,22 +80,24 @@ static inline void Spi_WriteByte(SPI_HandleTypeDef *hspi,u8 dat)
 
 	__HAL_SPI_CLEAR_OVRFLAG(hspi);
 #endif
-	HAL_SPI_Transmit(&hspi2,& dat, 1, HAL_MAX_DELAY);
+	HAL_SPI_Transmit(&hspi2, dat, 1, HAL_MAX_DELAY);
 	LCD_CSB(1);
 
 }
 #endif
 
 
-static __inline void WriteCommand( Uchar CommandByte )
+static __inline void WriteCommand( u8 CommandByte )
 {
 	_A0_0;
-	Spi_WriteByte(&hspi2, CommandByte);
+	spi_dat = CommandByte;
+	Spi_WriteByte(&hspi2, &spi_dat);
 }
-static __inline void WriteData( Uchar DataByte )
+static __inline void WriteData( u8 DataByte )
 {
 	_A0_1;
-	Spi_WriteByte(&hspi2, DataByte);
+	spi_dat = DataByte;
+	Spi_WriteByte(&hspi2, &spi_dat);
 }
 
 static __inline void _SetPos(u8 page, u8 col)

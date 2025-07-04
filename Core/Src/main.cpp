@@ -38,8 +38,8 @@
 #define APPNAME                        "CmBacktrace"
 #define HARDWARE_VERSION               "V1.0.0"
 #define SOFTWARE_VERSION               "V0.0.1"
-#define  TIM3_us2clk(S) 	(TIMXCLK/(10)*S/1000000) //us to clk
-#define  TIM2_us2clk(S) 	(TIMXCLK/(2)*S/1000000) //us to clk
+#define  TIM3_us2clk(S) 	(TIMXCLK/(20)*S/1000000) //us to clk
+#define  TIM2_us2clk(S) 	(TIMXCLK/(4)*S/1000000) //us to clk
 #define  TIM4_us2clk(S) 	(TIMXCLK/(1)*S/1000000) //us to clk
 
 
@@ -314,7 +314,7 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 2-1;
+  htim2.Init.Prescaler = 4 - 1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim2.Init.Period = TIM2_us2clk(10000)-1; //100hz
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -719,7 +719,7 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 10-1;
+  htim3.Init.Prescaler = 20 - 1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_DOWN;
   htim3.Init.Period = TIM3_us2clk(100)-1;   //100us
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
