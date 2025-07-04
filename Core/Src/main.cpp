@@ -38,8 +38,10 @@
 #define APPNAME                        "CmBacktrace"
 #define HARDWARE_VERSION               "V1.0.0"
 #define SOFTWARE_VERSION               "V0.0.1"
-#define  TIM3_us2clk(S) 	(TIMXCLK/(TIM3->PSC+1)*S/1000000) //us to clk
-#define  TIM2_us2clk(S) 	(TIMXCLK/(TIM2->PSC+1)*S/1000000) //us to clk
+#define  TIM3_us2clk(S) 	(TIMXCLK/(10)*S/1000000) //us to clk
+#define  TIM2_us2clk(S) 	(TIMXCLK/(2)*S/1000000) //us to clk
+#define  TIM4_us2clk(S) 	(TIMXCLK/(1)*S/1000000) //us to clk
+
 
 using namespace gui;
 // 创建一个 error_code 类型的变量
@@ -123,7 +125,7 @@ void SysInit()
   
   MX_RTC_Init();           //RTC初始化
   __disable_irq(); //关闭中断
-  //MX_SPI2_Init();           //SPI初始化
+  MX_SPI2_Init();           //SPI初始化
 
   MX_TIM3_Init();             //TIM3初始化
   
@@ -153,8 +155,8 @@ void Init(void){
   {
     ShutDown(); // 关机
   }		
-  LCD_GPIO_Init();        //暂时取消SPI初始化，用GPIO模拟SPI
-  LCD_init();            //LCD初始化(按照数据手册)
+  // LCD_GPIO_Init();        //暂时取消SPI初始化，用GPIO模拟SPI
+  Lcd_init();            //LCD初始化(按照数据手册)
 
   
   Status_MCU = Status_idle;
@@ -191,7 +193,7 @@ static void MX_TIM7_Init(void)
 
   /* USER CODE END TIM7_Init 1 */
   htim7.Instance = TIM7;
-  htim7.Init.Prescaler = 174;
+  htim7.Init.Prescaler = 350-1;
   htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim7.Init.Period = 1999;
   htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -359,7 +361,7 @@ static void MX_TIM4_Init(void)
   htim4.Instance = TIM4;
   htim4.Init.Prescaler = 1-1;    //1分频 1750000hz
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 49;
+  htim4.Init.Period = TIM4_us2clk(50) -1; //周期为50us
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
@@ -404,7 +406,7 @@ static void MX_TIM6_Init(void)
 
   /* USER CODE END TIM6_Init 1 */
   htim6.Instance = TIM6;
-  htim6.Init.Prescaler = 174;
+  htim6.Init.Prescaler = 350-1;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim6.Init.Period = 99; //周期为1ms
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
@@ -461,7 +463,7 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV8;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
@@ -593,12 +595,12 @@ static void MX_SPI2_Init(void)
   /* SPI2 parameter configuration*/
   hspi2.Instance = SPI2;
   hspi2.Init.Mode = SPI_MODE_MASTER;
-  hspi2.Init.Direction = SPI_DIRECTION_1LINE;//双线但只用发送 或单线
-  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi2.Init.Direction = SPI_DIRECTION_2LINES;//双线但只用发送 或 单线
+  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;    
+  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;   //根据设备需求设置
   hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -610,8 +612,7 @@ static void MX_SPI2_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN SPI2_Init 2 */
-  WRITE_REG(hspi2.Instance->CR1,hspi2.Instance->CR1 |= SPI_CR1_BIDIOE); //设置输出开启，与单线搭配使用，若为双线则不需要
-  __HAL_SPI_ENABLE(&hspi2);
+  // WRITE_REG(hspi2.Instance->CR1,hspi2.Instance->CR1 |= SPI_CR1_BIDIOE); //设置输出开启，与单线搭配使用，若为双线则不需要
 
   /* USER CODE END SPI2_Init 2 */
 
@@ -674,7 +675,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pin = POWER_ALL_ON_Pin|SNSR_GPIO_Pin|LCD_RSTB_Pin|BKLT_ON_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 
@@ -691,7 +692,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pin = DRIVER_ON_N_Pin|LCD_CSB_Pin|LCD_A0_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 

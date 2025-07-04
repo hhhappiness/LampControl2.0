@@ -111,7 +111,7 @@ void MenuPage_PulseWidth::OnValChange()
 		case iWidthSlider:
 //			pMainPage->Init();
 			Updata_OutPusle();
-			Show();
+			// Show();
 			break;
 		default:
 			break;

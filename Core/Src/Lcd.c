@@ -1,7 +1,6 @@
 #include "stm32.h"
 #include "bsp.h"
 #include "board_config.h"
-#include "SpiMaster.h"
 #include "Lcd.h"
 #include "fonts.h"
 #include "type.h"
@@ -10,13 +9,14 @@
 #include "core_config.h"
 #include "ctrl_common.h"
 #include "GUI_Page.hpp"
+#include "stm32g4xx_hal_spi.h"
 using namespace gui;
 
 extern SPI_HandleTypeDef hspi2;
 
 #define MIN(A,B) ((A)<(B)?(A):(B))
-#define WriteCommand(data) LCD_WR_REG(data)
-#define WriteData(data) LCD_WR_DATA8(data)
+// #define WriteCommand(data) LCD_WR_REG(data)
+// #define WriteData(data) LCD_WR_DATA8(data)
 
 
 #ifndef BOOTLOADER		//bootloader程序不输出汉字
@@ -32,36 +32,79 @@ static void Spi_WriteByte(unsigned char dat)
 	LCD_CSB = 1;
 }
 #else
-void Spi_WriteByte(unsigned char dat)
+
+static inline void Spi_WriteByte(SPI_HandleTypeDef *hspi,u8 dat)
 {
 	LCD_CSB(0);
-	SPI2->DR = dat;	//写入数据
-	__NOP5()//至少加4个nop保证开始发送
-	//HAL_SPI_Transmit(&hspi2, &dat, 1, 10);
-	while(SPI2->SR & SPI_FLAG_BSY);	//判断发送完成。不能用TXE，只是缓冲区空
-//	Delay_us(1);
+#if 0
+	/* Set the transaction information */
+	hspi->State       = HAL_SPI_STATE_BUSY_TX;
+	hspi->ErrorCode   = HAL_SPI_ERROR_NONE;
+	hspi->pTxBuffPtr  = (const uint8_t *)dat;
+	hspi->TxXferSize  = 1;
+	hspi->TxXferCount = 1;
+
+	/*Init field not used in handle to zero */
+	hspi->pRxBuffPtr  = (uint8_t *)NULL;
+	hspi->RxXferSize  = 0U;
+	hspi->RxXferCount = 0U;
+	hspi->TxISR       = NULL;
+	hspi->RxISR       = NULL;
+
+	*((__IO uint8_t *)&hspi->Instance->DR) = *((const uint8_t *)hspi->pTxBuffPtr);
+	hspi->pTxBuffPtr ++;
+	hspi->TxXferCount--;
+
+	    while (hspi->TxXferCount > 0U)
+    {
+      /* Wait until TXE flag is set to send data */
+      if (__HAL_SPI_GET_FLAG(hspi, SPI_FLAG_TXE))
+      {
+        if (hspi->TxXferCount > 1U)
+        {
+          /* write on the data register in packing mode */
+          hspi->Instance->DR = *((const uint16_t *)hspi->pTxBuffPtr);
+          hspi->pTxBuffPtr += sizeof(uint16_t);
+          hspi->TxXferCount -= 2U;
+        }
+        else
+        {
+          *((__IO uint8_t *)&hspi->Instance->DR) = *((const uint8_t *)hspi->pTxBuffPtr);
+          hspi->pTxBuffPtr++;
+          hspi->TxXferCount--;
+        }
+      }
+    }
+
+	__HAL_SPI_CLEAR_OVRFLAG(hspi);
+#endif
+	HAL_SPI_Transmit(&hspi2,& dat, 1, HAL_MAX_DELAY);
 	LCD_CSB(1);
 
 }
 #endif
 
 
-// static __inline void WriteCommand( Uchar CommandByte )
-// {
-// 	_A0_0;
-// 	Spi_WriteByte(CommandByte);
-// }
-// static __inline void WriteData( Uchar DataByte )
-// {
-// 	_A0_1;
-// 	Spi_WriteByte(DataByte);
-// }
+static __inline void WriteCommand( Uchar CommandByte )
+{
+	_A0_0;
+	Spi_WriteByte(&hspi2, CommandByte);
+}
+static __inline void WriteData( Uchar DataByte )
+{
+	_A0_1;
+	Spi_WriteByte(&hspi2, DataByte);
+}
 
 static __inline void _SetPos(u8 page, u8 col)
 {
 	WriteCommand(page|0xB0); //Set Page Address
 	WriteCommand( ((col)>>4) | 0x10); //Set Column Address High Byte
 	WriteCommand( (col)&0x0F ); //Low Byte Colum from S128 -> S1 auto add
+}
+void LcdTest()
+{
+	WriteCommand(0xA5);
 }
 void LcdFullFill(u8 data){
   	uint8_t i,j;
@@ -114,29 +157,31 @@ void LcmInit( void )
 
 }
 
-void LcdInit(void)
+void Lcd_init(void)
 {
-	LCD_CSB(0);
-	LCD_RSTB(0);
+	OLED_CS_Clr();  //打开片选使能
+	OLED_RST_Clr();
 	wdg();
-	Delay_ms(5);
+	delay_ms(20);
 	wdg();
-	LCD_RSTB(1);
-	Delay_ms(5);	
-	LCD_CSB(1);
-	WriteCommand(0xe2); //Set Power Control
-	WriteCommand(0x2f); //Set Power Control
-	WriteCommand(0x23); //Regulator resistor select(RR2,RR1,VRR0=0,1,1)
-	WriteCommand(0xa2); //Set LCD Bias
-	WriteCommand(0x81); //set reference voltage
-	WriteCommand(0x25); //Set electronic volume (EV) level//Set Register ratio Rb/Ra
-	WriteCommand(0xc8); //set SHL COM1 to COM64    
-	WriteCommand(0xa1); ////ADC select SEG1 to SEG132
-	WriteCommand(0x40); //Initial Display Line 
-	WriteCommand(0xa6); //set reverse display OFF
-	WriteCommand(0xa4); //set all pixels OFF
-	LcdFullFill(0x00); //清屏
-	WriteCommand(0xaf); //Display ON
+	OLED_RST_Set();
+	delay_ms(20);
+	wdg();
+	OLED_CS_Set();
+
+	WriteCommand(0xE2);               //initialize interal function  
+	WriteCommand(0x2F);               //power control(VB,VR,VF=1,1,1)     
+	WriteCommand(0x23);               //Regulator resistor select(RR2,RR1,VRR0=0,1,1) 
+	WriteCommand(0xA2);               //set LCD bias=1/9(BS=0)        
+	WriteCommand(0x81);               //set reference voltage        
+	WriteCommand(0x25);               //Set electronic volume (EV) level        
+	WriteCommand(0xC0);               //COM:C8上下颠倒；C0 正常显示    
+	WriteCommand(0xa1);               //SEG:A1 左右颠倒；A0 正常显示
+	WriteCommand(0x40);               //Initial Display Line        
+	WriteCommand(0xA6);               //set reverse display OFF        
+	WriteCommand(0xA4);               //set all pixels OFF
+	LCD_FullFill(0x00);             //full clear        
+	WriteCommand(0xAF);               //turns the display ON
 }
 
 

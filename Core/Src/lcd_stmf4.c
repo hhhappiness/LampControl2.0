@@ -105,6 +105,7 @@ void LCD_Writ_Bus(char dat)   //串行数据写入
   OLED_CS_Set();	//片选失能
 }
 
+#if 1
 void LCD_WR_DATA8(char da) //发送8位数据
 {	//OLED_CS_Clr();
     OLED_DC_Set();
@@ -130,7 +131,7 @@ void LCD_WR_REG(char da)	 //发送8位命令
 	LCD_WR_DATA(da);
 	//OLED_CS_Set();
 }
-
+#endif
 void LCD_FullFill( uint8_t FillData )
 {
 		uint8_t i,j;

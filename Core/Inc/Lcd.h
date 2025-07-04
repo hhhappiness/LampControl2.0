@@ -22,7 +22,8 @@ typedef unsigned int Uint;
 
 
 void LcmInit( void );
-void LcdInit( void );
+void LcdTest();
+void Lcd_init( void );
 void LcdFullFill(u8 data);
 void LcmPutBmp(u8 x,u8 y, const u8 *bmp,u8 w, u8 h);
 void LcmPutBmpRect(u8 x,u8 y, const u8 *bmp,u8 w, const Rect8_t * rect);

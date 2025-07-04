@@ -120,7 +120,7 @@ void MenuPage_SpeedUnit::OnValChange()
 		case iSpeedUnit:
 			OnChangeSpeedUnit();
 			Init();
-			Show();//更新显示
+			// Show();//更新显示
 			//BakUnit = AppPara.SpeedUnit;
 			break;
 		case iPlateLen:

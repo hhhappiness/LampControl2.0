@@ -21,7 +21,7 @@
 	#define HSEClk      12000000
 	#define SysClk      70000000
 	#define AHBClk      70000000
-	#define APB1Clk      8750000
+	#define APB1Clk     17500000
 	#define APB2Clk     35000000
 	#define SYS_CLOCK_SOURCE SYS_CLOCK_SOURCE_PLL
 	#define RTCCLK_SOURCE RTCCLKSource_LSI //RTCCLKSource_HSE_Div128 由于要计standby的时间，只能用LSI
