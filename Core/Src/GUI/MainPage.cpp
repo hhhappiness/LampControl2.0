@@ -3,6 +3,7 @@
 #include "SysParaCommon.h"
 #include "Icons.hpp"
 #include "key.h"
+#include "key_config.h"
 #include "MenuPage.hpp"
 #include "GUI_Speed.hpp"
 #include "adc.h"
@@ -83,7 +84,8 @@ int CMainPage::Loop()
 							SpeedCtrl.Update();
 							break;
 						case KEY_ENTER_LONG:
-							OnKeyMode();
+							OnMeasureMode();
+							// OnKeyMode();
 							break;
 						case KEY_DOWN_SHOT ://除2
 							MainScanFlag = 1;
@@ -129,7 +131,7 @@ int CMainPage::Loop()
 						case KEY_ENTER_SHOT : 
 							
 								//进入扫频界面
-								
+								if(!enterKeyEnable) break;
 								EnterScanFlag = 1;
 								ScanDlyFlag = 0;
 								OnEnter();	

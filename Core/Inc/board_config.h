@@ -33,6 +33,7 @@
 #define LCD_RSTB(x)	GPA_O(8,x) //RSTB=1 or 0	
 #define LCD_A0(x) 	GPB_O(14,x) //A0=1 or 0
 #define LCD_CSB(x) 	GPB_O(12,x) //CSB=0 or 1
+#define SNSR_PWR(x) 	GPA_O(1,x) //SNSR_PWR=1 or 0
 
 #define _A0_1 		GPB_O(14,1) //LCD_A0=1
 #define _A0_0 		GPB_O(14,0) //LCD_A0=0
@@ -54,8 +55,6 @@ __inline void LcdResetOn(void )  {LCD_RSTB(0);}
 __inline void LcdResetOff(void ) {LCD_RSTB(1);}
 
 #define GetChargePin	0
-
-void ShutDown(void);
 
 #ifdef __cplusplus
 }

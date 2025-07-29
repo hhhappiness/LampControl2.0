@@ -180,13 +180,15 @@ void StartInternalTrig()
   * @brief This function handles TIM2 global interrupt.
   */
  u8 KeyInput_Enable = 1;
+extern DAC_HandleTypeDef hdac1;
+
 void TIM6_DAC_IRQHandler(void)
 {
 	static u32 flag_1ms = 0, lastTrigClks;
 	HAL_TIM_IRQHandler(&htim6);//标志位之类的
-	HAL_IncTick();  //替代systick中断进行每ms计数
+	HAL_DAC_IRQHandler(&hdac1);
+	uwTick += uwTickFreq;	//替代systick中断进行每ms计数，防止有hal库的函数用到uwTick
 	flag_1ms++;   //1000/s，32位总共可以计数到2^32-1
-	
 	
 	if(flag_1ms%40 == 0&&KeyInput_Enable) { //每40ms执行一次
 		KeyInput(); //按键输入检测

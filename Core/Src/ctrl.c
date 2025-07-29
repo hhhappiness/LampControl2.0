@@ -164,23 +164,6 @@ void StopToFlash(void)
 	WorkEn = 0;
 }
 
-void ShutDown(void)
-{
-
-	// if(CmpAppParam())
-	// 	SaveConfig();
-	//if(CmpSysParam())
-		//SaveSysConfig();
-
-
-	BackLightOff();
-	LcdResetOn();
-	LCD_A0(0);
-	LCD_CSB(0);
-	PowerOff();
-	// while(1); //断电后若程序未停止，则死循环
-
-}
 #if 0
 
 void WriteEncrypt(void)  

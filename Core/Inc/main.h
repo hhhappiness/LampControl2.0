@@ -67,8 +67,10 @@ void Error_Handler(void);
 #define SNSR_PWR_GPIO_Port GPIOA
 #define POWER_ALL_ON_Pin GPIO_PIN_2
 #define POWER_ALL_ON_GPIO_Port GPIOA
-#define SNSR_GPIO_Pin GPIO_PIN_3
-#define SNSR_GPIO_GPIO_Port GPIOA
+#define SNSR_CONTROL_Pin GPIO_PIN_3
+#define SNSR_CONTROL_GPIO_Port GPIOA
+#define SNSR_DAC_Pin GPIO_PIN_5
+#define SNSR_DAC_GPIO_Port GPIOA
 #define DRIVER_STROBE_Pin GPIO_PIN_4
 #define DRIVER_STROBE_GPIO_Port GPIOA
 

@@ -1677,6 +1677,12 @@
                 <name>$PROJ_DIR$\..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_hal_cortex.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_hal_dac.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_hal_dac_ex.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Drivers\STM32G4xx_HAL_Driver\Src\stm32g4xx_hal_dma.c</name>
             </file>
             <file>

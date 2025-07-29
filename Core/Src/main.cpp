@@ -41,6 +41,7 @@
 #define  TIM3_us2clk(S) 	(TIMXCLK/(20)*S/1000000) //us to clk
 #define  TIM2_us2clk(S) 	(TIMXCLK/(4)*S/1000000) //us to clk
 #define  TIM4_us2clk(S) 	(TIMXCLK/(1)*S/1000000) //us to clk
+#define  TIM15_us2clk(S) 	(TIMxCLK/(70)*S/1000000) //us to clk
 
 
 using namespace gui;
@@ -48,11 +49,12 @@ using namespace gui;
 enum error_code my_error;
 
 ADC_HandleTypeDef hadc1,hadc2;
+DAC_HandleTypeDef hdac1;
 RTC_HandleTypeDef hrtc;
 SPI_HandleTypeDef hspi2;
 WWDG_HandleTypeDef hwwdg;
 DMA_HandleTypeDef hdma_adc1;
-TIM_HandleTypeDef htim2,htim3,htim4,htim6,htim7;
+TIM_HandleTypeDef htim2,htim3,htim4,htim6,htim7,htim15;
 
 
 void SystemClock_Config(void);
@@ -69,28 +71,16 @@ static void MX_TIM6_Init(void);
 static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_TIM7_Init(void);
+static void MX_TIM15_Init(void);
+static void MX_DAC1_Init(void);
 
 
 void SysInit(void);
 void Init(void);
-void fault_test_by_div0(void)
-{
-    volatile int * SCB_CCR = (volatile int *) 0xE000ED14; // SCB->CCR
-    int x, y, z;
 
-    *SCB_CCR |= (1 << 4); /* bit4: DIV_0_TRP. */
-
-    x = 10;
-    y = 0;
-    z = x / y;
-    printf("z:%d\n", z);
-}
 int main(void)
 {
   Init();
-  // SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk | SCB_SHCSR_USGFAULTENA_Msk; //Set bit 16~18
-  //printf("CmBacktrace Test...\r\n");
-  //cm_backtrace_init(APPNAME, HARDWARE_VERSION, SOFTWARE_VERSION);
   CMainPage & MainPage= CMainPage::GetInstance();
   while(1)
   {
@@ -98,6 +88,7 @@ int main(void)
     MainPage.Show();
     MainPage.Loop(); //主页面循环
   }
+
 }
 
 
@@ -134,6 +125,9 @@ void SysInit()
   MX_TIM6_Init();
   MX_ADC1_Init();
   MX_TIM7_Init();
+  MX_TIM15_Init();
+  MX_DAC1_Init();
+
   MX_WWDG_Init();             //看门狗初始化
 
 }
@@ -144,17 +138,21 @@ void Init(void){
   InitKey();        //按键初始化
 
   Encoder_Init(); //编码器初始化
-  __enable_irq(); //开启中断
+  __enable_irq();  //从这里使能中断，因为按键检测在TIM6中断中执行，但是依然不启用RTC中断，因为没开机前不需要相关处理
 
-  #if 1
+
   if(CheckPowerKey(1000))//电源键按至少2s
   {
     PowerOn(); // 开机
+  }else{
+    while(1);
   }
-  else
+  
+  /** Enable the WakeUp*/
+  if (HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 101, RTC_WAKEUPCLOCK_RTCCLK_DIV16) != HAL_OK) //设置中断，50ms一次
   {
-    ShutDown(); // 关机
-  }		
+    Error_Handler();
+  }
   // LCD_GPIO_Init();        //暂时取消SPI初始化，用GPIO模拟SPI
   Lcd_init();            //LCD初始化(按照数据手册)
 
@@ -162,18 +160,141 @@ void Init(void){
   Status_MCU = Status_idle;
   LoadSysConfig();//先加载SysPara，因为部分AppPara的参数转换需要知道灯管类型
   LoadConfig();
-  BackLightOn();       //背光打开
+  
   //初始化完毕，允许输出
 	Status_MCU =  Status_WorkStall;
+  BackLightOn();       //背光打开
   if(AppPara.PowerKey == PwrKey_Hit)   
   {
     StopToFlash();    //初始化暂停闪烁
     WorkEn = 0;
     PwrHitFlag = PwrHit_STALL;
   }
-  #endif
   
 }
+/**
+  * @brief DAC1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_DAC1_Init(void)
+{
+
+  /* USER CODE BEGIN DAC1_Init 0 */
+
+  /* USER CODE END DAC1_Init 0 */
+
+  DAC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN DAC1_Init 1 */
+
+  /* USER CODE END DAC1_Init 1 */
+
+  /** DAC Initialization
+  */
+  hdac1.Instance = DAC1;
+  if (HAL_DAC_Init(&hdac1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** DAC channel OUT2 config
+  */
+  sConfig.DAC_HighFrequency = DAC_HIGH_FREQUENCY_INTERFACE_MODE_AUTOMATIC;
+  sConfig.DAC_DMADoubleDataMode = DISABLE;
+  sConfig.DAC_SignedFormat = DISABLE;
+  sConfig.DAC_SampleAndHold = DAC_SAMPLEANDHOLD_DISABLE;
+  sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
+  sConfig.DAC_Trigger2 = DAC_TRIGGER_NONE;
+  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
+  sConfig.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_EXTERNAL;
+  sConfig.DAC_UserTrimming = DAC_TRIMMING_FACTORY;
+  if (HAL_DAC_ConfigChannel(&hdac1, &sConfig, DAC_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN DAC1_Init 2 */
+
+  /* USER CODE END DAC1_Init 2 */
+
+}
+/**
+  * @brief TIM15 Initialization Function
+  *        用来产生激光模块所需的455hz方波
+  * @param None
+  * @retval None
+  */
+static void MX_TIM15_Init(void)
+{
+
+  /* USER CODE BEGIN TIM15_Init 0 */
+
+  /* USER CODE END TIM15_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+
+  /* USER CODE BEGIN TIM15_Init 1 */
+
+  /* USER CODE END TIM15_Init 1 */
+  htim15.Instance = TIM15;
+  htim15.Init.Prescaler = 70-1;
+  htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim15.Init.Period = 2199 - 1;
+  htim15.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim15.Init.RepetitionCounter = 0;
+  htim15.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim15) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim15, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim15) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim15, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 2199/2 - 1;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel(&htim15, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  sBreakDeadTimeConfig.DeadTime = 0;
+  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+  sBreakDeadTimeConfig.BreakFilter = 0;
+  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime(&htim15, &sBreakDeadTimeConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM15_Init 2 */
+
+  /* USER CODE END TIM15_Init 2 */
+  HAL_TIM_MspPostInit(&htim15);
+
+}
+
 /**
   * @brief TIM7 Initialization Function
   * @note TIM7用于控制ADC1采样的定时触发
@@ -195,7 +316,7 @@ static void MX_TIM7_Init(void)
   htim7.Instance = TIM7;
   htim7.Init.Prescaler = 350-1;
   htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim7.Init.Period = 1999;
+  htim7.Init.Period = 50-1;    //50 * 10us = 500us = 2000hz
   htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
   {
@@ -266,7 +387,7 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_1;
   sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_12CYCLES_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
@@ -569,11 +690,7 @@ static void MX_RTC_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN RTC_Init 2 */
-/** Enable the WakeUp*/
-if (HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 101, RTC_WAKEUPCLOCK_RTCCLK_DIV16) != HAL_OK) //设置中断，50ms一次
-{
-  Error_Handler();
-}
+
   /* USER CODE END RTC_Init 2 */
 
 }
@@ -666,19 +783,19 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
  /*Configure GPIO pin Output Level */
- HAL_GPIO_WritePin(GPIOA, POWER_ALL_ON_Pin|SNSR_GPIO_Pin|LCD_RSTB_Pin|BKLT_ON_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOA, SNSR_PWR_Pin|POWER_ALL_ON_Pin|LCD_RSTB_Pin|BKLT_ON_Pin, GPIO_PIN_RESET);
 
  /*Configure GPIO pin Output Level */
  HAL_GPIO_WritePin(GPIOB, DRIVER_ON_N_Pin|LCD_CSB_Pin|LCD_A0_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : POWER_ALL_ON_Pin SNSR_GPIO_Pin LCD_RSTB_Pin BKLT_ON_Pin */
-  GPIO_InitStruct.Pin = POWER_ALL_ON_Pin|SNSR_GPIO_Pin|LCD_RSTB_Pin|BKLT_ON_Pin;
+    GPIO_InitStruct.Pin = SNSR_PWR_Pin|POWER_ALL_ON_Pin|LCD_RSTB_Pin|BKLT_ON_Pin;
+
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-
+  
   /*Configure GPIO pins : KEY_POWER_Pin KEY_RIGHT_Pin KEY_DOWN_Pin KEY_ENTER_Pin
                            KEY_LEFT_Pin KEY_UP_Pin */
   GPIO_InitStruct.Pin = KEY_POWER_Pin|KEY_RIGHT_Pin|KEY_DOWN_Pin|KEY_ENTER_Pin

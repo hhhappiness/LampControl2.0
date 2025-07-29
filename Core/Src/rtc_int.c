@@ -8,7 +8,7 @@
 #include "adc.h"
 #include "ctrl.h"
 #include "stm32g4xx_it.h"
-
+#include "key_config.h"
 //#include "RTT\Segger_RTT.h"
 //#include "utility.h"
 
@@ -110,9 +110,9 @@ void RTC_WKUP_IRQHandler(void)  //50ms为周期
 	//电源按键检测
 	PwrKey_Detector();
 	//组合按键Enter + Power 关机 
-	if((PwrKey_Status == PwrKey_Pressed)&&(!GPI_KEY_ENTER)){
-		ShutDown();
-	}
+	if((PwrKey_Status == PwrKey_Pressed)&&ENTER_PRESSED){
+		PowerOff();
+	}else enterKeyEnable = 1;
 	//KeyInput(); //按键输入检测,转移到TIM6中断中处理
 	
 	AnyKeyPressed_Control();//检测到任意键按下需要的处理
@@ -328,7 +328,7 @@ __inline void CloseDelay_Handler(void)
 		if(CloseCnt >= TimeGainMin*AppPara.PowerOffDly)  //缺省10Mins
 			{
 				//关闭系统
-				ShutDown();
+				PowerOff();
 			}
 	}
 	else

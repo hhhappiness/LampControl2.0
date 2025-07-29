@@ -25,7 +25,7 @@ typedef union{
 }KEY_BUF;
 
 extern u8 KeyInput_Enable;
-
+extern u8 enterKeyEnable; //是否允许进入enter按键处理函数
 //不同板子用得不同定时器
 #define DisableKeyTimInt() {KeyInput_Enable=0; }//禁按键定时器中断
 #define EnableKeyTimInt() {KeyInput_Enable=1; };//开按键定时器中断

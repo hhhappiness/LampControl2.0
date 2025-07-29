@@ -6,8 +6,10 @@
 // #include <arm_math.h>
 
 extern ADC_HandleTypeDef hadc1;
-extern TIM_HandleTypeDef htim7;
+extern TIM_HandleTypeDef htim7, htim15;
 extern DMA_HandleTypeDef hdma_adc1;
+extern DAC_HandleTypeDef hdac1;
+
 
 typedef struct{
     float frequencies[4]={};  // 四个主要频率
@@ -16,7 +18,7 @@ typedef struct{
 
 FrequencyPeaks fft_peaks; // 用于存储FFT计算结果
 
-#define BUFFER_SIZE 2000 // 采样缓冲区大小
+#define BUFFER_SIZE 4096 // 采样缓冲区大小
 
 uint16_t adc_buffer[BUFFER_SIZE]={0}; // 存储采样数据
 
@@ -138,7 +140,7 @@ int ScanAdcPage::Loop()
 {
     #if 1
     uint32_t remaining = BUFFER_SIZE,completion_percentage=0; // 剩余传输数量
-    // StartScan(); // 启动ADC采集
+    StartScan(); // 启动ADC采集
     while(remaining>0){ // 等待DMA传输完成
         // 获取剩余传输数量
         // remaining = __HAL_DMA_GET_COUNTER(&hdma_adc1);
@@ -146,11 +148,12 @@ int ScanAdcPage::Loop()
          
         // 计算已完成百分比
         completion_percentage = 19900 * (BUFFER_SIZE - remaining) / BUFFER_SIZE + 100;
-        remaining -= BUFFER_SIZE/5;
+        remaining -= __HAL_DMA_GET_COUNTER(&hdma_adc1);
         Progress->SetValue(completion_percentage); //更新进度条
         delay_ms(1000);
 
     }
+    StopScan(); 
     int* freqs = compute_fft_peak_frequencies(adc_buffer, 500, BUFFER_SIZE); // 计算FFT峰值频率
     #endif
     ShowResults(freqs); // 显示结果
@@ -180,9 +183,12 @@ int ScanAdcPage::Loop()
 
 
 #if 1
-
+// 停止激光传感器的驱动、ADC采集
 void ScanAdcPage::StopScan()
 {
+    HAL_TIM_PWM_Stop(&htim15, TIM_CHANNEL_2); // 停止PWM输出定时器触发
+    SNSR_PWR(0); // 关闭测频模块电源
+    HAL_DAC_Stop(&hdac1,DAC_CHANNEL_2); // 停止DAC
     HAL_TIM_Base_Stop(&htim7);    // 停止定时器触发
     HAL_ADC_Stop_DMA(&hadc1);     // 停止ADC和DMA	
 }
@@ -190,14 +196,24 @@ void ScanAdcPage::StopScan()
 ///启动自动加
 void ScanAdcPage::StartScan()  //开启adc定时采集并通过DMA传输到adc_buffer
 {
+    SNSR_PWR(1); //开启测频模块电源
+    StopToFlash();   //开启测频后停止LED输出
+    HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2); // 启动pwm输出定时器，455hz方波控制激光器
+    
     if(first_time) {  // 如果是第一次运行，进行 ADC 校准
         HAL_ADCEx_Calibration_Start(&hadc1,ADC_SINGLE_ENDED);
         first_time = 0;
     }
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, BUFFER_SIZE);
+
+    //用单片机的DAC输出一个模拟电压，来控制测频模块模拟部分的增益(有效控制范围约为2.3V-2.7V，电压越高增益越大)，使其尽量接近单片机ADC的满量程。
+   
+    HAL_DAC_Start(&hdac1,DAC1_CHANNEL_2); // 启动DAC
+    HAL_DAC_SetValue(&hdac1,DAC1_CHANNEL_2,DAC_ALIGN_12B_R,3000); // 设置DAC输出为2047，即1.65V
+
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, BUFFER_SIZE);   //传输数据个数，目前看手册感觉是以adc每次采集的16位数据为单位，所以还是buffersize
     // 启用DMA传输完成中断
     //__HAL_DMA_ENABLE_IT(&hdma_adc1, DMA_IT_TC);
-    HAL_TIM_Base_Start(&htim7);
+    HAL_TIM_Base_Start(&htim7);      //启动adc触发定时器
 }
 #endif
 
