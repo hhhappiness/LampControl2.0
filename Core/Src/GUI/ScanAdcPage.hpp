@@ -30,9 +30,10 @@ public:
 
 	int Val;
 	int BakX,BakY;
+	char signalVal[2];
 
-	
 	void OnStep(int step);
+	void ScanSignal();
 	void StopScan();
 	void StartScan();
 	virtual void Init();

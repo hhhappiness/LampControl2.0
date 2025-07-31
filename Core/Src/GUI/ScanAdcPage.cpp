@@ -1,8 +1,9 @@
-#include "ScanAdcPage.hpp"
+ï»¿#include "ScanAdcPage.hpp"
 #include "Icons.hpp"
 #include "ctrl.h"
 #include "AppParaCommon.h"
 #include "stm32g4xx_hal.h"
+#include <stdio.h>
 // #include <arm_math.h>
 
 extern ADC_HandleTypeDef hadc1;
@@ -12,17 +13,19 @@ extern DAC_HandleTypeDef hdac1;
 
 
 typedef struct{
-    float frequencies[4]={};  // ËÄ¸öÖ÷ÒªÆµÂÊ
-    float magnitudes[4]={};   // ¶ÔÓ¦µÄ·ùÖµ
+    float frequencies[4]={};  // å››ä¸ªä¸»è¦é¢‘ç‡
+    float magnitudes[4]={};   // å¯¹åº”çš„å¹…å€¼
 }FrequencyPeaks;
 
-FrequencyPeaks fft_peaks; // ÓÃÓÚ´æ´¢FFT¼ÆËã½á¹û
+FrequencyPeaks fft_peaks; // ç”¨äºå­˜å‚¨FFTè®¡ç®—ç»“æœ
 
-#define BUFFER_SIZE 4096 // ²ÉÑù»º³åÇø´óĞ¡
+#define BUFFER_SIZE 4096 // é‡‡æ ·ç¼“å†²åŒºå¤§å°
 
-uint16_t adc_buffer[BUFFER_SIZE]={0}; // ´æ´¢²ÉÑùÊı¾İ
+uint16_t adc_buffer[BUFFER_SIZE]={0}; // å­˜å‚¨é‡‡æ ·æ•°æ®
 
-u8 first_time = 1, DMA_flag=0; // ÓÃÓÚ±ê¼ÇÊÇ·ñµÚÒ»´ÎÔËĞĞ
+u8 first_time = 1, DMA_flag=0; // ç”¨äºæ ‡è®°æ˜¯å¦ç¬¬ä¸€æ¬¡è¿è¡Œ
+u8 algStrLenth_CH[2] = {3, 5};
+u8 algStrLenth_EN[2] = {3, 7};
 // void DMA1_Channel1_IRQHandler(void);
 int* compute_fft_peak_frequencies(uint16_t *adc_data, uint32_t sample_rate, uint32_t N);
 
@@ -39,14 +42,14 @@ namespace gui {
 
 static const char *AlgorithmStr_Cn[AlgNum]={
 	"FFT",
-	"FR ÂË²¨",
+	"FR æ»¤æ³¢",
 };
 static const char *AlgorithmStr_En[AlgNum]={
 	"FFT",
 	"FR Filter",
 };
 
-///¹¹Ôìº¯Êı
+///æ„é€ å‡½æ•°
 ScanAdcPage::ScanAdcPage()
 : GUI_Page(MaxObjNum, SecondDispBuf)
 , SpeedCtrl(GUI_Speed::GetInstance())
@@ -56,77 +59,82 @@ ScanAdcPage::ScanAdcPage()
 }
 
 
-///³õÊ¼»¯£¬±¸·İµ±Ô­PageÖ¸Õë£¬ÓÃÓÚÍË³öÊ±»Ö¸´ÏÔÊ¾
+///åˆå§‹åŒ–ï¼Œå¤‡ä»½å½“åŸPageæŒ‡é’ˆï¼Œç”¨äºé€€å‡ºæ—¶æ¢å¤æ˜¾ç¤º
 void ScanAdcPage::Init()
 {
 	bakPage = pCurrPage;
 	pCurrPage = this;
-	//½ø¶ÈÌõÉèÖÃ
+	//è¿›åº¦æ¡è®¾ç½®
 	Progress->SetPos(0,24);
 	Progress->SetRange(SpeedCtrl.Min, SpeedCtrl.Max);
-	Progress->SetValue(0); //³õÊ¼Öµ
+	Progress->SetValue(0); //åˆå§‹å€¼
 }
 
 void ScanAdcPage::UnInit()
 {
-    ObjList.Delete(0,MaxObjNum); // É¾³ıËùÓĞNew´´½¨µÄ¿Ø¼ş
-	//ÍË³öÇ°»Ö¸´pCurrPageÖ¸Õë
+    ObjList.Delete(0,MaxObjNum); // åˆ é™¤æ‰€æœ‰Newåˆ›å»ºçš„æ§ä»¶
+	//é€€å‡ºå‰æ¢å¤pCurrPageæŒ‡é’ˆ
 	pCurrPage = bakPage;
-	pCurrPage->Update();//»Ö¸´ÕÚ¸Ç²¿·ÖµÄÏÔÊ¾	
-    StopScan(); // Í£Ö¹²É¼¯
-	ClearKey();//ÇåµôºóÃæµÄ³¤°´¼ü
+	pCurrPage->Update();//æ¢å¤é®ç›–éƒ¨åˆ†çš„æ˜¾ç¤º	
+    StopScan(); // åœæ­¢é‡‡é›†
+	ClearKey();//æ¸…æ‰åé¢çš„é•¿æŒ‰é”®
 }
-///ÏÔÊ¾Ò»¸öÍâ¿ò£¬¸÷°´Å¥Í¼±ê£¬ÔÙÏÔÊ¾¿Ø¼ş
+///æ˜¾ç¤ºä¸€ä¸ªå¤–æ¡†ï¼Œå„æŒ‰é’®å›¾æ ‡ï¼Œå†æ˜¾ç¤ºæ§ä»¶
 void ScanAdcPage::Show()
 {
-    u8 algStrLenth_CH[2] = {3, 5};
-    u8 algStrLenth_EN[2] = {3, 7};
+
 	Clear();
 	//Rectangle(0, 0, LcmXPixel, LcmYPixel);
-	//ÏÔÊ¾´°¿Ú±êÌâ
+	//æ˜¾ç¤ºçª—å£æ ‡é¢˜
 	if(AppPara.Language == Lang_Chinese){
-		DispStr8((LcmXPixel-6*DEFAULT_HANZI_WIDTH-3*DEFAULT_ASCII_WIDTH)/2,0,"ÕıÔÚ²É¼¯Êı¾İ...");
-        DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-algStrLenth_CH[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"Ëã·¨:");
-        	//ÏÔÊ¾Ëã·¨
+		DispStr8((LcmXPixel-6*DEFAULT_HANZI_WIDTH-3*DEFAULT_ASCII_WIDTH)/2,0,"æ­£åœ¨é‡‡é›†æ•°æ®...");
+
+        #if TEST1
+        DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-algStrLenth_CH[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"ä¿¡å·:");
+
+        #else
+        DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-algStrLenth_CH[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"ç®—æ³•:");
+        	//æ˜¾ç¤ºç®—æ³•
 	    DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-algStrLenth_CH[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2 + \
             2*DEFAULT_HANZI_WIDTH+DEFAULT_ASCII_WIDTH,DIGITAL_Y,AlgorithmStr_Cn[AppPara.Algorithm]);	
+        #endif
 	}else{
 		DispStr8((LcmXPixel-17*DEFAULT_ASCII_WIDTH)/2,0,"Collecting Data...");
         DispStr8((LcmXPixel-10*DEFAULT_ASCII_WIDTH- algStrLenth_EN[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"Algorithm:");
-        	//ÏÔÊ¾Ëã·¨
+        	//æ˜¾ç¤ºç®—æ³•
 	    DispStr8((LcmXPixel-10*DEFAULT_ASCII_WIDTH- algStrLenth_EN[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2 + \
             10*DEFAULT_ASCII_WIDTH,DIGITAL_Y,AlgorithmStr_Cn[AppPara.Algorithm]);	
 	}
 	
-	//ÏÔÊ¾¿Ø¼ş
+	//æ˜¾ç¤ºæ§ä»¶
 	GUI_Page::Show(0);
 
 	Update();
 }
 
 void ScanAdcPage::ShowResults(int* freqs){
-    Clear(); // Çå³ıÏÔÊ¾ÇøÓò
+    Clear(); // æ¸…é™¤æ˜¾ç¤ºåŒºåŸŸ
     if(AppPara.Language == Lang_Chinese){
-		DispStr8((LcmXPixel-4*DEFAULT_HANZI_WIDTH-DEFAULT_ASCII_WIDTH)/2,0,"Ëã·¨½á¹û:");
-        DispStr8((LcmXPixel-3*DEFAULT_HANZI_WIDTH)/2,DIGITAL_Y,"ÇëÈ·ÈÏ");
+		DispStr8((LcmXPixel-4*DEFAULT_HANZI_WIDTH-DEFAULT_ASCII_WIDTH)/2,0,"ç®—æ³•ç»“æœ:");
+        DispStr8((LcmXPixel-3*DEFAULT_HANZI_WIDTH)/2,DIGITAL_Y,"è¯·ç¡®è®¤");
 	}else{
 		DispStr8((LcmXPixel-17*DEFAULT_ASCII_WIDTH)/2,0,"Algorithm Results:");
         DispStr8((LcmXPixel-13*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"Please confirm");
 	}
-    //ÏÔÊ¾ËÄ¸ö×î´ó·ùÖµ´ú±íµÄÆµÂÊ
-    Freq[0] = new GUI_NumText(freqs, 3, 0, &Song_Width9_ASCII); // ´´½¨ËÄ¸öÆµÂÊÎÄ±¾¿Ø¼ş
+    //æ˜¾ç¤ºå››ä¸ªæœ€å¤§å¹…å€¼ä»£è¡¨çš„é¢‘ç‡
+    Freq[0] = new GUI_NumText(freqs, 3, 0, &Song_Width9_ASCII); // åˆ›å»ºå››ä¸ªé¢‘ç‡æ–‡æœ¬æ§ä»¶
     Freq[1] = new GUI_NumText(freqs+1, 3, 0, &Song_Width9_ASCII);    
     Freq[2] = new GUI_NumText(freqs+2, 3, 0, &Song_Width9_ASCII);
     Freq[3] = new GUI_NumText(freqs+3, 3, 0, &Song_Width9_ASCII);
     for(int i = 0; i < 4; i++){
-        Freq[i]->SetPos(2 + (i) * (3 * 9+4), 24);  //setÃ¿¸ö¿Ø¼şµÄÎ»ÖÃ
-        Freq[i]->Enable = true; // ÆôÓÃ½¹µã¹¦ÄÜ
-        Freq[i]->Align = AlignRight; // ÓÒ¶ÔÆë
+        Freq[i]->SetPos(2 + (i) * (3 * 9+4), 24);  //setæ¯ä¸ªæ§ä»¶çš„ä½ç½®
+        Freq[i]->Enable = true; // å¯ç”¨ç„¦ç‚¹åŠŸèƒ½
+        Freq[i]->Align = AlignRight; // å³å¯¹é½
         ObjList.Append(Freq[i]);
     }
     SetFocus(iFreq1,false);
-    GUI_Page::Show(1, 4); //ÏÔÊ¾³ıÁË½ø¶ÈÌõºÍËã·¨¿Ø¼şÖ®ÍâµÄÆäËû¿Ø¼ş
-    Update(); // ¸üĞÂÏÔÊ¾
+    GUI_Page::Show(1, 4); //æ˜¾ç¤ºé™¤äº†è¿›åº¦æ¡å’Œç®—æ³•æ§ä»¶ä¹‹å¤–çš„å…¶ä»–æ§ä»¶
+    Update(); // æ›´æ–°æ˜¾ç¤º
 
 }
 
@@ -135,28 +143,33 @@ void ScanAdcPage::ShowResults(int* freqs){
 
 #define HOLD_REPEATE_NUM	4
 
-///°´¼üÑ­»·£¬×óÓÒ¼üÒÆ¶¯¹â±ê£¬È·¶¨Ñ¡ÖĞÍË³ö
+///æŒ‰é”®å¾ªç¯ï¼Œå·¦å³é”®ç§»åŠ¨å…‰æ ‡ï¼Œç¡®å®šé€‰ä¸­é€€å‡º
 int ScanAdcPage::Loop()
 {
     #if 1
-    uint32_t remaining = BUFFER_SIZE,completion_percentage=0; // Ê£Óà´«ÊäÊıÁ¿
-    StartScan(); // Æô¶¯ADC²É¼¯
-    while(remaining>0){ // µÈ´ıDMA´«ÊäÍê³É
-        // »ñÈ¡Ê£Óà´«ÊäÊıÁ¿
-        // remaining = __HAL_DMA_GET_COUNTER(&hdma_adc1);
+    uint32_t remaining = BUFFER_SIZE,completion_percentage=0; // å‰©ä½™ä¼ è¾“æ•°é‡
+    Rect8_t Rect;
+    StartScan(); // å¯åŠ¨ADCé‡‡é›†
+    while(POWER_PRESSED){ // ç”¨æˆ·æ¾å¼€æµ‹é¢‘é”®æ—¶é€€å‡º
+
         
-         
-        // ¼ÆËãÒÑÍê³É°Ù·Ö±È
-        completion_percentage = 19900 * (BUFFER_SIZE - remaining) / BUFFER_SIZE + 100;
-        remaining -= __HAL_DMA_GET_COUNTER(&hdma_adc1);
-        Progress->SetValue(completion_percentage); //¸üĞÂ½ø¶ÈÌõ
+        Rect = {(u8)((LcmXPixel-2*DEFAULT_HANZI_WIDTH-algStrLenth_CH[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2 + \
+            2*DEFAULT_HANZI_WIDTH+DEFAULT_ASCII_WIDTH),DIGITAL_Y, 2*DEFAULT_ASCII_WIDTH, DEFAULT_ASCII_FONT.Height};
+        
+        ScanSignal(); // æ‰«æä¿¡å·å¼ºåº¦
+        DispStr8( Rect.x, Rect.y ,&signalVal[0]);	
+        LcmPutBmpRect(Rect.x+4,Rect.y, pCurrPage->pPix,Width, &Rect); // æ›´æ–°æ˜¾ç¤º
+
+        completion_percentage = 19900 * (BUFFER_SIZE - remaining) / BUFFER_SIZE + 100;  // è®¡ç®—å·²å®Œæˆç™¾åˆ†æ¯”
+        remaining -= __HAL_DMA_GET_COUNTER(&hdma_adc1);         // è·å–å‰©ä½™ä¼ è¾“æ•°é‡
+        Progress->SetValue(completion_percentage);              //æ›´æ–°è¿›åº¦æ¡
         delay_ms(1000);
 
     }
     StopScan(); 
-    int* freqs = compute_fft_peak_frequencies(adc_buffer, 500, BUFFER_SIZE); // ¼ÆËãFFT·åÖµÆµÂÊ
+    int* freqs = compute_fft_peak_frequencies(adc_buffer, 500, BUFFER_SIZE); // è®¡ç®—FFTå³°å€¼é¢‘ç‡
     #endif
-    ShowResults(freqs); // ÏÔÊ¾½á¹û
+    ShowResults(freqs); // æ˜¾ç¤ºç»“æœ
     
     TKey = GetTimerCount();
 	TIdle = GetTimerCount(); 
@@ -181,51 +194,44 @@ int ScanAdcPage::Loop()
 
 }
 
-
-#if 1
-// Í£Ö¹¼¤¹â´«¸ĞÆ÷µÄÇı¶¯¡¢ADC²É¼¯
+void ScanAdcPage::ScanSignal(){
+    int signalValue = 0;
+    snprintf(signalVal, sizeof(signalVal), "%d", signalValue);
+}
+// åœæ­¢æ¿€å…‰ä¼ æ„Ÿå™¨çš„é©±åŠ¨ã€ADCé‡‡é›†
 void ScanAdcPage::StopScan()
 {
-    HAL_TIM_PWM_Stop(&htim15, TIM_CHANNEL_2); // Í£Ö¹PWMÊä³ö¶¨Ê±Æ÷´¥·¢
-    SNSR_PWR(0); // ¹Ø±Õ²âÆµÄ£¿éµçÔ´
-    HAL_DAC_Stop(&hdac1,DAC_CHANNEL_2); // Í£Ö¹DAC
-    HAL_TIM_Base_Stop(&htim7);    // Í£Ö¹¶¨Ê±Æ÷´¥·¢
-    HAL_ADC_Stop_DMA(&hadc1);     // Í£Ö¹ADCºÍDMA	
+    HAL_TIM_PWM_Stop(&htim15, TIM_CHANNEL_2); // åœæ­¢PWMè¾“å‡ºå®šæ—¶å™¨è§¦å‘
+    SNSR_PWR(0); // å…³é—­æµ‹é¢‘æ¨¡å—ç”µæº
+    HAL_DAC_Stop(&hdac1,DAC_CHANNEL_2); // åœæ­¢DAC
+    HAL_TIM_Base_Stop(&htim7);    // åœæ­¢å®šæ—¶å™¨è§¦å‘
+    HAL_ADC_Stop_DMA(&hadc1);     // åœæ­¢ADCå’ŒDMA	
 }
 
-///Æô¶¯×Ô¶¯¼Ó
-void ScanAdcPage::StartScan()  //¿ªÆôadc¶¨Ê±²É¼¯²¢Í¨¹ıDMA´«Êäµ½adc_buffer
+///å¯åŠ¨è‡ªåŠ¨åŠ 
+void ScanAdcPage::StartScan()  //å¼€å¯adcå®šæ—¶é‡‡é›†å¹¶é€šè¿‡DMAä¼ è¾“åˆ°adc_buffer
 {
-    SNSR_PWR(1); //¿ªÆô²âÆµÄ£¿éµçÔ´
-    StopToFlash();   //¿ªÆô²âÆµºóÍ£Ö¹LEDÊä³ö
-    HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2); // Æô¶¯pwmÊä³ö¶¨Ê±Æ÷£¬455hz·½²¨¿ØÖÆ¼¤¹âÆ÷
+    SNSR_PWR(1); //å¼€å¯æµ‹é¢‘æ¨¡å—ç”µæº
+    StopToFlash();   //å¼€å¯æµ‹é¢‘ååœæ­¢LEDè¾“å‡º
+    HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2); // å¯åŠ¨pwmè¾“å‡ºå®šæ—¶å™¨ï¼Œ455hzæ–¹æ³¢æ§åˆ¶æ¿€å…‰å™¨
     
-    if(first_time) {  // Èç¹ûÊÇµÚÒ»´ÎÔËĞĞ£¬½øĞĞ ADC Ğ£×¼
+    if(first_time) {  // å¦‚æœæ˜¯ç¬¬ä¸€æ¬¡è¿è¡Œï¼Œè¿›è¡Œ ADC æ ¡å‡†
         HAL_ADCEx_Calibration_Start(&hadc1,ADC_SINGLE_ENDED);
         first_time = 0;
     }
 
-    //ÓÃµ¥Æ¬»úµÄDACÊä³öÒ»¸öÄ£ÄâµçÑ¹£¬À´¿ØÖÆ²âÆµÄ£¿éÄ£Äâ²¿·ÖµÄÔöÒæ(ÓĞĞ§¿ØÖÆ·¶Î§Ô¼Îª2.3V-2.7V£¬µçÑ¹Ô½¸ßÔöÒæÔ½´ó)£¬Ê¹Æä¾¡Á¿½Ó½üµ¥Æ¬»úADCµÄÂúÁ¿³Ì¡£
+    //ç”¨å•ç‰‡æœºçš„DACè¾“å‡ºä¸€ä¸ªæ¨¡æ‹Ÿç”µå‹ï¼Œæ¥æ§åˆ¶æµ‹é¢‘æ¨¡å—æ¨¡æ‹Ÿéƒ¨åˆ†çš„å¢ç›Š(æœ‰æ•ˆæ§åˆ¶èŒƒå›´çº¦ä¸º2.3V-2.7Vï¼Œç”µå‹è¶Šé«˜å¢ç›Šè¶Šå¤§)ï¼Œä½¿å…¶å°½é‡æ¥è¿‘å•ç‰‡æœºADCçš„æ»¡é‡ç¨‹ã€‚
    
-    HAL_DAC_Start(&hdac1,DAC1_CHANNEL_2); // Æô¶¯DAC
-    HAL_DAC_SetValue(&hdac1,DAC1_CHANNEL_2,DAC_ALIGN_12B_R,3000); // ÉèÖÃDACÊä³öÎª2047£¬¼´1.65V
+    HAL_DAC_Start(&hdac1,DAC1_CHANNEL_2); // å¯åŠ¨DAC
+    HAL_DAC_SetValue(&hdac1,DAC1_CHANNEL_2,DAC_ALIGN_12B_R,3000); // è®¾ç½®DACè¾“å‡ºä¸º2047ï¼Œå³1.65V
 
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, BUFFER_SIZE);   //´«ÊäÊı¾İ¸öÊı£¬Ä¿Ç°¿´ÊÖ²á¸Ğ¾õÊÇÒÔadcÃ¿´Î²É¼¯µÄ16Î»Êı¾İÎªµ¥Î»£¬ËùÒÔ»¹ÊÇbuffersize
-    // ÆôÓÃDMA´«ÊäÍê³ÉÖĞ¶Ï
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, BUFFER_SIZE);   //ä¼ è¾“æ•°æ®ä¸ªæ•°ï¼Œç›®å‰çœ‹æ‰‹å†Œæ„Ÿè§‰æ˜¯ä»¥adcæ¯æ¬¡é‡‡é›†çš„16ä½æ•°æ®ä¸ºå•ä½ï¼Œæ‰€ä»¥è¿˜æ˜¯buffersize
+    // å¯ç”¨DMAä¼ è¾“å®Œæˆä¸­æ–­
     //__HAL_DMA_ENABLE_IT(&hdma_adc1, DMA_IT_TC);
-    HAL_TIM_Base_Start(&htim7);      //Æô¶¯adc´¥·¢¶¨Ê±Æ÷
+    HAL_TIM_Base_Start(&htim7);      //å¯åŠ¨adcè§¦å‘å®šæ—¶å™¨
 }
-#endif
 
-}//namespace gui {
-
-// /**
-//   * @brief This function handles DMA1 channel1 global interrupt.
-//   */
-// void DMA1_Channel1_IRQHandler(void){
-//   HAL_DMA_IRQHandler(&hdma_adc1);  // ´¦ÀíDMAÖĞ¶Ï
-//   DMA_flag = 1; 
-// }
+}
 typedef float float32_t;
 
 int* compute_fft_peak_frequencies(uint16_t *adc_data, uint32_t sample_rate, uint32_t N) {
@@ -236,44 +242,44 @@ int* compute_fft_peak_frequencies(uint16_t *adc_data, uint32_t sample_rate, uint
     float32_t *real = new float32_t[N];
     float32_t *magnitude = new float32_t[N/2];
     
-    // ¹éÒ»»¯ADCÊı¾İ²¢Ó¦ÓÃººÄş´°
+    // å½’ä¸€åŒ–ADCæ•°æ®å¹¶åº”ç”¨æ±‰å®çª—
     for (uint32_t i = 0; i < N; i++) {
-        // ººÄş´°ÏµÊı
+        // æ±‰å®çª—ç³»æ•°
         float window = 0.5f * (1.0f - cosf(2.0f * PI * i / (N - 1)));
-        // Ó¦ÓÃ´°º¯Êıµ½¹éÒ»»¯Êı¾İ
+        // åº”ç”¨çª—å‡½æ•°åˆ°å½’ä¸€åŒ–æ•°æ®
         real[i] = ((float)(adc_data[i] - 2048) / 2048.0f) * window;
     }
 
 
-    // Ö´ĞĞFFT
+    // æ‰§è¡ŒFFT
     arm_rfft_fast_init_f32(&S, N);
     arm_rfft_fast_f32(&S, real, real, 0);
 
-    // ¼ÆËã·ùÖµÆ×
+    // è®¡ç®—å¹…å€¼è°±
     for (uint32_t i = 0; i < N/2; i++) {
-        // Êµ²¿ºÍĞé²¿ÔÚCMSIS-DSPµÄrfft½á¹ûÖĞµÄÅÅÁĞ·½Ê½
+        // å®éƒ¨å’Œè™šéƒ¨åœ¨CMSIS-DSPçš„rfftç»“æœä¸­çš„æ’åˆ—æ–¹å¼
         float re = real[2*i];
         float im = real[2*i+1];
-        magnitude[i] = sqrtf(re*re + im*im) / (N/2); // ¹éÒ»»¯
+        magnitude[i] = sqrtf(re*re + im*im) / (N/2); // å½’ä¸€åŒ–
     }
     
-    // Ñ°ÕÒ×î´óµÄËÄ¸ö·ùÖµ¶ÔÓ¦µÄÆµÂÊ
+    // å¯»æ‰¾æœ€å¤§çš„å››ä¸ªå¹…å€¼å¯¹åº”çš„é¢‘ç‡
     uint32_t max_indices[4] = {0, 0, 0, 0};
     float max_mags[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     
-    // ´ÓµÚ2¸öÔªËØ¿ªÊ¼£¨Ìø¹ıDC·ÖÁ¿£©
+    // ä»ç¬¬2ä¸ªå…ƒç´ å¼€å§‹ï¼ˆè·³è¿‡DCåˆ†é‡ï¼‰
     for (uint32_t i = 1; i < N/2; i++) {
         if (magnitude[i] > max_mags[3]) {
-            // ¼ì²éÊÇ·ñÊÇ¾Ö²¿·åÖµ£¨±ÈÏàÁÚµã´ó£©
+            // æ£€æŸ¥æ˜¯å¦æ˜¯å±€éƒ¨å³°å€¼ï¼ˆæ¯”ç›¸é‚»ç‚¹å¤§ï¼‰
             if (i > 0 && i < N/2 - 1) {
                 if (magnitude[i] < magnitude[i-1] || magnitude[i] < magnitude[i+1]) {
-                    continue; // ²»ÊÇ¾Ö²¿·åÖµ
+                    continue; // ä¸æ˜¯å±€éƒ¨å³°å€¼
                 }
             }
             
-            // ²åÈëĞÂÖµ²¢±£³ÖÊı×éÅÅĞò
+            // æ’å…¥æ–°å€¼å¹¶ä¿æŒæ•°ç»„æ’åº
             if (magnitude[i] > max_mags[0]) {
-                // ĞÂÖµÊÇ×î´óµÄ
+                // æ–°å€¼æ˜¯æœ€å¤§çš„
                 max_mags[3] = max_mags[2];
                 max_indices[3] = max_indices[2];
                 max_mags[2] = max_mags[1];
@@ -283,7 +289,7 @@ int* compute_fft_peak_frequencies(uint16_t *adc_data, uint32_t sample_rate, uint
                 max_mags[0] = magnitude[i];
                 max_indices[0] = i;
             } else if (magnitude[i] > max_mags[1]) {
-                // ĞÂÖµÊÇµÚ¶ş´óµÄ
+                // æ–°å€¼æ˜¯ç¬¬äºŒå¤§çš„
                 max_mags[3] = max_mags[2];
                 max_indices[3] = max_indices[2];
                 max_mags[2] = max_mags[1];
@@ -291,42 +297,42 @@ int* compute_fft_peak_frequencies(uint16_t *adc_data, uint32_t sample_rate, uint
                 max_mags[1] = magnitude[i];
                 max_indices[1] = i;
             } else if (magnitude[i] > max_mags[2]) {
-                // ĞÂÖµÊÇµÚÈı´óµÄ
+                // æ–°å€¼æ˜¯ç¬¬ä¸‰å¤§çš„
                 max_mags[3] = max_mags[2];
                 max_indices[3] = max_indices[2];
                 max_mags[2] = magnitude[i];
                 max_indices[2] = i;
             } else {
-                // ĞÂÖµÊÇµÚËÄ´óµÄ
+                // æ–°å€¼æ˜¯ç¬¬å››å¤§çš„
                 max_mags[3] = magnitude[i];
                 max_indices[3] = i;
             }
         }
     }
 
-    // Ê¹ÓÃÅ×ÎïÏß²åÖµÌá¸ßÆµÂÊ¹À¼Æ¾«¶È
+    // ä½¿ç”¨æŠ›ç‰©çº¿æ’å€¼æé«˜é¢‘ç‡ä¼°è®¡ç²¾åº¦
     FrequencyPeaks result;
     for (int i = 0; i < 4; i++) {
         uint32_t idx = max_indices[i];
         if (idx > 0 && idx < N/2 - 1) {
-            // Å×ÎïÏß²åÖµ
+            // æŠ›ç‰©çº¿æ’å€¼
             float alpha = magnitude[idx-1];
             float beta = magnitude[idx];
             float gamma = magnitude[idx+1];
             float delta = 0.5f * (alpha - gamma) / (alpha - 2.0f*beta + gamma);
             
-            // ĞŞÕıÆµÂÊ¹À¼Æ
+            // ä¿®æ­£é¢‘ç‡ä¼°è®¡
             float corrected_idx = idx + delta;
             result.frequencies[i] = (float)(corrected_idx * sample_rate) / N;
         } else {
-            // Ö±½Ó¼ÆËãÆµÂÊ£¨ÎŞ·¨²åÖµµÄÇé¿ö£©
+            // ç›´æ¥è®¡ç®—é¢‘ç‡ï¼ˆæ— æ³•æ’å€¼çš„æƒ…å†µï¼‰
             result.frequencies[i] = (float)(idx * sample_rate) / N;
         }
         
         result.magnitudes[i] = max_mags[i];
     }
-    fft_peaks = result; // ±£´æ½á¹ûµ½È«¾Ö±äÁ¿
-    freqs = (int*)result.frequencies; // ·µ»ØÆµÂÊÊı×éÖ¸Õë
+    fft_peaks = result; // ä¿å­˜ç»“æœåˆ°å…¨å±€å˜é‡
+    freqs = (int*)result.frequencies; // è¿”å›é¢‘ç‡æ•°ç»„æŒ‡é’ˆ
 
     delete[] real;
     delete[] magnitude;
