@@ -48,7 +48,8 @@ CMainPage::CMainPage()
 
 void CMainPage::OnMeasureMode()
 {
-	
+	//关闭LED
+	isOnMeasureMode = true;
 	ScanAdcPage* MeasurePage = new ScanAdcPage;
 	MeasurePage->Init();
 	MeasurePage->Show();
@@ -56,6 +57,9 @@ void CMainPage::OnMeasureMode()
 	delete MeasurePage; //删除测量页面对象
 	//返回值则为用户选择的算法计算值，直接将SpeedCtrl的值设置为此值
 	SpeedCtrl.OnSetVal(Ret*100); //设置SpeedCtrl的值
+//重新打开LED
+	isOnMeasureMode = false;
+	StartToFlash();
 	Init(); //重新初始化页面
 	Show();	//显示
 }
@@ -73,8 +77,9 @@ int CMainPage::Loop()
 				if(IsTrigMode(Trig_Internal)){//内触发只调频率
 					switch(Key){
 						#ifdef LAYSER
-						case KEY_POWER_LONG:
-							OnMeasureMode();
+						case KEY_HALF_POWER_LONG:
+						 	if(!POWER_PRESSED) //如果是长按重按时按下的KEY_HALF_POWER_LONG,则不进入测频界面
+								OnMeasureMode();
 							break;
 						#endif
 						case KEY_ENCODER:
@@ -84,8 +89,7 @@ int CMainPage::Loop()
 							SpeedCtrl.Update();
 							break;
 						case KEY_ENTER_LONG:
-							OnMeasureMode();
-							// OnKeyMode();
+							OnKeyMode();
 							break;
 						case KEY_DOWN_SHOT ://除2
 							MainScanFlag = 1;

@@ -2,7 +2,7 @@
 #define _KET_H_
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif 
 
 
@@ -23,7 +23,11 @@
 #define KEY_UP_LONG			(KEY_UP_SHOT + 0x40)
 #define KEY_POWER_SHOT		6
 #define KEY_POWER_LONG		(KEY_POWER_SHOT + 0x40)
-#define KEY_ENCODER         7
+#define KEY_HALF_POWER_SHOT 7
+#define KEY_HALF_POWER_LONG (KEY_HALF_POWER_SHOT + 0x40)
+#define KEY_ENCODER         8
+
+
 
 #define KEY_DIV2_RELEASE	(KEY_DIV2_SHOT + 0x20)
 #define KEY_MULT_RELEASE 	(KEY_MULT_SHOT + 0x20)
@@ -42,7 +46,7 @@
 
 
 #ifdef __cplusplus
- }
+}
 #endif 
 
 #endif//_KET_H_

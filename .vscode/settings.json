@@ -78,5 +78,11 @@
         "__config": "cpp",
         "__nullptr": "cpp"
     },
-    "Codegeex.RepoIndex": true
+    "Codegeex.RepoIndex": true,
+    "editor.defaultFormatter": "ms-vscode.cpptools",
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "file",
+    "editor.formatOnType": false,
+    "C_Cpp.clang_format_sortIncludes": false
 }

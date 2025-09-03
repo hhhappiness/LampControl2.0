@@ -110,6 +110,8 @@ void Error_Handler(void);
 #define KEY_LEFT_GPIO_Port GPIOB
 #define KEY_UP_Pin GPIO_PIN_7
 #define KEY_UP_GPIO_Port GPIOB
+#define HALF_ENTER_Pin GPIO_PIN_11
+#define HALF_ENTER_GPIO_Port GPIOB
 
 #define LCD_CSB_Pin_O(x)		((x==0) ? (GPIOB->ODR & ~LCD_CSB_Pin) : (GPIOB->ODR | LCD_CSB_Pin))
 #define LCD_SCL_Pin_O(x)		((x==0) ? (GPIOB->ODR & ~LCD_SCL_Pin) : (GPIOB->ODR | LCD_SCL_Pin))

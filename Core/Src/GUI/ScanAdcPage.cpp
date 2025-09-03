@@ -1,4 +1,4 @@
-﻿#include "ScanAdcPage.hpp"
+#include "ScanAdcPage.hpp"
 #include "Icons.hpp"
 #include "ctrl.h"
 #include "AppParaCommon.h"
@@ -13,17 +13,17 @@ extern DAC_HandleTypeDef hdac1;
 
 
 typedef struct{
-    float frequencies[4]={};  // 四个主要频率
-    float magnitudes[4]={};   // 对应的幅值
+    float frequencies[4]={};  // �ĸ���ҪƵ��
+    float magnitudes[4]={};   // ��Ӧ�ķ�ֵ
 }FrequencyPeaks;
 
-FrequencyPeaks fft_peaks; // 用于存储FFT计算结果
+FrequencyPeaks fft_peaks; // ���ڴ洢FFT������
 
-#define BUFFER_SIZE 4096 // 采样缓冲区大小
+#define BUFFER_SIZE 4096 // ������������С
 
-uint16_t adc_buffer[BUFFER_SIZE]={0}; // 存储采样数据
+uint16_t adc_buffer[BUFFER_SIZE]={0}; // �洢��������
 
-u8 first_time = 1, DMA_flag=0; // 用于标记是否第一次运行
+u8 first_time = 1, DMA_flag=0; // ���ڱ���Ƿ��һ������
 u8 algStrLenth_CH[2] = {3, 5};
 u8 algStrLenth_EN[2] = {3, 7};
 // void DMA1_Channel1_IRQHandler(void);
@@ -42,14 +42,14 @@ namespace gui {
 
 static const char *AlgorithmStr_Cn[AlgNum]={
 	"FFT",
-	"FR 滤波",
+	"FR �˲�",
 };
 static const char *AlgorithmStr_En[AlgNum]={
 	"FFT",
 	"FR Filter",
 };
 
-///构造函数
+///���캯��
 ScanAdcPage::ScanAdcPage()
 : GUI_Page(MaxObjNum, SecondDispBuf)
 , SpeedCtrl(GUI_Speed::GetInstance())
@@ -59,82 +59,82 @@ ScanAdcPage::ScanAdcPage()
 }
 
 
-///初始化，备份当原Page指针，用于退出时恢复显示
+///��ʼ�������ݵ�ԭPageָ�룬�����˳�ʱ�ָ���ʾ
 void ScanAdcPage::Init()
 {
 	bakPage = pCurrPage;
 	pCurrPage = this;
-	//进度条设置
+	//����������
 	Progress->SetPos(0,24);
 	Progress->SetRange(SpeedCtrl.Min, SpeedCtrl.Max);
-	Progress->SetValue(0); //初始值
+	Progress->SetValue(0); //��ʼֵ
 }
 
 void ScanAdcPage::UnInit()
 {
-    ObjList.Delete(0,MaxObjNum); // 删除所有New创建的控件
-	//退出前恢复pCurrPage指针
+    ObjList.Delete(0,MaxObjNum); // ɾ������New�����Ŀؼ�
+	//�˳�ǰ�ָ�pCurrPageָ��
 	pCurrPage = bakPage;
-	pCurrPage->Update();//恢复遮盖部分的显示	
-    StopScan(); // 停止采集
-	ClearKey();//清掉后面的长按键
+	pCurrPage->Update();//�ָ��ڸǲ��ֵ���ʾ	
+    StopScan(); // ֹͣ�ɼ�
+	ClearKey();//�������ĳ�����
 }
-///显示一个外框，各按钮图标，再显示控件
+///��ʾһ����򣬸���ťͼ�꣬����ʾ�ؼ�
 void ScanAdcPage::Show()
 {
 
 	Clear();
 	//Rectangle(0, 0, LcmXPixel, LcmYPixel);
-	//显示窗口标题
+	//��ʾ���ڱ���
 	if(AppPara.Language == Lang_Chinese){
-		DispStr8((LcmXPixel-6*DEFAULT_HANZI_WIDTH-3*DEFAULT_ASCII_WIDTH)/2,0,"正在采集数据...");
+		DispStr8((LcmXPixel-6*DEFAULT_HANZI_WIDTH-3*DEFAULT_ASCII_WIDTH)/2,0,"���ڲɼ�����...");
 
         #if TEST1
-        DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-algStrLenth_CH[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"信号:");
+        DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-algStrLenth_CH[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"�ź�:");
 
         #else
-        DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-algStrLenth_CH[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"算法:");
-        	//显示算法
+        DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-algStrLenth_CH[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"�㷨:");
+        	//��ʾ�㷨
 	    DispStr8((LcmXPixel-2*DEFAULT_HANZI_WIDTH-algStrLenth_CH[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2 + \
             2*DEFAULT_HANZI_WIDTH+DEFAULT_ASCII_WIDTH,DIGITAL_Y,AlgorithmStr_Cn[AppPara.Algorithm]);	
         #endif
 	}else{
 		DispStr8((LcmXPixel-17*DEFAULT_ASCII_WIDTH)/2,0,"Collecting Data...");
         DispStr8((LcmXPixel-10*DEFAULT_ASCII_WIDTH- algStrLenth_EN[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"Algorithm:");
-        	//显示算法
+        	//��ʾ�㷨
 	    DispStr8((LcmXPixel-10*DEFAULT_ASCII_WIDTH- algStrLenth_EN[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2 + \
             10*DEFAULT_ASCII_WIDTH,DIGITAL_Y,AlgorithmStr_Cn[AppPara.Algorithm]);	
 	}
 	
-	//显示控件
+	//��ʾ�ؼ�
 	GUI_Page::Show(0);
 
 	Update();
 }
 
 void ScanAdcPage::ShowResults(int* freqs){
-    Clear(); // 清除显示区域
+    Clear(); // �����ʾ����
     if(AppPara.Language == Lang_Chinese){
-		DispStr8((LcmXPixel-4*DEFAULT_HANZI_WIDTH-DEFAULT_ASCII_WIDTH)/2,0,"算法结果:");
-        DispStr8((LcmXPixel-3*DEFAULT_HANZI_WIDTH)/2,DIGITAL_Y,"请确认");
+		DispStr8((LcmXPixel-4*DEFAULT_HANZI_WIDTH-DEFAULT_ASCII_WIDTH)/2,0,"�㷨���:");
+        DispStr8((LcmXPixel-3*DEFAULT_HANZI_WIDTH)/2,DIGITAL_Y,"��ȷ��");
 	}else{
 		DispStr8((LcmXPixel-17*DEFAULT_ASCII_WIDTH)/2,0,"Algorithm Results:");
         DispStr8((LcmXPixel-13*DEFAULT_ASCII_WIDTH)/2,DIGITAL_Y,"Please confirm");
 	}
-    //显示四个最大幅值代表的频率
-    Freq[0] = new GUI_NumText(freqs, 3, 0, &Song_Width9_ASCII); // 创建四个频率文本控件
+    //��ʾ�ĸ�����ֵ������Ƶ��
+    Freq[0] = new GUI_NumText(freqs, 3, 0, &Song_Width9_ASCII); // �����ĸ�Ƶ���ı��ؼ�
     Freq[1] = new GUI_NumText(freqs+1, 3, 0, &Song_Width9_ASCII);    
     Freq[2] = new GUI_NumText(freqs+2, 3, 0, &Song_Width9_ASCII);
     Freq[3] = new GUI_NumText(freqs+3, 3, 0, &Song_Width9_ASCII);
     for(int i = 0; i < 4; i++){
-        Freq[i]->SetPos(2 + (i) * (3 * 9+4), 24);  //set每个控件的位置
-        Freq[i]->Enable = true; // 启用焦点功能
-        Freq[i]->Align = AlignRight; // 右对齐
+        Freq[i]->SetPos(2 + (i) * (3 * 9+4), 24);  //setÿ���ؼ���λ��
+        Freq[i]->Enable = true; // ���ý��㹦��
+        Freq[i]->Align = AlignRight; // �Ҷ���
         ObjList.Append(Freq[i]);
     }
     SetFocus(iFreq1,false);
-    GUI_Page::Show(1, 4); //显示除了进度条和算法控件之外的其他控件
-    Update(); // 更新显示
+    GUI_Page::Show(1, 4); //��ʾ���˽��������㷨�ؼ�֮��������ؼ�
+    Update(); // ������ʾ
 
 }
 
@@ -143,33 +143,40 @@ void ScanAdcPage::ShowResults(int* freqs){
 
 #define HOLD_REPEATE_NUM	4
 
-///按键循环，左右键移动光标，确定选中退出
+///����ѭ�������Ҽ��ƶ���꣬ȷ��ѡ���˳�
 int ScanAdcPage::Loop()
 {
     #if 1
-    uint32_t remaining = BUFFER_SIZE,completion_percentage=0; // 剩余传输数量
+    uint32_t remaining = BUFFER_SIZE,completion_percentage=0; // ʣ�ഫ������
     Rect8_t Rect;
-    StartScan(); // 启动ADC采集
-    while(POWER_PRESSED){ // 用户松开测频键时退出
+    StartScan(); // ����ADC�ɼ�
+    while(HALF_POWER_PRESSED){ // �û�����Դ�ᰴ��ʱ�������ݲɼ�
 
         
         Rect = {(u8)((LcmXPixel-2*DEFAULT_HANZI_WIDTH-algStrLenth_CH[AppPara.Algorithm]*DEFAULT_ASCII_WIDTH)/2 + \
             2*DEFAULT_HANZI_WIDTH+DEFAULT_ASCII_WIDTH),DIGITAL_Y, 2*DEFAULT_ASCII_WIDTH, DEFAULT_ASCII_FONT.Height};
         
-        ScanSignal(); // 扫描信号强度
+        ScanSignal(); // ɨ���ź�ǿ��
         DispStr8( Rect.x, Rect.y ,&signalVal[0]);	
-        LcmPutBmpRect(Rect.x+4,Rect.y, pCurrPage->pPix,Width, &Rect); // 更新显示
+        LcmPutBmpRect(Rect.x+4,Rect.y, pCurrPage->pPix,Width, &Rect); // ������ʾ
 
-        completion_percentage = 19900 * (BUFFER_SIZE - remaining) / BUFFER_SIZE + 100;  // 计算已完成百分比
-        remaining -= __HAL_DMA_GET_COUNTER(&hdma_adc1);         // 获取剩余传输数量
-        Progress->SetValue(completion_percentage);              //更新进度条
+        completion_percentage = 19900 * (BUFFER_SIZE - remaining) / BUFFER_SIZE + 100;  // ��������ɰٷֱ�
+        remaining -= __HAL_DMA_GET_COUNTER(&hdma_adc1);         // ��ȡʣ�ഫ������
+        Progress->SetValue(completion_percentage);              //���½�����
         delay_ms(1000);
 
+        if(POWER_PRESSED)
+            break;
+    }
+    if(! POWER_PRESSED || !HALF_POWER_PRESSED) 
+    {
+        StopScan();
+        return *SpeedCtrl.pVal/100;  //����ԭֵ
     }
     StopScan(); 
-    int* freqs = compute_fft_peak_frequencies(adc_buffer, 500, BUFFER_SIZE); // 计算FFT峰值频率
+    int* freqs = compute_fft_peak_frequencies(adc_buffer, 500, BUFFER_SIZE); // ����FFT��ֵƵ��
     #endif
-    ShowResults(freqs); // 显示结果
+    ShowResults(freqs); // ��ʾ���
     
     TKey = GetTimerCount();
 	TIdle = GetTimerCount(); 
@@ -198,37 +205,37 @@ void ScanAdcPage::ScanSignal(){
     int signalValue = 0;
     snprintf(signalVal, sizeof(signalVal), "%d", signalValue);
 }
-// 停止激光传感器的驱动、ADC采集
+// ֹͣ���⴫������������ADC�ɼ�
 void ScanAdcPage::StopScan()
 {
-    HAL_TIM_PWM_Stop(&htim15, TIM_CHANNEL_2); // 停止PWM输出定时器触发
-    SNSR_PWR(0); // 关闭测频模块电源
-    HAL_DAC_Stop(&hdac1,DAC_CHANNEL_2); // 停止DAC
-    HAL_TIM_Base_Stop(&htim7);    // 停止定时器触发
-    HAL_ADC_Stop_DMA(&hadc1);     // 停止ADC和DMA	
+    HAL_TIM_PWM_Stop(&htim15, TIM_CHANNEL_2); // ֹͣPWM�����ʱ������
+    SNSR_PWR(0); // �رղ�Ƶģ���Դ
+    HAL_DAC_Stop(&hdac1,DAC_CHANNEL_2); // ֹͣDAC
+    HAL_TIM_Base_Stop(&htim7);    // ֹͣ��ʱ������
+    HAL_ADC_Stop_DMA(&hadc1);     // ֹͣADC��DMA	
 }
 
-///启动自动加
-void ScanAdcPage::StartScan()  //开启adc定时采集并通过DMA传输到adc_buffer
+///�����Զ���
+void ScanAdcPage::StartScan()  //����adc��ʱ�ɼ���ͨ��DMA���䵽adc_buffer
 {
-    SNSR_PWR(1); //开启测频模块电源
-    StopToFlash();   //开启测频后停止LED输出
-    HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2); // 启动pwm输出定时器，455hz方波控制激光器
+    SNSR_PWR(1); //������Ƶģ���Դ
+    StopToFlash();   //������Ƶ��ֹͣLED���
+    HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2); // ����pwm�����ʱ����455hz�������Ƽ�����
     
-    if(first_time) {  // 如果是第一次运行，进行 ADC 校准
+    if(first_time) {  // ����ǵ�һ�����У����� ADC У׼
         HAL_ADCEx_Calibration_Start(&hadc1,ADC_SINGLE_ENDED);
         first_time = 0;
     }
 
-    //用单片机的DAC输出一个模拟电压，来控制测频模块模拟部分的增益(有效控制范围约为2.3V-2.7V，电压越高增益越大)，使其尽量接近单片机ADC的满量程。
+    //�õ�Ƭ����DAC���һ��ģ���ѹ�������Ʋ�Ƶģ��ģ�ⲿ�ֵ�����(��Ч���Ʒ�ΧԼΪ2.3V-2.7V����ѹԽ������Խ��)��ʹ�価���ӽ���Ƭ��ADC�������̡�
    
-    HAL_DAC_Start(&hdac1,DAC1_CHANNEL_2); // 启动DAC
-    HAL_DAC_SetValue(&hdac1,DAC1_CHANNEL_2,DAC_ALIGN_12B_R,3000); // 设置DAC输出为2047，即1.65V
+    HAL_DAC_Start(&hdac1,DAC1_CHANNEL_2); // ����DAC
+    HAL_DAC_SetValue(&hdac1,DAC1_CHANNEL_2,DAC_ALIGN_12B_R,3000); // ����DAC���Ϊ2047����1.65V
 
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, BUFFER_SIZE);   //传输数据个数，目前看手册感觉是以adc每次采集的16位数据为单位，所以还是buffersize
-    // 启用DMA传输完成中断
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buffer, BUFFER_SIZE);   //�������ݸ�����Ŀǰ���ֲ�о�����adcÿ�βɼ���16λ����Ϊ��λ�����Ի���buffersize
+    // ����DMA��������ж�
     //__HAL_DMA_ENABLE_IT(&hdma_adc1, DMA_IT_TC);
-    HAL_TIM_Base_Start(&htim7);      //启动adc触发定时器
+    HAL_TIM_Base_Start(&htim7);      //����adc������ʱ��
 }
 
 }
@@ -242,44 +249,44 @@ int* compute_fft_peak_frequencies(uint16_t *adc_data, uint32_t sample_rate, uint
     float32_t *real = new float32_t[N];
     float32_t *magnitude = new float32_t[N/2];
     
-    // 归一化ADC数据并应用汉宁窗
+    // ��һ��ADC���ݲ�Ӧ�ú�����
     for (uint32_t i = 0; i < N; i++) {
-        // 汉宁窗系数
+        // ������ϵ��
         float window = 0.5f * (1.0f - cosf(2.0f * PI * i / (N - 1)));
-        // 应用窗函数到归一化数据
+        // Ӧ�ô���������һ������
         real[i] = ((float)(adc_data[i] - 2048) / 2048.0f) * window;
     }
 
 
-    // 执行FFT
+    // ִ��FFT
     arm_rfft_fast_init_f32(&S, N);
     arm_rfft_fast_f32(&S, real, real, 0);
 
-    // 计算幅值谱
+    // �����ֵ��
     for (uint32_t i = 0; i < N/2; i++) {
-        // 实部和虚部在CMSIS-DSP的rfft结果中的排列方式
+        // ʵ�����鲿��CMSIS-DSP��rfft����е����з�ʽ
         float re = real[2*i];
         float im = real[2*i+1];
-        magnitude[i] = sqrtf(re*re + im*im) / (N/2); // 归一化
+        magnitude[i] = sqrtf(re*re + im*im) / (N/2); // ��һ��
     }
     
-    // 寻找最大的四个幅值对应的频率
+    // Ѱ�������ĸ���ֵ��Ӧ��Ƶ��
     uint32_t max_indices[4] = {0, 0, 0, 0};
     float max_mags[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     
-    // 从第2个元素开始（跳过DC分量）
+    // �ӵ�2��Ԫ�ؿ�ʼ������DC������
     for (uint32_t i = 1; i < N/2; i++) {
         if (magnitude[i] > max_mags[3]) {
-            // 检查是否是局部峰值（比相邻点大）
+            // ����Ƿ��Ǿֲ���ֵ�������ڵ��
             if (i > 0 && i < N/2 - 1) {
                 if (magnitude[i] < magnitude[i-1] || magnitude[i] < magnitude[i+1]) {
-                    continue; // 不是局部峰值
+                    continue; // ���Ǿֲ���ֵ
                 }
             }
             
-            // 插入新值并保持数组排序
+            // ������ֵ��������������
             if (magnitude[i] > max_mags[0]) {
-                // 新值是最大的
+                // ��ֵ������
                 max_mags[3] = max_mags[2];
                 max_indices[3] = max_indices[2];
                 max_mags[2] = max_mags[1];
@@ -289,7 +296,7 @@ int* compute_fft_peak_frequencies(uint16_t *adc_data, uint32_t sample_rate, uint
                 max_mags[0] = magnitude[i];
                 max_indices[0] = i;
             } else if (magnitude[i] > max_mags[1]) {
-                // 新值是第二大的
+                // ��ֵ�ǵڶ����
                 max_mags[3] = max_mags[2];
                 max_indices[3] = max_indices[2];
                 max_mags[2] = max_mags[1];
@@ -297,42 +304,42 @@ int* compute_fft_peak_frequencies(uint16_t *adc_data, uint32_t sample_rate, uint
                 max_mags[1] = magnitude[i];
                 max_indices[1] = i;
             } else if (magnitude[i] > max_mags[2]) {
-                // 新值是第三大的
+                // ��ֵ�ǵ������
                 max_mags[3] = max_mags[2];
                 max_indices[3] = max_indices[2];
                 max_mags[2] = magnitude[i];
                 max_indices[2] = i;
             } else {
-                // 新值是第四大的
+                // ��ֵ�ǵ��Ĵ��
                 max_mags[3] = magnitude[i];
                 max_indices[3] = i;
             }
         }
     }
 
-    // 使用抛物线插值提高频率估计精度
+    // ʹ�������߲�ֵ���Ƶ�ʹ��ƾ���
     FrequencyPeaks result;
     for (int i = 0; i < 4; i++) {
         uint32_t idx = max_indices[i];
         if (idx > 0 && idx < N/2 - 1) {
-            // 抛物线插值
+            // �����߲�ֵ
             float alpha = magnitude[idx-1];
             float beta = magnitude[idx];
             float gamma = magnitude[idx+1];
             float delta = 0.5f * (alpha - gamma) / (alpha - 2.0f*beta + gamma);
             
-            // 修正频率估计
+            // ����Ƶ�ʹ���
             float corrected_idx = idx + delta;
             result.frequencies[i] = (float)(corrected_idx * sample_rate) / N;
         } else {
-            // 直接计算频率（无法插值的情况）
+            // ֱ�Ӽ���Ƶ�ʣ��޷���ֵ�������
             result.frequencies[i] = (float)(idx * sample_rate) / N;
         }
         
         result.magnitudes[i] = max_mags[i];
     }
-    fft_peaks = result; // 保存结果到全局变量
-    freqs = (int*)result.frequencies; // 返回频率数组指针
+    fft_peaks = result; // ��������ȫ�ֱ���
+    freqs = (int*)result.frequencies; // ����Ƶ������ָ��
 
     delete[] real;
     delete[] magnitude;

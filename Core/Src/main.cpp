@@ -793,12 +793,12 @@ static void MX_GPIO_Init(void)
 
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;  
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   
-  /*Configure GPIO pins : KEY_POWER_Pin KEY_RIGHT_Pin KEY_DOWN_Pin KEY_ENTER_Pin
+  /*Configure GPIO pins : KEY_POWER_Pin KEY_RIGHT_Pin HALF_ENTER_Pin KEY_DOWN_Pin KEY_ENTER_Pin
                            KEY_LEFT_Pin KEY_UP_Pin */
-  GPIO_InitStruct.Pin = KEY_POWER_Pin|KEY_RIGHT_Pin|KEY_DOWN_Pin|KEY_ENTER_Pin
+  GPIO_InitStruct.Pin = KEY_POWER_Pin|HALF_ENTER_Pin|KEY_RIGHT_Pin|KEY_DOWN_Pin|KEY_ENTER_Pin
                           |KEY_LEFT_Pin|KEY_UP_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;

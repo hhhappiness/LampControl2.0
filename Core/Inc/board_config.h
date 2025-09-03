@@ -2,7 +2,7 @@
 #define _BOARD_CONFIG_H_
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif 
 
 #include "stm32.h"
@@ -14,7 +14,7 @@
 #define APP_ADDRESS  	0x8004000
 #define BOOT_ADDRESS	0x8000000
 
-//进入HardFault中断后按哪个键复位，这里设成Enter键
+    //进入HardFault中断后按哪个键复位，这里设成Enter键
 #define FaultResetCondition() 	(GPI_KEY_ENTER == 0)
 
 // My GPIO function define
@@ -28,6 +28,7 @@
 //输出管脚
 
 #define POWER_PRESSED 	(GPB_I(0)==0) //电源按键按下
+#define HALF_POWER_PRESSED 	(GPB_I(11)==0) //电源轻按键按下
 #define ENTER_PRESSED 	(GPB_I(5)==0) //Enter键按下
 #define BKLT_SW(x)		GPA_O(15,x)
 #define LCD_RSTB(x)	GPA_O(8,x) //RSTB=1 or 0	
@@ -47,17 +48,17 @@
 //Mode键和Enter键除做通用按键使用外还有特殊功能，在此定义管脚	 
 #define GPI_KEY_ENTER 	GPB_I(5)		 
 
-__inline void PowerOn(void )  {GPA_O(2,1);}
-__inline void PowerOff(void ) {GPA_O(2,0);}
-__inline void BackLightOn(void )  {BKLT_SW(1);}
-__inline void BackLightOff(void ) {BKLT_SW(0);}
-__inline void LcdResetOn(void )  {LCD_RSTB(0);}
-__inline void LcdResetOff(void ) {LCD_RSTB(1);}
+    __inline void PowerOn(void) { GPA_O(2, 1); }
+    __inline void PowerOff(void) { GPA_O(2, 0); }
+    __inline void BackLightOn(void) { BKLT_SW(1); }
+    __inline void BackLightOff(void) { BKLT_SW(0); }
+    __inline void LcdResetOn(void) { LCD_RSTB(0); }
+    __inline void LcdResetOff(void) { LCD_RSTB(1); }
 
 #define GetChargePin	0
 
 #ifdef __cplusplus
 }
 #endif 
-	
+
 #endif
