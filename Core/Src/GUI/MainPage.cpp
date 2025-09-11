@@ -53,10 +53,10 @@ void CMainPage::OnMeasureMode()
 	ScanAdcPage* MeasurePage = new ScanAdcPage;
 	MeasurePage->Init();
 	MeasurePage->Show();
-	int Ret = MeasurePage->Loop();	 
+	float Ret = MeasurePage->fLoop();	 
 	delete MeasurePage; //删除测量页面对象
 	//返回值则为用户选择的算法计算值，直接将SpeedCtrl的值设置为此值
-	SpeedCtrl.OnSetVal(Ret*100); //设置SpeedCtrl的值
+	SpeedCtrl.OnSetVal((int)(Ret*100)); //设置SpeedCtrl的值
 //重新打开LED
 	isOnMeasureMode = false;
 	StartToFlash();

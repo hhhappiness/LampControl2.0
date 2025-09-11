@@ -12,8 +12,8 @@ define symbol __ICFEDIT_region_CCMSRAM_start__ = 0x10000000;
 define symbol __ICFEDIT_region_CCMSRAM_end__   = 0x100027FF;
 
 /*-Sizes-*/
-define symbol __ICFEDIT_size_cstack__ = 0x1000;
-define symbol __ICFEDIT_size_heap__   = 0x1000;
+define symbol __ICFEDIT_size_cstack__ = 0x380;
+define symbol __ICFEDIT_size_heap__   = 0x350;
 /**** End of ICF editor section. ###ICF###*/
 
 
@@ -33,4 +33,4 @@ place at address mem:__ICFEDIT_intvec_start__ { readonly section .intvec };
 place in ROM_region   { readonly };
 place in RAM_region   { readwrite,
                         block CSTACK, block HEAP };
-place in CCMSRAM_region { };
+place in CCMSRAM_region {  };

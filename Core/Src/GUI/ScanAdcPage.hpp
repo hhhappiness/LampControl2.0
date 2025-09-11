@@ -5,8 +5,6 @@
 #include "GUI_page.hpp"
 #include "GUI_Speed.hpp"
 
-
-
 namespace gui {
 class ScanAdcPage : public GUI_Page
 {
@@ -33,14 +31,14 @@ public:
 	char signalVal[2];
 
 	void OnStep(int step);
-	void ScanSignal();
 	void StopScan();
 	void StartScan();
 	virtual void Init();
 	void UnInit();
 	void ShowResults(int* freqs);
 	virtual void Show();
-	virtual int Loop();
+	// virtual int Loop();
+	float fLoop();
 };
 
 
