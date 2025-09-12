@@ -155,7 +155,7 @@ float ScanAdcPage::fLoop()
 {
     uint32_t remaining = BUFFER_SIZE,completion_percentage=0; // 剩余传输数量
     int collectTimes = 1;
-    float frequency = 0;
+    float frequency = -1;
     Rect8_t Rect;
 
     StartScan(); // 启动ADC采集条件
@@ -194,8 +194,8 @@ float ScanAdcPage::fLoop()
             ADC_DONE_FLAG = 1;
         }   
     }
-    // if(ADC_DONE_FLAG)
-    if(0)
+    if(ADC_DONE_FLAG)
+    //if(0)
     {
         DO_FFT( 1000, &frequency);
         // 将frequency转换为字符串
@@ -212,7 +212,7 @@ float ScanAdcPage::fLoop()
         Update();
     }
 
-    #if 1 //观察信号强度
+    #if 0 //观察信号强度
     if (glob_cnt >= 20) {
         uint32_t sum = 0;
         // 计算最近20个FFT输入缓冲区数据的总和
@@ -234,11 +234,11 @@ float ScanAdcPage::fLoop()
             break;
     }
     StopScan();
-    if(! POWER_PRESSED) 
+    if(frequency > 0 && POWER_PRESSED){
+        return frequency;
+    }else
     {
         return (float)*SpeedCtrl.pVal/100;  //返回原值
-    }else if(frequency > 0){
-        return frequency;
     }
 #if 0
     int* freqs = compute_fft_peak_frequencies(0, 500, BUFFER_SIZE); // 计算FFT峰值频率
@@ -328,10 +328,10 @@ void DO_FFT( unsigned int SampleRate, float *freq_found)
         avg_power += (double)fft_magnitude[i];
       //  printf("%d %.0f\n", i, fft_magnitude[i]);
     }
-    printf("\ntotal power %f\n", avg_power);
+    //printf("\ntotal power %f\n", avg_power);
     avg_power = avg_power / (100);
     
-    printf("avg_power %f\n", avg_power);
+    //printf("avg_power %f\n", avg_power);
     double threshold = avg_power * 4 ;
     
     //搜索1-50Hz
@@ -342,7 +342,7 @@ void DO_FFT( unsigned int SampleRate, float *freq_found)
       {
         double fre_resu =  (double)SampleRate / (FFT_LENGTH);  // 频率分辨率
         double freq_find =  i * fre_resu;
-        printf("First Freq below 50Hz: %.3f Hz, Magnitude: %f\n", freq_find, fft_magnitude[i]);
+        //printf("First Freq below 50Hz: %.3f Hz, Magnitude: %f\n", freq_find, fft_magnitude[i]);
         peak_found = 1;
         *freq_found = freq_find;
         break;
@@ -351,7 +351,7 @@ void DO_FFT( unsigned int SampleRate, float *freq_found)
     
     if (!peak_found) 
     {
-        printf("No significant peak found above threshold in 1-50Hz range\n");
+        //printf("No significant peak found above threshold in 1-50Hz range\n");
     }
     
 }

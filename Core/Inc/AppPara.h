@@ -24,7 +24,7 @@
 #define IsTrigMode(x) ((AppPara.TrigMode &(x))!=0)
 
 ///界面语言枚举，缺省是中文
-enum{
+enum {
 	Lang_Chinese,///<中文
 	Lang_English,///<英文
 	LangNum		///<当前支持的语言数量
@@ -51,20 +51,20 @@ enum {
 
 ///速度的单位种类枚举
 typedef enum {
-    Unit_Hz,	//频率，以Hz为单位
-    Unit_rpm, 	//转速，以rpm为单位
+	Unit_Hz,	//频率，以Hz为单位
+	Unit_rpm, 	//转速，以rpm为单位
 	Unit_mpmin,	//线速度，以m/min单位
 	SpeedUnitNum ///<支持的单位种类数
 }SpeedUnit_t;
 
-typedef enum{
+typedef enum {
 	Alg_FFT,
 	Alg_FR_Filter,
 	AlgNum
 }Algorithm_t;
 
 ///参数表结构体
-typedef struct{
+typedef struct {
 	u32 MagicNum;	///<幻数
 	u32 Version;	///<参数表版本
 	int TrigMode;	///<触发模式
@@ -103,19 +103,18 @@ typedef struct{
 	int BackLightDelay;	 	//无按键操作xx分钟后关闭背光
 	int PowerDelay;	 		//电源按键延时
 	int WorkTime;			//持续闪xxx分钟后暂停，
-	
+
 	/* project params set */
 	int FreqLimit_Led;	 //LED频率上限
 	int MaxPower;	 //灯管频率上限
-	
-	u32 Reserved[APP_PARA_SIZE/4-29];
+
+	u32 Reserved[APP_PARA_SIZE / 4 - 29];
 	u32 Sum;		 //check sum
-	u32 crc;		 //crc校验和
 }APP_PARA;
 
 extern const int SpeedUnitList[SpeedUnitNum];
 extern const int AlgTypeList[AlgNum];
-extern const char * const SpeedUnitStr[SpeedUnitNum];
+extern const char* const SpeedUnitStr[SpeedUnitNum];
 extern const int LanguageList[LangNum];
 //extern int LightTypeList[LightTypeNum];
 #endif

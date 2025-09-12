@@ -38,10 +38,6 @@
 #define APPNAME                        "CmBacktrace"
 #define HARDWARE_VERSION               "V1.0.0"
 #define SOFTWARE_VERSION               "V0.0.1"
-#define  TIM3_us2clk(S) 	(TIMXCLK/(20)*S/1000000) //us to clk
-#define  TIM2_us2clk(S) 	(TIMXCLK/(4)*S/1000000) //us to clk
-#define  TIM4_us2clk(S) 	(TIMXCLK/(1)*S/1000000) //us to clk
-#define  TIM15_us2clk(S) 	(TIMxCLK/(70)*S/1000000) //us to clk
 
 
 using namespace gui;
@@ -239,9 +235,9 @@ static void MX_TIM15_Init(void)
 
   /* USER CODE END TIM15_Init 1 */
   htim15.Instance = TIM15;
-  htim15.Init.Prescaler = 70-1;
+  htim15.Init.Prescaler = 2-1; //70MHz/2 = 35MHz
   htim15.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim15.Init.Period = 2199 - 1;
+  htim15.Init.Period = 77-1;  //35MHz/77 = 454.545kHz ≈ 455kHz
   htim15.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim15.Init.RepetitionCounter = 0;
   htim15.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -265,7 +261,7 @@ static void MX_TIM15_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 2199/2 - 1;
+  sConfigOC.Pulse = 77/2 - 1;  //50%占空比
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -501,7 +497,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 4 - 1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = TIM2_us2clk(10000)-1; //100hz
+  htim2.Init.Period = ((TIMXCLK/(4)+100/2)/100) - 1;//us to clk; //100hz
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -546,7 +542,7 @@ static void MX_TIM4_Init(void)
   htim4.Instance = TIM4;
   htim4.Init.Prescaler = 1-1;    //1分频 1750000hz
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = TIM4_us2clk(50) -1; //周期为50us
+  htim4.Init.Period = (TIMXCLK/(1)*50/1000000) - 1; //us to clk; //周期为50us
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
@@ -902,13 +898,13 @@ static void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 20 - 1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_DOWN;
-  htim3.Init.Period = TIM3_us2clk(100)-1;   //100us
+  htim3.Init.Period = (TIMXCLK/(20)*100/1000000) - 1;   //100us
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
   {
     Error_Handler();
-  }
+  } 
   sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
   if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
   {
@@ -936,7 +932,7 @@ static void MX_TIM3_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = TIM3_us2clk(5)-1; //5us
+  sConfigOC.Pulse = (TIMXCLK/(20)*5/1000000) - 1; //5us
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)

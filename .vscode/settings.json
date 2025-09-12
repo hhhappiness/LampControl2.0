@@ -76,7 +76,8 @@
         "byteconstsymbol.h": "c",
         "gui_page.hpp": "c",
         "__config": "cpp",
-        "__nullptr": "cpp"
+        "__nullptr": "cpp",
+        "flash.h": "c"
     },
     "Codegeex.RepoIndex": true,
     "editor.defaultFormatter": "ms-vscode.cpptools",
