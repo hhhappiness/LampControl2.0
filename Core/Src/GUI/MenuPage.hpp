@@ -95,6 +95,7 @@ public:
 	///¿Ø¼þË÷Òý
 	enum{
 		iAlgorithm, 
+		iThreshold,
 		MaxObjNum
 	};
 	virtual void Show();

@@ -53,11 +53,11 @@ namespace gui {
 
 static const char *AlgorithmStr_Cn[AlgNum]={
 	"FFT",
-	"FR 滤波",
+	// "FR 滤波",
 };
 static const char *AlgorithmStr_En[AlgNum]={
 	"FFT",
-	"FR Filter",
+	// "FR Filter",
 };
 
 ///构造函数
@@ -156,16 +156,21 @@ float ScanAdcPage::fLoop()
     uint32_t remaining = BUFFER_SIZE,completion_percentage=0; // 剩余传输数量
     int collectTimes = 1;
     float frequency = -1;
+    int last_quarter = -1;
+
     Rect8_t Rect;
 
     StartScan(); // 启动ADC采集条件
     glob_cnt = 0;
     ADC_DONE_FLAG = 0;
     memset((void*)fft_inputbuf, 0, sizeof(fft_inputbuf));
-
-    while(HALF_POWER_PRESSED){ // 用户按电源轻按键时进行数据采集
         Rect = {(u8)((LcmXPixel-4*DEFAULT_HANZI_WIDTH - RESULT_NUM*DEFAULT_ASCII_WIDTH )/2 + \
             4*DEFAULT_HANZI_WIDTH+DEFAULT_ASCII_WIDTH),DIGITAL_Y, RESULT_NUM*DEFAULT_ASCII_WIDTH, DEFAULT_ASCII_FONT.Height};
+   #ifdef TEST_FFT
+    while(ENTER_PRESSED){
+        #else
+    while(HALF_POWER_PRESSED){ // 用户按电源轻按键时进行数据采集
+#endif
 #ifdef DMA_ADC
         DispStr8( Rect.x, Rect.y ,&signalVal[0]);	
         LcmPutBmpRect(Rect.x+4,Rect.y, pCurrPage->pPix,Width, &Rect); // 更新显示
@@ -187,7 +192,12 @@ float ScanAdcPage::fLoop()
         glob_cnt = glob_cnt + 2;  // 缓冲区索引后移
         time_trig = 0;  // 清除触发标志
         completion_percentage = 19900 * glob_cnt / BUFFER_SIZE + 100;  // 计算完成百分比
-        Progress->SetValue(completion_percentage);  // 更新进度条
+        // 每完成四分之一时更新一次进度条
+        int current_quarter = completion_percentage / 5000; // 每 5000 为四分之一（19900+100=20000，20000/4=5000）
+        if (current_quarter != last_quarter) {
+            Progress->SetValue(completion_percentage);  // 更新进度条
+            last_quarter = current_quarter;
+        }
 
         if(glob_cnt == FFT_LENGTH * 2) // 采集完成,进行计算FFT
         {
@@ -197,6 +207,16 @@ float ScanAdcPage::fLoop()
     if(ADC_DONE_FLAG)
     //if(0)
     {
+        #ifdef TEST_FFT
+        // 将采集到的fft_input数据存到本地的txt文件中
+        FILE *fp = fopen("fft_input_data.txt", "w");
+        if (fp != NULL) {
+            for (int i = 0; i < FFT_LENGTH * 2; i++) {
+                fprintf(fp, "%f\n", fft_inputbuf[i]);
+            }
+            fclose(fp);
+        }
+        #endif
         DO_FFT( 1000, &frequency);
         // 将frequency转换为字符串
         char freq_str[6];
@@ -232,6 +252,10 @@ float ScanAdcPage::fLoop()
     #endif
         if(POWER_PRESSED)
             break;
+            #ifdef TEST_FFT
+        if(!ENTER_PRESSED)
+            break;
+            #endif
     }
     StopScan();
     if(frequency > 0 && POWER_PRESSED){
@@ -315,12 +339,23 @@ int* compute_fft_peak_frequencies(uint16_t *adc_data, uint32_t sample_rate, uint
     return freqs;
 }
 #if 1
+int thresholdFactor = 4;
 void DO_FFT( unsigned int SampleRate, float *freq_found)
 {
    // Blackman_Win(fft_inputbuf,  Sampling_CNT);
     arm_cfft_f32(&arm_cfft_sR_f32_len2048, fft_inputbuf, 0, 1); 
     arm_cmplx_mag_f32(fft_inputbuf, fft_magnitude, FFT_LENGTH);
     
+    #ifdef TEST_FFT
+    // 将采集到的fft_input数据存到本地的txt文件中
+    FILE *fp = fopen("fft_magnitude.txt", "w");
+    if (fp != NULL) {
+        for (int i = 0; i < FFT_LENGTH; i++) {
+            fprintf(fp, "%f\n", fft_magnitude[i]);
+        }
+        fclose(fp);
+    }
+    #endif
     //计算平均功率
     double avg_power = 0;
     for(int i = 2; i < 102; i++) 
@@ -332,7 +367,7 @@ void DO_FFT( unsigned int SampleRate, float *freq_found)
     avg_power = avg_power / (100);
     
     //printf("avg_power %f\n", avg_power);
-    double threshold = avg_power * 4 ;
+    double threshold = avg_power * thresholdFactor;
     
     //搜索1-50Hz
     int peak_found = 0;
@@ -341,8 +376,26 @@ void DO_FFT( unsigned int SampleRate, float *freq_found)
       if( fft_magnitude[i]> threshold && fft_magnitude[i]> fft_magnitude[i-1] && fft_magnitude[i] > fft_magnitude[i+1] )  
       {
         double fre_resu =  (double)SampleRate / (FFT_LENGTH);  // 频率分辨率
-        double freq_find =  i * fre_resu;
-        //printf("First Freq below 50Hz: %.3f Hz, Magnitude: %f\n", freq_find, fft_magnitude[i]);
+        
+        // 使用二次抛物线插值法提高频率估计精度
+        // 获取峰值点及其左右两个点的幅度
+        double y1 = fft_magnitude[i-1];
+        double y2 = fft_magnitude[i];
+        double y3 = fft_magnitude[i+1];
+        
+        // 计算插值偏移量
+        // 使用二次抛物线插值公式: delta = (y3 - y1) / (2 * (2*y2 - y1 - y3))
+        double delta = (y3 - y1) / (2 * (2*y2 - y1 - y3));
+        
+        // 限制偏移量在[-0.5, 0.5]范围内，确保插值结果在相邻两个频率点之间
+        if (delta > 0.5) delta = 0.5;
+        if (delta < -0.5) delta = -0.5;
+        
+        // 计算插值后的频率
+        double freq_find = (i  + delta) * fre_resu;
+        
+        //printf("First Freq below 50Hz: %.3f Hz, Magnitude: %f, Interpolated delta: %.3f\n", 
+        //       freq_find, fft_magnitude[i], delta);
         peak_found = 1;
         *freq_found = freq_find;
         break;

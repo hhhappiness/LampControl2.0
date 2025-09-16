@@ -5,24 +5,24 @@
 #include "SysParaCommon.h"
 
 ///转速单位参数值列表
-const int SpeedUnitList[SpeedUnitNum]=
+const int SpeedUnitList[SpeedUnitNum] =
 {
 	Unit_Hz,	//Hz
   Unit_rpm, 	//Rpm
 	Unit_mpmin,	//m/min
 };
 
-const char * const SpeedUnitStr[SpeedUnitNum]=
+const char* const SpeedUnitStr[SpeedUnitNum] =
 {
 	"Hz",
   "rpm",
 	"m/min"
 };
 
-const int AlgTypeList[AlgNum]=
+const int AlgTypeList[AlgNum] =
 {
 	Alg_FFT,
-	Alg_FR_Filter
+	// Alg_FR_Filter,
 };
 
 ///语言版本参数值列表
@@ -37,8 +37,8 @@ APP_PARA 	AppPara;				///<使用中的参数表
 APP_PARA 	AppPara_Backup;			///<备份参数表
 
 ///参数表缺省值
-const APP_PARA AppParaDefault=
-{	
+const APP_PARA AppParaDefault =
+{
 	APP_PARA_MAGIC_NUM,	//u32 MagicNum;	//幻数
 	APP_PARA_VERSION,	//u32 Version;	
 
@@ -80,10 +80,10 @@ const APP_PARA AppParaDefault=
 	30,				//int BackLightDelay;	 //背光延时时间
 	30,				//int PowerDelay;	 //电源按键延时
 	120,				//int WorkTime;
-	
+
 	/* project params set */
 	200,			//int FreqLimit_Led;	 //LED频率上限
-	2000,			//int FreqLimit_Tube;	 //灯管频率上限
+	3800,			//int FreqLimit_Tube;	 //灯管频率上限
 
 	0,				//int LightType;
 	//u32 Reserved[APP_PARA_SIZE/4-26];
@@ -91,7 +91,7 @@ const APP_PARA AppParaDefault=
 };
 
 ///参数表最小值
-const APP_PARA AppParaMin=		//最小值
+const APP_PARA AppParaMin =		//最小值
 {
 	APP_PARA_MAGIC_NUM,	//u32 MagicNum;	//幻数
 	APP_PARA_VERSION,	//u32 Version;	
@@ -105,7 +105,7 @@ const APP_PARA AppParaMin=		//最小值
 	100,			//int LineSpeed;	//线速度,0.01
 	30,				//int PlateLen;	//版长mm		
 	1,				//int ImagePerPlate;	//每版有多个少画面
-	
+
 	//单脉冲相关参数
 	5,				//int Delay_SinglePulse;		//延时闪光时间
 	360,			//int Div_SinglePulse;	// 延时细分数，10,100,360
@@ -134,7 +134,7 @@ const APP_PARA AppParaMin=		//最小值
 	10,				//int BackLightDelay;	 //背光延时时间
 	30,				//int PowerDelay;	 //电源按键延时
 	5,				//int WorkTime;
-	
+
 	/* project params set */
 	200,			//int FreqLimit_Led;	 //LED频率上限
 	2000,			//int FreqLimit_Tube;	 //灯管频率上限
@@ -145,7 +145,7 @@ const APP_PARA AppParaMin=		//最小值
 };
 
 ///参数表最大值
-const APP_PARA AppParaMax=		//最大值
+const APP_PARA AppParaMax =		//最大值
 {
 	APP_PARA_MAGIC_NUM,	//u32 MagicNum;	//幻数
 	APP_PARA_VERSION,	//u32 Version;	
@@ -154,12 +154,12 @@ const APP_PARA AppParaMax=		//最大值
 	2,				//int SpeedUnit; 	//速度模式，频率/转速
 	1,				//int Algorithm;   //FR_Filter
 
-	MAX_FREQ_LED*100,			//int LampFreq;	//内触发频率
-	MAX_FREQ_LED*600,			//int Rpm;		//内触发转速
-	MAX_FREQ_LED*300,			//int LineSpeed;	//线速度,0.01
+	MAX_FREQ_LED * 100,			//int LampFreq;	//内触发频率
+	MAX_FREQ_LED * 600,			//int Rpm;		//内触发转速
+	MAX_FREQ_LED * 300,			//int LineSpeed;	//线速度,0.01
 	2000,			//int PlateLen;	//版长mm	
 	20,			//int ImagePerPlate;	//每版有多个少画面
-	
+
 	//单脉冲相关参数
 	355,				//int Delay_SinglePulse;		//延时闪光时间
 	360,			//int Div_SinglePulse;	// 延时细分数，10,100,360
@@ -180,15 +180,15 @@ const APP_PARA AppParaMax=		//最大值
 	100,				//int PulseWidth_Led;   //LED输出脉冲宽度
 	200,			//int PulseWidth_Tube;   //灯管输出脉冲宽度
 	/* 系统参数  */
-	LangNum-1,		//int Language;	 //语言
+	LangNum - 1,		//int Language;	 //语言
 	CONTRAST_MAX,	//int Contrast;	 //对比度设置
 	//节能参数
-	PwrKeyNum-1,	//int PowerKey;	//电源键功能
+	PwrKeyNum - 1,	//int PowerKey;	//电源键功能
 	99,				//int PowerOffDly; //关机延时
 	1000,				//int BackLightDelay;	 //背光延时时间
 	30,				//int PowerDelay;	 //电源按键延时
 	MAX_WORKTIME_LED,				//int WorkTime;
-	
+
 	/* project params set */
 	200,			//int FreqLimit_Led;	 //LED频率上限
 	3000,			//int FreqLimit_Tube;	 //灯管频率上限
@@ -220,7 +220,7 @@ void VerifyParas(void)
 	VerifyParaToDefault(ImagePerPlate);
 	VerifyParaToDefault(rfeq);
 	VerifyParaToDefault(Delay_Wifi);
-	
+
 	VerifyParaToDefault(GearNum);
 	VerifyParaToDefault(Delay_Gear);
 	VerifyParaToDefault(EncodeNum);
@@ -238,15 +238,15 @@ void VerifyParas(void)
 	VerifyParaToDefault(WorkTime);
 	VerifyParaToDefault(FreqLimit_Led);
 	VerifyParaToDefault(MaxPower);
-	
-	
-}
 
+
+}
+#define	MAX_STROB_POWER	380000 
 ///部分参数需要转换后使用，这里将参数表里的参数转换成实际使用的变量
 void OnLoadConfig(void)
-{	
-	image_num = AppPara.ImagePerPlate ;
+{
+	image_num = AppPara.ImagePerPlate;
 
-	max_strobe_power = 100*AppPara.MaxPower;
+	max_strobe_power = MAX_STROB_POWER;
 
 }

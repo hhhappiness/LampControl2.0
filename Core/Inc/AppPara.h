@@ -59,7 +59,7 @@ typedef enum {
 
 typedef enum {
 	Alg_FFT,
-	Alg_FR_Filter,
+	// Alg_FR_Filter,
 	AlgNum
 }Algorithm_t;
 

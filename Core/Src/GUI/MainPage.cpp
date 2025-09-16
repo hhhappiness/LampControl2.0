@@ -45,7 +45,6 @@ CMainPage::CMainPage()
 	ifShortDotWidth = 1;
 }	
 	
-
 void CMainPage::OnMeasureMode()
 {
 	//关闭LED
@@ -59,6 +58,7 @@ void CMainPage::OnMeasureMode()
 	SpeedCtrl.OnSetVal((int)(Ret*100)); //设置SpeedCtrl的值
 //重新打开LED
 	isOnMeasureMode = false;
+	PwrHitFlag = PwrHit_STALL;
 	StartToFlash();
 	Init(); //重新初始化页面
 	Show();	//显示
@@ -77,7 +77,12 @@ int CMainPage::Loop()
 				if(IsTrigMode(Trig_Internal)){//内触发只调频率
 					switch(Key){
 						#ifdef LAYSER
-						case KEY_HALF_POWER_LONG:
+
+						#ifdef TEST_FFT
+						case KEY_ENTER_LONG:
+						#else
+						 case KEY_HALF_POWER_LONG:
+						#endif
 						 	if(!POWER_PRESSED) //如果是长按重按时按下的KEY_HALF_POWER_LONG,则不进入测频界面
 								OnMeasureMode();
 							break;
@@ -88,9 +93,11 @@ int CMainPage::Loop()
 							SpeedCtrl.Display();
 							SpeedCtrl.Update();
 							break;
+						#ifndef TEST_FFT
 						case KEY_ENTER_LONG:
 							OnKeyMode();
 							break;
+						#endif
 						case KEY_DOWN_SHOT ://除2
 							MainScanFlag = 1;
 							SpeedCtrl.Div2();
@@ -132,6 +139,7 @@ int CMainPage::Loop()
 							SpeedCtrl.Update();
 							
 							break;		
+							#if 1
 						case KEY_ENTER_SHOT : 
 							
 								//进入扫频界面
@@ -147,7 +155,7 @@ int CMainPage::Loop()
 								ScanDlyCounting = 1;								
 							
 							break;
-							
+							#endif
 					}
 				}else{//外触发跟普通界面一样
 					GUI_Num * p = (GUI_Num *)ObjList[FocusId]; 

@@ -134,9 +134,9 @@ volatile u8 Trig_Ext_On = 0;
 volatile u8 Trig_Ext_En_Wifi = 0;
 volatile u8 Trig_Ext_On_Wifi = 0;
 
-#define	MAX_STROB_POWER	1000000 
+#define	MAX_STROB_POWER	380000 
 //MOS管打开有个延时，暂时固定一个7us的偏移量
-#define PULSE_WIDTH_OFFSET  1
+#define PULSE_WIDTH_OFFSET  0
 volatile u32	max_strobe_power = MAX_STROB_POWER;
 
 void TIM_Reset(TIM_TypeDef* TIM);
@@ -261,11 +261,11 @@ void Updata_OutPusle(void)
 	if (IsTrigMode(Trig_Internal)) {
 
 		if ((AppPara.SpeedUnit == Unit_Hz) && (AppPara.LampFreq > 0)) {
-			max_pulse = (max_strobe_power + AppPara.LampFreq / 2) / AppPara.LampFreq;
+			max_pulse = ( max_strobe_power ) / AppPara.LampFreq;
 		}
 		else if ((AppPara.SpeedUnit == Unit_rpm) && (AppPara.Rpm > 0)) {
 			tmp = (AppPara.Rpm + 3) / 6;
-			max_pulse = (max_strobe_power + tmp / 2) / tmp;
+			max_pulse = (max_strobe_power ) / tmp;
 		}
 		else if ((AppPara.SpeedUnit == Unit_mpmin) && (AppPara.LineSpeed > 0))
 		{
@@ -283,12 +283,14 @@ void Updata_OutPusle(void)
 			real_nextclks = VerifyInterFreq(tmp_nextclks);
 			//实际的输出频率
 			tmp = TIM2_clk2Hz(real_nextclks);
-			max_pulse = (max_strobe_power + tmp / 2) / tmp;
+			max_pulse = (max_strobe_power ) / tmp;
 
 		}
 
 		tmp = MIN(max_pulse, AppPara.PulseWidth_LED) + PULSE_WIDTH_OFFSET;
 		//tmp = AppPara.PulseWidth_LED + PULSE_WIDTH_OFFSET ;
+		if (tmp > 100)
+			tmp = 100;
 		flash_pulse = TIM3_us2clk(tmp);
 		SetFlash_PulseWidth(flash_pulse);
 
