@@ -167,7 +167,7 @@ float ScanAdcPage::fLoop()
         Rect = {(u8)((LcmXPixel-4*DEFAULT_HANZI_WIDTH - RESULT_NUM*DEFAULT_ASCII_WIDTH )/2 + \
             4*DEFAULT_HANZI_WIDTH+DEFAULT_ASCII_WIDTH),DIGITAL_Y, RESULT_NUM*DEFAULT_ASCII_WIDTH, DEFAULT_ASCII_FONT.Height};
 
-    while(HALF_POWER_PRESSED){ // 用户按电源轻按键时进行数据采集
+    while(HALF_POWER_PRESSED || POWER_PRESSED){ // 用户按电源轻按键时进行数据采集
 #ifdef DMA_ADC
         DispStr8( Rect.x, Rect.y ,&signalVal[0]);	
         LcmPutBmpRect(Rect.x+4,Rect.y, pCurrPage->pPix,Width, &Rect); // 更新显示
