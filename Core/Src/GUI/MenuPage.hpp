@@ -94,8 +94,10 @@ public:
 
 	///¿Ø¼þË÷Òý
 	enum{
-		iAlgorithm, 
+		// iAlgorithm, 
 		iThreshold,
+		iMinLimit,
+		iMaxLimit,
 		MaxObjNum
 	};
 	virtual void Show();

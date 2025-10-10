@@ -108,6 +108,10 @@ typedef struct {
 	int FreqLimit_Led;	 //LED频率上限
 	int MaxPower;	 //灯管频率上限
 
+	int Threshold;	///<触发阈值
+	int minLimit;	///<最小频率
+	int maxLimit;	///<最大频率
+
 	u32 Reserved[APP_PARA_SIZE / 4 - 29];
 	u32 Sum;		 //check sum
 }APP_PARA;

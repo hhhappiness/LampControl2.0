@@ -19,7 +19,7 @@
 #define ScanDlyTime	3*TimeGainSec   //用于自动扫描后的延时3秒
 //用于手动调整频率后的延时3秒
 //在手动扫描延时3秒的过程中，无论是屏蔽单击模式的操作
-#define MainScanDlyTime 3*TimeGainSec	
+#define MainScanDlyTime 1*TimeGainSec	
 
 
 u32 nWorkTime;

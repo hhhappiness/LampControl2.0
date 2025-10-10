@@ -38,8 +38,8 @@ static const char *ContactStr[CONTACT_NUM]=
 	//最后一条打印bootloader版本号
 };
 #else
-const char WuhanKesaiStr_Cn[]="武汉科赛智能电子";
-const char WuhanKesaiStr_En[]="Wuhan Kesai";
+const char WuhanKesaiStr_Cn[]="固德视控科技";
+const char WuhanKesaiStr_En[]="Good Vision Tech";
 ///切换联系方式的字符串
 static const char *ContactStr[CONTACT_NUM]=
 {

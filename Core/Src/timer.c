@@ -289,8 +289,8 @@ void Updata_OutPusle(void)
 
 		tmp = MIN(max_pulse, AppPara.PulseWidth_LED) + PULSE_WIDTH_OFFSET;
 		//tmp = AppPara.PulseWidth_LED + PULSE_WIDTH_OFFSET ;
-		if (tmp > 100)
-			tmp = 100;
+		if (tmp > 99)
+			tmp = 99;
 		flash_pulse = TIM3_us2clk(tmp);
 		SetFlash_PulseWidth(flash_pulse);
 

@@ -2,6 +2,7 @@
 #include "Icons.hpp"
 #include "ctrl.h"
 
+extern int encoder_val;
 namespace gui {
 
 #define DIGITAL_X	16
@@ -123,6 +124,7 @@ void GUI_NumPage::ClearInv()
 
 #define HOLD_REPEATE_NUM	4
 
+
 ///按键循环，左右键移动光标，确定选中退出
 int GUI_NumPage::Loop()
 {
@@ -143,7 +145,12 @@ int GUI_NumPage::Loop()
 				if(Key !=KEY_DOWN_LONG && Key != KEY_UP_LONG){
 					HoldRepeatKey = 0;
 				}
-				switch(Key){				
+				switch(Key){		
+				case KEY_ENCODER:
+				if(encoder_val > 20)
+					encoder_val = 20;
+					OnStep(encoder_val);
+					break;		
 				case KEY_UP_SHOT : 
 					switch(AutoMode){
 						case GUI_Num::Mode_None:

@@ -85,7 +85,9 @@ const APP_PARA AppParaDefault =
 	200,			//int FreqLimit_Led;	 //LED频率上限
 	3800,			//int FreqLimit_Tube;	 //灯管频率上限
 
-	0,				//int LightType;
+	4,				//int Threshold;	///<触发阈值
+	1,				//int minLimit;	///<最小频率
+	50,			//int maxLimit;	///<最大频率
 	//u32 Reserved[APP_PARA_SIZE/4-26];
 	//u32 Sum;		 //check sum
 };
@@ -139,7 +141,9 @@ const APP_PARA AppParaMin =		//最小值
 	200,			//int FreqLimit_Led;	 //LED频率上限
 	2000,			//int FreqLimit_Tube;	 //灯管频率上限
 
-	0,				//int LightType;
+	0,				//int Threshold;	///<触发阈值
+	1,				//int minLimit;	///<最小频率
+	1,			//int maxLimit;	///<最大频率
 	//u32 Reserved[APP_PARA_SIZE/4-26];
 	//u32 Sum;		 //check sum	
 };
@@ -192,8 +196,12 @@ const APP_PARA AppParaMax =		//最大值
 	/* project params set */
 	200,			//int FreqLimit_Led;	 //LED频率上限
 	3000,			//int FreqLimit_Tube;	 //灯管频率上限
+	10,				//int Threshold;	///<触发阈值
+	200,				//int minLimit;	///<最小频率
+	200,			//int maxLimit;	///<最大频率
 
-	1,				//int LightType;
+
+
 	//u32 Reserved[APP_PARA_SIZE/4-26];
 	//u32 Sum;		 //check sum};
 };
