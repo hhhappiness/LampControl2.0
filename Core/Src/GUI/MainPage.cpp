@@ -81,10 +81,9 @@ int CMainPage::Loop()
 						#ifdef TEST_FFT
 						case KEY_ENTER_LONG:
 						#else
-						 case KEY_HALF_POWER_LONG:
+						 case KEY_POWER_LONG:
 						#endif
-						 	if(!POWER_PRESSED) //如果是长按重按时按下的KEY_HALF_POWER_LONG,则不进入测频界面
-								OnMeasureMode();
+							OnMeasureMode();
 							break;
 						#endif
 						case KEY_ENCODER:

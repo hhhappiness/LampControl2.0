@@ -14,7 +14,7 @@
 
 //定时器20Hz, 50mS,实测40mS,每秒25.  LSI时钟模式下。
 //后面改成了HSE/128分频，比较准些。实测50mS一次，比较准
-#define TimeGainSec	20
+#define TimeGainSec	5
 #define TimeGainMin	1200 //20*60 一分钟
 #define ScanDlyTime	3*TimeGainSec   //用于自动扫描后的延时3秒
 //用于手动调整频率后的延时3秒
