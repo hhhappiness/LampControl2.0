@@ -134,6 +134,7 @@ void StartToFlash(void)
 {
 	if (isOnMeasureMode)  //如果处于测频模式，不打开LED
 		return;
+	GPB_O(10, 0); //打开升压电路 
 	// 打开所有定时器
 	OpenPwmTimer();
 	// 更新输出脉冲
@@ -164,7 +165,7 @@ void StopToFlash(void)
 	ClosePwmTimer();
 	Status_MCU = Status_WorkStall;
 	//停止输出的时候，需要控制Strobe的状态，Led和灯管的不同
-	GPA_O(4, 0); //关闭Strobe输出
+	GPB_O(10, 1); //关闭升压电路 
 	WorkEn = 0;
 }
 

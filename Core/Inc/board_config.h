@@ -25,6 +25,36 @@ extern "C" {
 #define GPA_I(i) ((GPIOA->IDR & (1<<i)) ? 1 : 0)
 #define GPB_I(i) ((GPIOB->IDR & (1<<i)) ? 1 : 0)
 
+// GPIO模式设置宏定义
+// 模式定义: 0-输入模式, 1-输出模式, 2-复用功能模式, 3-模拟模式
+#define GPA_MODE(i,m) ((GPIOA->MODER) = ((GPIOA->MODER & ~(0x03 << (2*i))) | ((m & 0x03) << (2*i))))
+#define GPB_MODE(i,m) ((GPIOB->MODER) = ((GPIOB->MODER & ~(0x03 << (2*i))) | ((m & 0x03) << (2*i))))
+
+// GPIO输出类型设置宏定义
+// 输出类型: 0-推挽输出, 1-开漏输出
+#define GPA_OTYPE(i,t) ((t==1) ? (GPIOA->OTYPER |= (1<<i)):(GPIOA->OTYPER &= ~(1<<i)))
+#define GPB_OTYPE(i,t) ((t==1) ? (GPIOB->OTYPER |= (1<<i)):(GPIOB->OTYPER &= ~(1<<i)))
+
+// GPIO上拉/下拉设置宏定义
+// 上拉/下拉: 0-无上拉下拉, 1-上拉, 2-下拉
+#define GPA_PUPD(i,p) ((GPIOA->PUPDR) = ((GPIOA->PUPDR & ~(0x03 << (2*i))) | ((p & 0x03) << (2*i))))
+#define GPB_PUPD(i,p) ((GPIOB->PUPDR) = ((GPIOB->PUPDR & ~(0x03 << (2*i))) | ((p & 0x03) << (2*i))))
+
+// GPIO模式常量定义
+#define GPIO_MODE_INPUT        0x00  // 输入模式
+#define GPIO_MODE_OUTPUT       0x01  // 输出模式
+#define GPIO_MODE_ALTERNATE    0x02  // 复用功能模式
+#define GPIO_MODE_ANALOG       0x03  // 模拟模式
+
+// GPIO输出类型常量定义
+#define GPIO_OTYPE_PP          0x00  // 推挽输出
+#define GPIO_OTYPE_OD          0x01  // 开漏输出
+
+// GPIO上拉/下拉常量定义
+#define GPIO_PUPD_NONE         0x00  // 无上拉下拉
+#define GPIO_PUPD_PULLUP       0x01  // 上拉
+#define GPIO_PUPD_PULLDOWN     0x02  // 下拉
+
 //输出管脚
 
 #define POWER_PRESSED 	(GPB_I(0)==0) //电源按键按下
@@ -48,12 +78,12 @@ extern "C" {
 //Mode键和Enter键除做通用按键使用外还有特殊功能，在此定义管脚	 
 #define GPI_KEY_ENTER 	GPB_I(5)		 
 
-    __inline void PowerOn(void) { GPA_O(2, 1); }
-    __inline void PowerOff(void) { GPA_O(2, 0); }
-    __inline void BackLightOn(void) { BKLT_SW(1); }
-    __inline void BackLightOff(void) { BKLT_SW(0); }
-    __inline void LcdResetOn(void) { LCD_RSTB(0); }
-    __inline void LcdResetOff(void) { LCD_RSTB(1); }
+    __inline void PowerOn(void) { GPA_MODE(2, GPIO_MODE_OUTPUT); GPA_O(2, 1); }
+    __inline void PowerOff(void) { GPA_O(2, 0); GPA_MODE(2, GPIO_MODE_INPUT); }
+    __inline void BackLightOn(void) { GPA_MODE(15, GPIO_MODE_OUTPUT); BKLT_SW(1); }
+    __inline void BackLightOff(void) { BKLT_SW(0); GPA_MODE(15, GPIO_MODE_INPUT); }
+    __inline void LcdResetOn(void) { GPA_MODE(8, GPIO_MODE_OUTPUT); LCD_RSTB(0); }
+    __inline void LcdResetOff(void) { LCD_RSTB(1); GPA_MODE(8, GPIO_MODE_INPUT); }
 
 #define GetChargePin	0
 

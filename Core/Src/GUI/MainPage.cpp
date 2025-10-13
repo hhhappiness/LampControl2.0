@@ -58,7 +58,7 @@ void CMainPage::OnMeasureMode()
 	SpeedCtrl.OnSetVal((int)(Ret*100)); //设置SpeedCtrl的值
 //重新打开LED
 	isOnMeasureMode = false;
-	PwrHitFlag = PwrHit_STALL;
+	// PwrHitFlag = PwrHit_STALL;
 	StartToFlash();
 	Init(); //重新初始化页面
 	Show();	//显示

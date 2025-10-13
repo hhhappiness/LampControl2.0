@@ -275,11 +275,12 @@ float ScanAdcPage::fLoop()
 void ScanAdcPage::StopScan()
 {
     HAL_TIM_PWM_Stop(&htim15, TIM_CHANNEL_2); // 停止PWM输出定时器触发
+    GPA_MODE(3, GPIO_MODE_INPUT); // 将PA3设置为输入模式以降低功耗
     SNSR_PWR(0); // 关闭测频模块电源
     HAL_DAC_Stop(&hdac1,DAC_CHANNEL_2); // 停止DAC
     #ifdef DMA_ADC
     HAL_TIM_Base_Stop(&htim7);    // 停止定时器触发
-    HAL_ADC_Stop_DMA(&hadc1);     // 停止ADC和DMA	
+    HAL_ADC_Stop_DMA(&hadc1);     // 停止ADC和 DMA	
     #endif
 }
 
@@ -288,7 +289,8 @@ void ScanAdcPage::StartScan()  //开启adc定时采集并通过DMA传输到adc_buffer
 {
     SNSR_PWR(1); //开启测频模块电源
     StopToFlash();   //开启测频后停止LED输出
-    HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2); // 启动pwm输出定时器，455hz方波控制激光器
+    GPA_MODE(3, GPIO_MODE_ALTERNATE); // 将PA3设置为复用功能模式以支持PWM输出
+    HAL_TIM_PWM_Start(&htim15, TIM_CHANNEL_2); // 启动pwm输出定时器，455Khz方波控制激光器
     
     if(first_time) {  // 如果是第一次运行，进行 ADC 校准
         HAL_ADCEx_Calibration_Start(&hadc1,ADC_SINGLE_ENDED);
