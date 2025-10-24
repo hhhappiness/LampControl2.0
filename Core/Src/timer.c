@@ -249,6 +249,7 @@ int TestFreq = 60;//1
 
 //MAX Power:16W
 //800W*2% = 16W
+int MaxForShow = AppParaMax.PulseWidth_LED;
 
 void Updata_OutPusle(void)
 {
@@ -261,11 +262,11 @@ void Updata_OutPusle(void)
 	if (IsTrigMode(Trig_Internal)) {
 
 		if ((AppPara.SpeedUnit == Unit_Hz) && (AppPara.LampFreq > 0)) {
-			max_pulse = ( max_strobe_power ) / AppPara.LampFreq;
+			max_pulse = (max_strobe_power) / AppPara.LampFreq;
 		}
 		else if ((AppPara.SpeedUnit == Unit_rpm) && (AppPara.Rpm > 0)) {
 			tmp = (AppPara.Rpm + 3) / 6;
-			max_pulse = (max_strobe_power ) / tmp;
+			max_pulse = (max_strobe_power) / tmp;
 		}
 		else if ((AppPara.SpeedUnit == Unit_mpmin) && (AppPara.LineSpeed > 0))
 		{
@@ -283,15 +284,18 @@ void Updata_OutPusle(void)
 			real_nextclks = VerifyInterFreq(tmp_nextclks);
 			//实际的输出频率
 			tmp = TIM2_clk2Hz(real_nextclks);
-			max_pulse = (max_strobe_power ) / tmp;
+			max_pulse = (max_strobe_power) / tmp;
 
 		}
+		tmp = MIN(max_pulse, AppParaMax.PulseWidth_LED) + PULSE_WIDTH_OFFSET;
 
-		tmp = MIN(max_pulse, AppPara.PulseWidth_LED) + PULSE_WIDTH_OFFSET;
 		//tmp = AppPara.PulseWidth_LED + PULSE_WIDTH_OFFSET ;
 		if (tmp > 99)
 			tmp = 99;
-		flash_pulse = TIM3_us2clk(tmp);
+		MaxForShow = tmp;   //设置脉冲菜单界面参数为最大允许值
+		if (AppPara.PulseWidth_LED > tmp)
+			AppPara.PulseWidth_LED = tmp;
+		flash_pulse = TIM3_us2clk(AppPara.PulseWidth_LED);
 		SetFlash_PulseWidth(flash_pulse);
 
 	}

@@ -306,9 +306,11 @@ void CMainPage::Show()
 	DispStr8(BATTERY_ICON_X-8,0,"D");
 #endif	
 	//显示security bit是否加上
+	#if 0
 	if(!SecureApplication()){ //无读保护则生效  
 		DispStr8(BATTERY_ICON_X-15,0,"!");   
 	}
+	#endif
 	Update();
 }
 

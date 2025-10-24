@@ -7,6 +7,7 @@
 /**
 本界面只在LED版有，用于设置Led闪光的脉冲宽度。
 **/
+extern int MaxForShow;
 namespace gui {
 MenuPage_PulseWidth::MenuPage_PulseWidth()
 : MenuPage(MaxObjNum)
@@ -26,7 +27,9 @@ void MenuPage_PulseWidth::Init() {
 	GUI_Num *p = NULL;
 	ObjList.Delete(0);
 	if(!SecretMode){
-		ObjList.Append(new GUI_Num(&AppPara.PulseWidth_LED, AppParaMin.PulseWidth_LED, AppParaMax.PulseWidth_LED,3));
+		if(AppPara.PulseWidth_LED > MaxForShow)
+			AppPara.PulseWidth_LED = MaxForShow;
+		ObjList.Append(new GUI_Num(&AppPara.PulseWidth_LED, AppParaMin.PulseWidth_LED, MaxForShow,3));
 		if(IsLanguageCh()) {
 			ObjList[iWidthSlider]	->SetPos(32,16);
 		}
@@ -95,9 +98,6 @@ void MenuPage_PulseWidth::Show()
 	Update();
 	wdg();
 }
-
-
-
 
 void MenuPage_PulseWidth::OnValChange()
 {

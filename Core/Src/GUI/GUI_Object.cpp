@@ -215,6 +215,7 @@ int GUI_Num::OnStep(int step){
 		return Ret;///确认退出编辑再生效
 	}
 }
+
 int GUI_Num::OnSetVal(int val){
 	int bak=*pVal;//备份旧值
 	int Ret = StepS32(*pVal,val-*pVal,Min,Max);
