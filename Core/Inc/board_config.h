@@ -74,7 +74,6 @@ extern "C" {
 #define _RSTB_1 	GPA_O(8,1) //LCD_RSTB=1
 
 //输入管脚	 
-#define CHARGE_PIN	GPB_I(12)
 //Mode键和Enter键除做通用按键使用外还有特殊功能，在此定义管脚	 
 #define GPI_KEY_ENTER 	GPB_I(5)		 
 
@@ -85,7 +84,6 @@ extern "C" {
     __inline void LcdResetOn(void) { GPA_MODE(8, GPIO_MODE_OUTPUT); LCD_RSTB(0); }
     __inline void LcdResetOff(void) { LCD_RSTB(1); GPA_MODE(8, GPIO_MODE_INPUT); }
 
-#define GetChargePin	0
 
 #ifdef __cplusplus
 }

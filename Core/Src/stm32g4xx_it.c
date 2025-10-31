@@ -15,9 +15,9 @@
   *
   ******************************************************************************
   */
-/* USER CODE END Header */
+  /* USER CODE END Header */
 
-/* Includes ------------------------------------------------------------------*/
+  /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32g4xx_it.h"
 
@@ -58,6 +58,7 @@
 /* External variables --------------------------------------------------------*/
 extern RTC_HandleTypeDef hrtc;
 extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
 extern DMA_HandleTypeDef hdma_adc1;
 
 /* USER CODE BEGIN EV */
@@ -90,13 +91,13 @@ void NMI_Handler(void)
 
   /* USER CODE END NonMaskableInt_IRQn 0 */
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
-   while (1)
+  while (1)
   {
     wdg();
-		if(FaultResetCondition()){
-			//Reset(); //用自己写的跳转函数不行，没法切换CPU的中断状态
-			SoftReset();
-		}
+    if (FaultResetCondition()) {
+      //Reset(); //用自己写的跳转函数不行，没法切换CPU的中断状态
+      SoftReset();
+    }
   }
   /* USER CODE END NonMaskableInt_IRQn 1 */
 }

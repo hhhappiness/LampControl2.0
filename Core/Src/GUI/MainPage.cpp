@@ -48,7 +48,7 @@ CMainPage::CMainPage()
 void CMainPage::OnMeasureMode()
 {
 	//关闭LED
-	isOnMeasureMode = true;
+	NotToFlash = true;
 	ScanAdcPage* MeasurePage = new ScanAdcPage;
 	MeasurePage->Init();
 	MeasurePage->Show();
@@ -57,7 +57,7 @@ void CMainPage::OnMeasureMode()
 	//返回值则为用户选择的算法计算值，直接将SpeedCtrl的值设置为此值
 	SpeedCtrl.OnSetVal((int)(Ret*100)); //设置SpeedCtrl的值
 //重新打开LED
-	isOnMeasureMode = false;
+	NotToFlash = false;
 	// PwrHitFlag = PwrHit_STALL;
 	StartToFlash();
 	Init(); //重新初始化页面
@@ -430,7 +430,7 @@ void CMainPage::OnIdle()
 		TIdle = GetTimerCount();
 		OnIdleMainPage(TIdle);
 
-		ChargeFlag = GetChargePin;
+		ChargeFlag = BatteryChargingStatus;
 		//充电与电池压状态
 		if(ChargeFlag)	// 充电插头插入，闪动显示充电标志
 		{

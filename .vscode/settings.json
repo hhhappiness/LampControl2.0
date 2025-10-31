@@ -77,7 +77,8 @@
         "gui_page.hpp": "c",
         "__config": "cpp",
         "__nullptr": "cpp",
-        "flash.h": "c"
+        "flash.h": "c",
+        "charge_detect.h": "c"
     },
     "Codegeex.RepoIndex": true,
     "editor.defaultFormatter": "ms-vscode.cpptools",

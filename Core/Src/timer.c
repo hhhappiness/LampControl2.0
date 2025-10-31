@@ -9,9 +9,7 @@
 #include "stm32g4xx_hal_tim.h"
 
 extern TIM_HandleTypeDef htim2, htim3, htim4, htim6;
-#define MAJOR_VERSION 	1
-#define MID_VERSION 	0
-#define MINOR_VERSION 	0
+
 //关于小数点位数。
 //角度的单位是1度，除以360转成圆周比例，Q30无符号小数。
 //平均间隔由于211加权得到4倍的值，多了两位。
@@ -187,6 +185,7 @@ extern DAC_HandleTypeDef hdac1;
 void TIM6_DAC_IRQHandler(void)
 {
 	static u32 flag_1ms = 0, lastTrigClks;
+	static u8 last_charge_sts;
 	HAL_TIM_IRQHandler(&htim6);//标志位之类的
 	HAL_DAC_IRQHandler(&hdac1);
 	uwTick += uwTickFreq;	//替代systick中断进行每ms计数，防止有hal库的函数用到uwTick
@@ -198,8 +197,16 @@ void TIM6_DAC_IRQHandler(void)
 	else if (flag_1ms % 60 == 1) { //执行一次
 		Encoder_Update();
 	}
-	else if (flag_1ms % 100 == 2) { //100ms执行一次
-		wdg();
+	else if (flag_1ms % 1000 == 2) { //1000ms执行一次
+		if (HAL_GPIO_ReadPin(CHG_STS_GPIO_Port, CHG_STS_Pin) != last_charge_sts)
+		{
+			BatteryChargingStatus = 1;
+		}
+		else
+		{
+			BatteryChargingStatus = 0;
+		}
+		last_charge_sts = HAL_GPIO_ReadPin(CHG_STS_GPIO_Port, CHG_STS_Pin);
 	}
 	if (NextTrigClks != lastTrigClks) {  //频率变化了再开始重新设置ARR
 		if (Status_MCU == Status_WorkFlash && IsTrigMode(Trig_Internal)) StartInternalTrig();   //内触发模式,定期更新的内触发频率

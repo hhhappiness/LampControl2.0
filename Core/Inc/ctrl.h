@@ -20,6 +20,9 @@ extern "C" {
 
 	extern  Status_MCU_t Status_MCU;
 
+	// 充电状态标志位，0表示未充电，1表示正在充电
+	extern uint8_t BatteryChargingStatus;
+
 #define IsLanguageCh() ((AppPara.Language == Lang_Chinese) ? 1:0)
 	//#define Hz2Rpm(x) 	((x*6 + 5)/10) 	//rpm = hz*60/100 =( hz*6/10 = hz*6 + 5)/10
 	//#define Rpm2Hz(x)	((x*10 + 3)/6)	//hz = (rpm/60)*100 = rpm*10/6
@@ -36,7 +39,7 @@ extern "C" {
 	void StartToFlash(void);
 	void StopToFlash(void);
 
-	extern bool isOnMeasureMode;
+	extern bool NotToFlash;
 
 	void WriteEncrypt(void);
 	BOOL JudgeEncrypt(void);

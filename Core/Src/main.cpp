@@ -134,8 +134,7 @@ void Init(void){
 
   Encoder_Init(); //编码器初始化
   __enable_irq();  //从这里使能中断，因为按键检测在TIM6中断中执行，但是依然不启用RTC中断，因为没开机前不需要相关处理
-
-
+  
   if(CheckPowerKey(1000))//电源键按至少2s
   {
     PowerOn(); // 开机
@@ -858,7 +857,7 @@ static void MX_GPIO_Init(void)
   
   /*Configure GPIO pins : KEY_POWER_Pin KEY_RIGHT_Pin HALF_ENTER_Pin KEY_DOWN_Pin KEY_ENTER_Pin
                            KEY_LEFT_Pin KEY_UP_Pin */
-  GPIO_InitStruct.Pin = KEY_POWER_Pin|HALF_ENTER_Pin|KEY_RIGHT_Pin|KEY_DOWN_Pin|KEY_ENTER_Pin
+  GPIO_InitStruct.Pin = KEY_POWER_Pin|CHG_STS_Pin|HALF_ENTER_Pin|KEY_RIGHT_Pin|KEY_DOWN_Pin|KEY_ENTER_Pin
                           |KEY_LEFT_Pin|KEY_UP_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -910,6 +909,7 @@ static void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
+
   if (HAL_TIM_OnePulse_Init(&htim3, TIM_OPMODE_SINGLE) != HAL_OK)
   {
     Error_Handler();
@@ -939,6 +939,8 @@ static void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
+
+  
   /* USER CODE BEGIN TIM3_Init 2 */
 
   /* USER CODE END TIM3_Init 2 */

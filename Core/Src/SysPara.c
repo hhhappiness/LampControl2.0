@@ -5,13 +5,13 @@
 
 SYS_PARA 	SysPara;				///<使用中的参数表
 
-const char * LightType_StrList[LIGHT_TYPE_NUM]={
-	"WKS100LI0",
-	"WKS100LI1",
-	"WKS100_LI",
+const char* LightType_StrList[LIGHT_TYPE_NUM] = {
+	"GSL100_LI0",
+	"GSL100_LI1",
+	"GSL100_LI",
 };
 
-const int LightTypeList[LIGHT_TYPE_NUM]={
+const int LightTypeList[LIGHT_TYPE_NUM] = {
 	WKS100_LI0,
 	WKS100_LI1,
 	WKS100_LI,
@@ -21,15 +21,15 @@ const int LightTypeList[LIGHT_TYPE_NUM]={
 int LightType2Id(void)
 {
 	int i;
-	for(i=0;i<LIGHT_TYPE_NUM;i++){
-		if(LightTypeList[i] == SysPara.LightType) return i;
+	for (i = 0;i < LIGHT_TYPE_NUM;i++) {
+		if (LightTypeList[i] == SysPara.LightType) return i;
 	}
 	return -1;
 }
 
 
 ///参数表缺省值
-const SYS_PARA SysParaDefault={	
+const SYS_PARA SysParaDefault = {
 	SYS_PARA_MAGIC_NUM,	//u32 MagicNum;	//幻数
 	SYS_PARA_VERSION,	//u32 Version;	
 
@@ -42,7 +42,7 @@ const SYS_PARA SysParaDefault={
 	0xffffffff,			//UID
 	0,
 	0, 					//des1
-	~(0),				
+	~(0),
 	0,					//des2
 	~(0),
 	0,					//sn1
@@ -52,7 +52,7 @@ const SYS_PARA SysParaDefault={
 };
 
 ///参数表最小值
-const SYS_PARA SysParaMin={		//最小值
+const SYS_PARA SysParaMin = {		//最小值
 	SYS_PARA_MAGIC_NUM,	//u32 MagicNum;	//幻数
 	SYS_PARA_VERSION,	//u32 Version;	
 
@@ -65,7 +65,7 @@ const SYS_PARA SysParaMin={		//最小值
 	0,				//UID
 	0,
 	0, 					//des1
-	~(0),				
+	~(0),
 	0,					//des2
 	~(0),
 	0,					//sn1
@@ -74,7 +74,7 @@ const SYS_PARA SysParaMin={		//最小值
 };
 
 ///参数表最大值
-const SYS_PARA SysParaMax={		//最大值
+const SYS_PARA SysParaMax = {		//最大值
 	SYS_PARA_MAGIC_NUM,	//u32 MagicNum;	//幻数
 	SYS_PARA_VERSION,	//u32 Version;	
 
@@ -83,11 +83,11 @@ const SYS_PARA SysParaMax={		//最大值
 	0xffffffff,					//系数A
 	0xffffffff,
 	0xffffffff,					//系数C
-	0xffffffff,	
+	0xffffffff,
 	0xffffffff,					//UID
 	0xffffffff,
 	0xffffffff, 					//des1
-	0xffffffff,				
+	0xffffffff,
 	0xffffffff,					//des2
 	0xffffffff,
 	0xffffffff,					//sn1

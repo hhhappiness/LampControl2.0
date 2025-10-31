@@ -17,7 +17,10 @@ extern void StartInternalTrig();
 //int Status_MCU = Status_WorkStall;
 
 Status_MCU_t Status_MCU;
-bool isOnMeasureMode = false;
+bool NotToFlash = false;
+
+// 充电状态标志位，0表示未充电，1表示正在充电
+uint8_t BatteryChargingStatus = 0;
 extern TIM_HandleTypeDef htim2, htim3, htim4;
 #define ENCRYPT_BASE 0x0800FC00
 
@@ -132,7 +135,7 @@ inline void OpenPwmTimer(void)
 
 void StartToFlash(void)
 {
-	if (isOnMeasureMode)  //如果处于测频模式，不打开LED
+	if (NotToFlash || BatteryChargingStatus)  //如果处于测频模式或充电中，不打开LED
 		return;
 	GPB_O(10, 0); //打开升压电路 
 	// 打开所有定时器

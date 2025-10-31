@@ -44,8 +44,8 @@ const char WuhanKesaiStr_En[]="Good Vision Tech";
 static const char *ContactStr[CONTACT_NUM]=
 {
 	WuhanKesaiStr_Cn,
-	"www.whkszn.com",
-	"18086662932",
+	"http://gvmtech.com/",
+	"18791339359",
 	//最后一条打印bootloader版本号，已移到第二行
 };
 #endif
