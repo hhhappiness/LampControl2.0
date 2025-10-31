@@ -59,7 +59,7 @@ class PowerSetupPage : public SubPage
 public:
 	PowerSetupPage();
 	enum{
-		iPowerKey,
+		// iPowerKey,
 		iWorkTime,
 		iPowerOffDelay,
 		iBackLightDelay,
