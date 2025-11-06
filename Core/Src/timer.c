@@ -185,7 +185,7 @@ extern DAC_HandleTypeDef hdac1;
 void TIM6_DAC_IRQHandler(void)
 {
 	static u32 flag_1ms = 0, lastTrigClks;
-	static u8 last_charge_sts;
+	static u8 last_charge_sts, leatest_charge_sts;
 	HAL_TIM_IRQHandler(&htim6);//标志位之类的
 	HAL_DAC_IRQHandler(&hdac1);
 	uwTick += uwTickFreq;	//替代systick中断进行每ms计数，防止有hal库的函数用到uwTick
@@ -198,15 +198,17 @@ void TIM6_DAC_IRQHandler(void)
 		Encoder_Update();
 	}
 	else if (flag_1ms % 1000 == 2) { //1000ms执行一次
-		if (HAL_GPIO_ReadPin(CHG_STS_GPIO_Port, CHG_STS_Pin) != last_charge_sts)
+		leatest_charge_sts = HAL_GPIO_ReadPin(CHG_STS_GPIO_Port, CHG_STS_Pin);
+		if (leatest_charge_sts != last_charge_sts)
 		{
 			BatteryChargingStatus = 1;
+			StopToFlash();
 		}
 		else
 		{
 			BatteryChargingStatus = 0;
 		}
-		last_charge_sts = HAL_GPIO_ReadPin(CHG_STS_GPIO_Port, CHG_STS_Pin);
+		last_charge_sts = leatest_charge_sts;
 	}
 	if (NextTrigClks != lastTrigClks) {  //频率变化了再开始重新设置ARR
 		if (Status_MCU == Status_WorkFlash && IsTrigMode(Trig_Internal)) StartInternalTrig();   //内触发模式,定期更新的内触发频率

@@ -16,13 +16,14 @@ SystemSetupPage::SystemSetupPage()
 {
 
 	ObjList.Append(new GUI_List(56,16,&AppPara.Language, LangNum, LanguageList, (const char **) LanguageStrList));
+	#if 0 
 	GUI_Num *pConstrast = new GUI_Num(&AppPara.Contrast,AppParaMin.Contrast,AppParaMax.Contrast, 2);
 	ObjList.Append(pConstrast);
 	
 	//ObjList[iLanguage]->SetPos(38,0);
 	//ObjList[iContrast]->SetPos(48,16);
 	pConstrast->OnChange = OnChangeContrast;
-	
+	#endif
 	SetFocus(iLanguage);
 }
 		
@@ -38,17 +39,17 @@ void SystemSetupPage::Show()
 	//显示静态文本
 	if(AppPara.Language == Lang_Chinese){
 		DispStr8(0,0, "语  言:");
-		DispStr8(0,16,"对比度:");
+		// DispStr8(0,16,"对比度:");
 		
 		ObjList[iLanguage]->SetPos(7*7+2,0);
-		ObjList[iContrast]->SetPos(7*7+2,16);
+		// ObjList[iContrast]->SetPos(7*7+2,16);
 
 		
 	}else{
 		DispStr8(0,0, "Language:");
-		DispStr8(0,16,"Contrast:");		
+		// DispStr8(0,16,"Contrast:");		
 		ObjList[iLanguage]->SetPos(7*9+2,0);
-		ObjList[iContrast]->SetPos(7*9+2,16);
+		// ObjList[iContrast]->SetPos(7*9+2,16);
 
 	}
 	//显示控件

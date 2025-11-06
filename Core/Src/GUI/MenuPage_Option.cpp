@@ -20,7 +20,7 @@ void MenuPage_Option::Init()
 	if(IsLanguageCh()) {
 		if (!SecretMode) {
 			ObjList.Append(new GUI_TextButton(ITEM_WIDTH,16,"节能设置"));
-			ObjList.Append(new GUI_TextButton(ITEM_WIDTH,16,"系统设置"));
+			ObjList.Append(new GUI_TextButton(ITEM_WIDTH,16,"语言设置"));
 			ObjList.Append(new GUI_TextButton(ITEM_WIDTH,16,"版本信息"));
 		}else{
             ObjList.Append(new GUI_TextButton(ITEM_WIDTH, 16, "工程参数"));
@@ -34,7 +34,7 @@ void MenuPage_Option::Init()
 	else {
 		if (!SecretMode) {
 			ObjList.Append(new GUI_TextButton(ITEM_WIDTH,16,"Energy"));
-			ObjList.Append(new GUI_TextButton(ITEM_WIDTH,16,"System"));
+			ObjList.Append(new GUI_TextButton(ITEM_WIDTH,16,"Language"));
 			ObjList.Append(new GUI_TextButton(ITEM_WIDTH,16,"Version"));
 		}else{
             ObjList.Append(new GUI_TextButton(ITEM_WIDTH,16,"Engineer"));
